@@ -3,8 +3,13 @@ name = "airnode-abi"
 version = "0.1.0"
 authors = ["EnormousCloud"]
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/EnormousCloud/airnode/"
+homepage = "https://github.com/EnormousCloud/airnode/"
+description = "Airnode ABI (API3.org) encoder/decoder"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
 hex = "0.4"
