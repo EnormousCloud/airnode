@@ -2,8 +2,11 @@ use ethereum_types::{H160, U256};
 use std::fmt;
 use std::str::FromStr;
 
+/// All Airnode ABI parameters, represended as a map. 
+/// In fact, this is just an alias to `std::collections::HashMap<String, ABIParameter>`
 pub type DecodedMap = std::collections::HashMap<String, ABIParameter>;
 
+/// Atomic parameter in the Airnode ABI
 #[derive(Debug, PartialEq, Clone)]
 pub enum ABIParameter {
     Bytes {
@@ -33,6 +36,25 @@ pub enum ABIParameter {
     },
 }
 
+impl ABIParameter {
+    /// returns name of the parameter
+    pub fn get_name(&self) -> &str {
+        match &self {
+            Self::Bytes { name, value: _ } => name,
+            Self::String { name, value: _ } => name,
+            Self::Address { name, value: _ } => name,
+            Self::Bytes32 { name, value: _ } => name,
+            Self::Uint256 { name, value: _ } => name,
+            Self::Int256 {
+                name,
+                value: _,
+                sign: _,
+            } => name,
+        }
+    }
+}
+
+/// Airnode ABI object that can be encoded into the vector of U256 and decoded from it
 #[derive(Debug, PartialEq, Clone)]
 pub struct ABIParameters {
     pub version: u8,
@@ -45,7 +67,10 @@ impl ABIParameters {
     }
 
     pub fn none() -> Self {
-        Self { version: 1, params: vec![] }
+        Self {
+            version: 1,
+            params: vec![],
+        }
     }
 
     pub fn only(params: ABIParameter) -> Self {
@@ -53,6 +78,27 @@ impl ABIParameters {
             version: 1,
             params: vec![params],
         }
+    }
+
+    pub fn get(&self, key: &str) -> Option<ABIParameter> {
+        let filtered: Vec<&ABIParameter> = self
+            .params
+            .iter()
+            .filter(|&x| x.get_name() == key)
+            .collect();
+        if filtered.len() > 0 {
+            Some(filtered[0].clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn into_map(&self) -> DecodedMap {
+        let mut map = DecodedMap::new();
+        for p in &self.params {
+            map.insert(p.get_name().to_owned(), p.clone());
+        }
+        map
     }
 
     pub fn encode(self) -> Vec<U256> {
@@ -285,9 +331,8 @@ mod tests {
 
     #[test]
     fn it_decodes_empty() {
-        let data: Vec<U256> = vec![
-            hex!("3100000000000000000000000000000000000000000000000000000000000000").into(),
-        ];
+        let data: Vec<U256> =
+            vec![hex!("3100000000000000000000000000000000000000000000000000000000000000").into()];
         let res = ABIParameters::decode(data).unwrap();
         assert_eq!(res, ABIParameters::none());
     }
@@ -306,7 +351,7 @@ mod tests {
         });
         assert_eq!(res, expected);
     }
-    
+
     #[test]
     fn it_decodes_int256() {
         let data: Vec<U256> = vec![
@@ -338,7 +383,6 @@ mod tests {
         assert_eq!(res, expected);
     }
 
-
     #[test]
     fn it_decodes_bytes() {
         let data: Vec<U256> = vec![
@@ -366,7 +410,9 @@ mod tests {
         let res = ABIParameters::decode(data).unwrap();
         let expected = ABIParameters::only(ABIParameter::Bytes32 {
             name: "TestBytes32Name".to_owned(),
-            value: vec![hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into()],
+            value: vec![
+                hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
+            ],
         });
         assert_eq!(res, expected);
     }
@@ -387,5 +433,4 @@ mod tests {
         });
         assert_eq!(res, expected);
     }
-
 }
