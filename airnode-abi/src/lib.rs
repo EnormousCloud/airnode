@@ -1,34 +1,23 @@
 use ethereum_types::{H160, U256};
 use std::fmt;
-use std::str::FromStr;
+use serde::{Deserialize, Serialize};
+// use std::str::FromStr;
 
-/// All Airnode ABI parameters, represended as a map. 
-/// In fact, this is just an alias to `HashMap<String, Param>`
-pub type DecodedMap = std::collections::HashMap<String, Param>;
+/// All Airnode ABI parameters, represended as a map.
+/// In fact, this is just an alias to `BTreeMap<String, Param>`
+pub type DecodedMap = std::collections::BTreeMap<String, Param>;
 
 /// Atomic parameter in the Airnode ABI
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Param {
     /// parameter that embeds array of bytes (dynamic size)
-    Bytes {
-        name: String,
-        value: Vec<u8>,
-    },
+    Bytes { name: String, value: Vec<u8> },
     /// parameter that embeds UTF-8 string (dynamic size)
-    String {
-        name: String,
-        value: String,
-    },
+    String { name: String, value: String },
     /// parameter that embeds EVM address (160 bits, H160)
-    Address {
-        name: String,
-        value: H160,
-    },
+    Address { name: String, value: H160 },
     /// parameters that embeds array of 256 bits values
-    Bytes32 {
-        name: String,
-        value: Vec<U256>,
-    },
+    Bytes32 { name: String, value: Vec<U256> },
     /// parameters that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
     Int256 {
         name: String,
@@ -36,10 +25,7 @@ pub enum Param {
         sign: i32, // we need to store the sign separately as we don't have
     },
     /// parameters that embeds unsigned 256 bits value
-    Uint256 {
-        name: String,
-        value: U256,
-    },
+    Uint256 { name: String, value: U256 },
 }
 
 impl Param {
@@ -58,10 +44,62 @@ impl Param {
             } => name,
         }
     }
+
+    /// returns value of the parameter as string (for debugging purposes only)
+    pub fn get_value(&self) -> String {
+        match &self {
+            Self::Bytes { name: _, value } => format!("{:x?}", value),
+            Self::String { name: _, value } => value.clone(),
+            Self::Address { name: _, value } => format!("{:?}", value),
+            Self::Bytes32 { name: _, value } => format!("{:x?}", value),
+            Self::Uint256 { name: _, value } => format!("{:x?}", value),
+            Self::Int256 {
+                name: _,
+                value,
+                sign,
+            } => {
+                if *sign >= 0 {
+                    format!("{:x?}", value)
+                } else {
+                    format!("-{:x?}", value)
+                }
+            }
+        }
+    }
+
+    /// returns character of the parameter for encoding
+    /// - Upper case letters refer to dynamically sized types
+    /// - Lower case letters refer to statically sized types
+    pub fn get_char(&self) -> char {
+        match &self {
+            Self::Bytes { name: _, value: _ } => 'B',
+            Self::String { name: _, value: _ } => 'S',
+            Self::Address { name: _, value: _ } => 'a',
+            Self::Bytes32 { name: _, value: _ } => 'b',
+            Self::Uint256 { name: _, value: _ } => 'u',
+            Self::Int256 {
+                name: _,
+                value: _,
+                sign: _,
+            } => 'i',
+        }
+    }
+}
+
+impl fmt::Display for Param {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}({}={})",
+            self.get_char(),
+            self.get_name(),
+            self.get_value()
+        )
+    }
 }
 
 /// Airnode ABI object that can be encoded into the vector of U256 and decoded from it
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ABI {
     /// Id of the ABI version. It is always "1" so far
     pub version: u8,
@@ -105,7 +143,7 @@ impl ABI {
         }
     }
 
-    /// turn all parameters into map by parameters name (useful for debugging and testing)
+    /// turn all parameters into map by parameters name (for debugging and testing)
     pub fn into_map(&self) -> DecodedMap {
         let mut map = DecodedMap::new();
         for p in &self.params {
@@ -114,106 +152,32 @@ impl ABI {
         map
     }
 
+    /// get parameters encoded into schema string. 
+    /// Each parameter type will be represented by a char.
+    // The first character, 1, represents the encoding version. 
+    pub fn schema(&self) -> String {
+        let s: String = self.params.iter().map(|p| p.get_char()).collect();
+        format!("1{}", s)
+    }
+
     /// encodes ABI into vector or 256 bit values
-    pub fn encode(self) -> Vec<U256> {
-        let mut out = vec![];
-        out
+    /// The function can encode up to 31 parameters (and 1 byte is used to encode the encoding version). 
+    pub fn encode(self) -> Result<Vec<U256>, ()> {
+        if self.params.len() > 31 {
+            return Err(())
+        }
+
+        // let v = into32(self.schema());
+        let mut out = vec![
+            
+        ];
+
+        Ok(out)
     }
 
     /// decodes ABI from the vector or 256 bit values
     pub fn decode(input: Vec<U256>) -> Result<Self, ()> {
         Err(())
-    }
-}
-
-#[derive(Debug, PartialEq, Clone)]
-enum ParamType {
-    Bytes,
-    String,
-    Address,
-    Bytes32,
-    Int256,
-    Uint256,
-}
-
-// Upper case letters refer to dynamically sized types
-// Lower case letters refer to statically sized types
-#[derive(Debug, PartialEq, Clone)]
-#[allow(non_camel_case_types)]
-enum ParamTypeShort {
-    B,
-    S,
-    a,
-    b,
-    i,
-    u,
-}
-
-impl ParamTypeShort {
-    pub fn into(&self) -> ParamType {
-        match &self {
-            ParamTypeShort::B => ParamType::Bytes,
-            ParamTypeShort::S => ParamType::String,
-            ParamTypeShort::a => ParamType::Address,
-            ParamTypeShort::b => ParamType::Bytes32,
-            ParamTypeShort::i => ParamType::Int256,
-            ParamTypeShort::u => ParamType::Uint256,
-        }
-    }
-}
-
-impl ParamType {
-    pub fn into(&self) -> ParamTypeShort {
-        match &self {
-            ParamType::Bytes => ParamTypeShort::B,
-            ParamType::String => ParamTypeShort::S,
-            ParamType::Address => ParamTypeShort::a,
-            ParamType::Bytes32 => ParamTypeShort::b,
-            ParamType::Int256 => ParamTypeShort::i,
-            ParamType::Uint256 => ParamTypeShort::u,
-        }
-    }
-}
-
-impl fmt::Display for ParamType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", format!("{}", self).to_lowercase())
-    }
-}
-
-impl fmt::Display for ParamTypeShort {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", format!("{}", self).to_lowercase())
-    }
-}
-
-impl FromStr for ParamType {
-    type Err = ();
-    fn from_str(input: &str) -> Result<ParamType, Self::Err> {
-        match input.to_lowercase().as_str() {
-            "bytes" => Ok(ParamType::Bytes),
-            "string" => Ok(ParamType::String),
-            "address" => Ok(ParamType::Address),
-            "bytes32" => Ok(ParamType::Bytes32),
-            "int256" => Ok(ParamType::Int256),
-            "uint256" => Ok(ParamType::Uint256),
-            _ => Err(()),
-        }
-    }
-}
-
-impl FromStr for ParamTypeShort {
-    type Err = ();
-    fn from_str(input: &str) -> Result<ParamTypeShort, Self::Err> {
-        match input.to_lowercase().as_str() {
-            "B" => Ok(ParamTypeShort::B),
-            "S" => Ok(ParamTypeShort::S),
-            "a" => Ok(ParamTypeShort::a),
-            "b" => Ok(ParamTypeShort::b),
-            "i" => Ok(ParamTypeShort::i),
-            "u" => Ok(ParamTypeShort::u),
-            _ => Err(()),
-        }
     }
 }
 
@@ -251,7 +215,7 @@ mod tests {
             value: rand_vec(16),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -262,7 +226,7 @@ mod tests {
             value: rand_str(),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -279,7 +243,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -291,7 +255,7 @@ mod tests {
             value: H160::from(H160::from_slice(&r)),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -304,7 +268,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -318,7 +282,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -332,13 +296,13 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(value.clone().encode()).unwrap();
+        let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
         assert_eq!(decoded, value);
     }
 
     #[test]
     fn it_encodes_empty() {
-        let value = ABI::none().encode();
+        let value = ABI::none().encode().unwrap();
         let expected: U256 =
             hex!("3100000000000000000000000000000000000000000000000000000000000000").into();
         assert_eq!(vec![expected], value);
@@ -447,5 +411,47 @@ mod tests {
             value: "Some string value".to_owned(),
         });
         assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_decodes_multiple() {
+        let data: Vec<U256> = vec![
+            hex!("3162615369427500000000000000000000000000000000000000000000000000").into(),
+            hex!("62797465733332206e616d650000000000000000000000000000000000000000").into(),
+            hex!("62797465732033322076616c7565000000000000000000000000000000000000").into(),
+            hex!("77616c6c65740000000000000000000000000000000000000000000000000000").into(),
+            hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(),
+            hex!("737472696e67206e616d65000000000000000000000000000000000000000000").into(),
+            hex!("00000000000000000000000000000000000000000000000000000000000001a0").into(),
+            hex!("62616c616e636500000000000000000000000000000000000000000000000000").into(),
+            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into(),
+            hex!("6279746573206e616d6500000000000000000000000000000000000000000000").into(),
+            hex!("00000000000000000000000000000000000000000000000000000000000001e0").into(),
+            hex!("686f6c6465727300000000000000000000000000000000000000000000000000").into(),
+            hex!("000000000000000000000000000000000000000000000001158e460913d00000").into(),
+            hex!("000000000000000000000000000000000000000000000000000000000000000c").into(),
+            hex!("737472696e672076616c75650000000000000000000000000000000000000000").into(),
+            hex!("0000000000000000000000000000000000000000000000000000000000000003").into(),
+            hex!("123abc0000000000000000000000000000000000000000000000000000000000").into(),
+        ];
+        let res = ABI::decode(data).unwrap();
+        let bytes32_val = "bytes 32 value".as_bytes();
+        let expected = ABI::new(vec![
+            Param::Bytes32{ name: "bytes32 name".to_owned(), value: vec![U256::from(into32(bytes32_val))] },
+            Param::Bytes{ name: "bytes name".to_owned(), value: hex!("123abc").into() },
+            Param::String{ name: "string name".to_owned(), value: "string value".to_owned() },
+            Param::Int256{ name: "balance".to_owned(), value: U256::from_dec_str("10000000000000000000").unwrap(), sign: -1 },
+            Param::Uint256{ name: "holders".to_owned(), value: U256::from_dec_str("20000000000000000000").unwrap() },
+            Param::Address{ name: "wallet".to_owned(), value: hex!("4128922394C63A204Dd98ea6fbd887780b78bb7d").into()},
+        ]);
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    #[should_panic]
+
+    fn it_fails_on_zero() {
+        let data: Vec<U256> = vec![U256::from(0)];
+        ABI::decode(data).unwrap();
     }
 }
