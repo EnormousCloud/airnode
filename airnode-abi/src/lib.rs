@@ -4,7 +4,8 @@ mod helpers;
 use ethereum_types::{H160, U256};
 use std::fmt;
 use serde::{Deserialize, Serialize};
-use helpers::{str_chunks, str_chunk32};
+use helpers::{str_chunks, str_chunk32, address_chunk, int_chunk, chunks};
+use std::collections::HashMap;
 
 /// All Airnode ABI parameters, represended as a map.
 /// In fact, this is just an alias to `BTreeMap<String, Param>`
@@ -19,8 +20,8 @@ pub enum Param {
     String { name: String, value: String },
     /// parameter that embeds EVM address (160 bits, H160)
     Address { name: String, value: H160 },
-    /// parameters that embeds array of 256 bits values
-    Bytes32 { name: String, value: Vec<U256> },
+    /// parameters that embeds single 256 bits value
+    Bytes32 { name: String, value: U256 },
     /// parameters that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
     Int256 {
         name: String,
@@ -89,27 +90,39 @@ impl Param {
         }
     }
 
-    /// returns encoded version of this parameter values as array of 256-bit chunks.
-    pub fn into_chunks(&self) -> Vec<U256> {
+    /// returns whether the size of the parameter value is fixed
+    pub fn is_fixed_size(&self) -> bool {
+        match &self {
+            Self::Bytes { name: _, value: _ } => false,
+            Self::String { name: _, value: _ } => false,
+            _ => true,
+        }
+    }
+
+    /// returns encoded version of fixed size chunks
+    pub fn fixed_chunks(&self) -> Vec<U256> {
         match &self {
             Self::Bytes { name, value } => {
-                vec![str_chunk32(name)]
+                // dynamic, second parameter is reserved to be overwritten
+                vec![str_chunk32(name), U256::from(0), U256::from(value.len())]
             },
             Self::String { name, value } => {
-                vec![str_chunk32(name)].into_iter().chain(str_chunks(value).into_iter()).collect()
+                // dynamic, second parameter is reserved to be overwritten
+                vec![str_chunk32(name), U256::from(0), U256::from(value.len())]
             },
-            Self::Address { name, value } => vec![
-                str_chunk32(name),
-            ],
-            Self::Bytes32 { name, value} => vec![
-                str_chunk32(name),
-            ],
-            Self::Uint256 { name, value } => vec![
-                str_chunk32(name),
-            ],
-            Self::Int256 { name, value, sign } => vec![
-                str_chunk32(name),
-            ],
+            Self::Address { name, value } => vec![str_chunk32(name), address_chunk(*value)],
+            Self::Bytes32 { name, value} => vec![str_chunk32(name), value.clone()],
+            Self::Uint256 { name, value } => vec![str_chunk32(name), value.clone()],
+            Self::Int256 { name, value, sign } => vec![str_chunk32(name), int_chunk(*value, *sign)],
+        }
+    }
+
+    /// returns encoded version of dynamic size chunks
+    pub fn dynamic_chunks(&self) -> Vec<U256> {
+        match &self {
+            Self::Bytes { name: _, value } => chunks(value),
+            Self::String { name: _, value } => str_chunks(value),
+            _ => vec![]
         }
     }
 
@@ -197,24 +210,32 @@ impl ABI {
         format!("1{}", s)
     }
 
-    /// get parameters encoded into schema as the first chunk in encoded 
-    /// Each parameter type will be represented by a char.
-    // The first character, 1, represents the encoding version. 
-    pub fn schema_chunk(&self) -> U256 {
-        U256::from(self.schema().as_bytes())
-    }
-
     /// encodes ABI into vector or 256 bit values
     /// The function can encode up to 31 parameters (and 1 byte is used to encode the encoding version). 
     pub fn encode(self) -> Result<Vec<U256>, ()> {
         if self.params.len() > 31 {
             return Err(())
         }
-        let mut out = vec![self.schema_chunk()];
-        self.params.iter().for_each(|p| {
-            p.into_chunks().iter().for_each(|chunk| {
+        let mut out = vec![str_chunk32(self.schema().as_str())];
+        let mut m: HashMap<usize, usize>  = HashMap::new();
+        // first loop - pushing chunks of the fixed size
+        self.params.iter().enumerate().for_each(|(i, p)| {
+            if !p.is_fixed_size() {
+                m.insert(i, out.len() + 1);
+            }
+            p.fixed_chunks().iter().for_each(|chunk| {
                 out.push(chunk.clone());
             });
+        });
+        // second loop - pushing chunks of dynamic size and adjusting their offsets
+        let mut offset: usize = out.len() * 0x20;
+        self.params.iter().enumerate().for_each(|(i, p)| {
+            let w_offset = m.get(&i).unwrap();
+            out[*w_offset] = U256::from(offset);            
+            p.dynamic_chunks().iter().for_each(|chunk| {
+                out.push(chunk.clone());
+            });
+            offset = out.len() * 0x20;
         });
         Ok(out)
     }
@@ -272,15 +293,10 @@ mod tests {
 
     #[test]
     fn it_encodes_decodes_bytes32() {
-        let mut input: Vec<U256> = vec![];
-        let n: u8 = ((rand::random::<f32>() * 10.0) as u8) / 10;
-        for _ in 1..n {
-            let r = rand_vec(32);
-            input.push(U256::from(into32(&r)));
-        }
+        let r = rand_vec(32);
         let param = Param::Bytes32 {
             name: rand_str(),
-            value: input,
+            value: U256::from(into32(&r)),
         };
         let value = ABI::only(param);
         let decoded = ABI::decode(value.clone().encode().unwrap()).unwrap();
@@ -345,7 +361,7 @@ mod tests {
         let value = ABI::none().encode().unwrap();
         let expected: U256 =
             hex!("3100000000000000000000000000000000000000000000000000000000000000").into();
-        assert_eq!(vec![expected], value);
+        assert_eq!(value, vec![expected]);
     }
 
     #[test]
@@ -429,9 +445,7 @@ mod tests {
         let res = ABI::decode(data).unwrap();
         let expected = ABI::only(Param::Bytes32 {
             name: "TestBytes32Name".to_owned(),
-            value: vec![
-                hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
-            ],
+            value: hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
         });
         assert_eq!(res, expected);
     }
@@ -457,14 +471,14 @@ mod tests {
     fn it_decodes_multiple() {
         let data: Vec<U256> = vec![
             hex!("3162615369427500000000000000000000000000000000000000000000000000").into(), //:00, 1baSiBu
-            hex!("62797465733332206e616d650000000000000000000000000000000000000000").into(), //:20
-            hex!("62797465732033322076616c7565000000000000000000000000000000000000").into(), //:40
-            hex!("77616c6c65740000000000000000000000000000000000000000000000000000").into(), //:60
-            hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(), //:80
-            hex!("737472696e67206e616d65000000000000000000000000000000000000000000").into(), //:a0
-            hex!("00000000000000000000000000000000000000000000000000000000000001a0").into(), //:c0
-            hex!("62616c616e636500000000000000000000000000000000000000000000000000").into(), //:e0
-            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into(), //:10
+            hex!("62797465733332206e616d650000000000000000000000000000000000000000").into(), //:20  "bytes name"
+            hex!("62797465732033322076616c7565000000000000000000000000000000000000").into(), //:40  "bytes 32 value"
+            hex!("77616c6c65740000000000000000000000000000000000000000000000000000").into(), //:60  "wallet"
+            hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(), //:80  0x4128922394C63A204Dd98ea6fbd887780b78bb7d
+            hex!("737472696e67206e616d65000000000000000000000000000000000000000000").into(), //:a0  "string name"
+            hex!("00000000000000000000000000000000000000000000000000000000000001a0").into(), //:c0  offset where to find string
+            hex!("62616c616e636500000000000000000000000000000000000000000000000000").into(), //:e0  "balance"
+            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into(), //:10 -10000000000000000000
             hex!("6279746573206e616d6500000000000000000000000000000000000000000000").into(), //:12
             hex!("00000000000000000000000000000000000000000000000000000000000001e0").into(), //:14
             hex!("686f6c6465727300000000000000000000000000000000000000000000000000").into(), //:16
@@ -477,7 +491,7 @@ mod tests {
         let res = ABI::decode(data).unwrap();
         let bytes32_val = "bytes 32 value".as_bytes();
         let expected = ABI::new(vec![
-            Param::Bytes32{ name: "bytes32 name".to_owned(), value: vec![U256::from(into32(bytes32_val))] },
+            Param::Bytes32{ name: "bytes32 name".to_owned(), value: U256::from(into32(bytes32_val)) },
             Param::Bytes{ name: "bytes name".to_owned(), value: hex!("123abc").into() },
             Param::String{ name: "string name".to_owned(), value: "string value".to_owned() },
             Param::Int256{ name: "balance".to_owned(), value: U256::from_dec_str("10000000000000000000").unwrap(), sign: -1 },
