@@ -1,5 +1,4 @@
-use ethereum_types::{U256, U512};
-use std::ops::Add;
+use ethereum_types::{H160, U256, U512};
 use std::str::FromStr;
 use std::convert::TryInto;
 
@@ -21,18 +20,6 @@ pub fn rpad32(src: &[u8]) -> Vec<u8> {
     s
 }
 
-/// converts array of bytes into vector, padded by 32 bytes with 0 at the begginning
-pub fn lpad32(src: &[u8]) -> Vec<u8> {
-    let mut s = vec![];
-    while (s.len() + src.len()) % 32 != 0 {
-        s.push(0u8);
-    }
-    for ch in src.iter() {
-        s.push(*ch);
-    }
-    s
-}
-
 /// convert string less than 31 characters long.
 /// string is padded with 0 to the right.
 pub fn str_chunk32(src: &str) -> U256 {
@@ -44,18 +31,23 @@ pub fn str_chunk32(src: &str) -> U256 {
 }
 
 /// convert string of unlimited length into array of 256 bits
-/// every string is padded with 0 to the right.
+/// string is padded with 0 to the right.
 pub fn str_chunks(src: &str) -> Vec<U256> {
+    chunks(src.as_bytes())
+}
+
+/// convert bytes array of unlimited length into array of 256 bits
+/// bytes are padded with 0 to the right.
+pub fn chunks(src: &[u8]) -> Vec<U256> {
     let mut chunk: Vec<u8> = vec![];
     let mut out = vec![];
-    for s in src.as_bytes() {
+    for s in src.iter() {
         chunk.push(*s);
         if chunk.len() == 32 {
             out.push(U256::from(into32(&chunk)));
             chunk = vec![];
         }
     }
-
     if chunk.len() > 0 {
         let v = rpad32(&chunk);
         out.push(U256::from(into32(&v)));
@@ -82,6 +74,11 @@ pub fn int_chunk(src: U256, sign: i32) -> U256 {
     }
 }
 
+/// converts EVM address into 256 bits
+pub fn address_chunk(src: H160) -> U256 {
+    U256::from(src.as_bytes())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,15 +99,6 @@ mod tests {
         let expected: U256 = hex!("3175000000000000000000000000000000000000000000000000000000000000").into();
         assert_eq!(U256::from(padded.as_slice()), expected);
     }
-
-    #[test]
-    fn it_can_lpad32() {
-        let padded = lpad32(&vec![ 0x31, 0x75 ]);
-        assert_eq!(padded.len(), 32);
-        let expected: U256 = hex!("0000000000000000000000000000000000000000000000000000000000003175").into();
-        assert_eq!(U256::from(padded.as_slice()), expected);
-    }
-
     #[test]
     fn it_pads_hello() {
         let res = str_chunk32("hello");
