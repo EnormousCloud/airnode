@@ -1,7 +1,10 @@
+mod helpers;
+
+#[allow(unused_variables)]
 use ethereum_types::{H160, U256};
 use std::fmt;
 use serde::{Deserialize, Serialize};
-// use std::str::FromStr;
+use helpers::{str_chunks, str_chunk32};
 
 /// All Airnode ABI parameters, represended as a map.
 /// In fact, this is just an alias to `BTreeMap<String, Param>`
@@ -27,6 +30,7 @@ pub enum Param {
     /// parameters that embeds unsigned 256 bits value
     Uint256 { name: String, value: U256 },
 }
+
 
 impl Param {
     /// returns name of the parameter
@@ -84,6 +88,39 @@ impl Param {
             } => 'i',
         }
     }
+
+    /// returns encoded version of this parameter values as array of 256-bit chunks.
+    pub fn into_chunks(&self) -> Vec<U256> {
+        match &self {
+            Self::Bytes { name, value } => {
+                vec![str_chunk32(name)]
+            },
+            Self::String { name, value } => {
+                vec![str_chunk32(name)].into_iter().chain(str_chunks(value).into_iter()).collect()
+            },
+            Self::Address { name, value } => vec![
+                str_chunk32(name),
+            ],
+            Self::Bytes32 { name, value} => vec![
+                str_chunk32(name),
+            ],
+            Self::Uint256 { name, value } => vec![
+                str_chunk32(name),
+            ],
+            Self::Int256 { name, value, sign } => vec![
+                str_chunk32(name),
+            ],
+        }
+    }
+
+    /// decodes name and value from array of chunks, starting at the given `offset` 
+    /// and using type from `ch` character.
+    /// Returns `Param` instance and updates `offset` with the bigger value.
+    pub fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize) -> Result<Self, ()>  {
+        let name_chunk = arr[*offset];
+        *offset += 1;
+        Ok(Self::Bytes { name: "todo".to_string(), value: vec![] })
+    }
 }
 
 impl fmt::Display for Param {
@@ -110,7 +147,7 @@ pub struct ABI {
 impl ABI {
     /// constructor of Airnode ABI from the list of parameters
     pub fn new(params: Vec<Param>) -> Self {
-        Self { version: 1, params }
+        Self { version: 0x31, params }
     }
 
     /// constructor of Airnode ABI with no parameters
@@ -160,18 +197,25 @@ impl ABI {
         format!("1{}", s)
     }
 
+    /// get parameters encoded into schema as the first chunk in encoded 
+    /// Each parameter type will be represented by a char.
+    // The first character, 1, represents the encoding version. 
+    pub fn schema_chunk(&self) -> U256 {
+        U256::from(self.schema().as_bytes())
+    }
+
     /// encodes ABI into vector or 256 bit values
     /// The function can encode up to 31 parameters (and 1 byte is used to encode the encoding version). 
     pub fn encode(self) -> Result<Vec<U256>, ()> {
         if self.params.len() > 31 {
             return Err(())
         }
-
-        // let v = into32(self.schema());
-        let mut out = vec![
-            
-        ];
-
+        let mut out = vec![self.schema_chunk()];
+        self.params.iter().for_each(|p| {
+            p.into_chunks().iter().for_each(|chunk| {
+                out.push(chunk.clone());
+            });
+        });
         Ok(out)
     }
 
@@ -183,15 +227,11 @@ impl ABI {
 
 #[cfg(test)]
 mod tests {
-    use super::{Param, ABI};
+    use super::*;
     use ethereum_types::{H160, U256};
     use hex_literal::hex;
     use rand::{thread_rng, Rng};
-    use std::convert::TryInto;
-
-    fn into32(src: &[u8]) -> [u8; 32] {
-        src.try_into().expect("slice with incorrect length")
-    }
+    use helpers::into32;
 
     fn rand_str() -> String {
         thread_rng()
@@ -416,23 +456,23 @@ mod tests {
     #[test]
     fn it_decodes_multiple() {
         let data: Vec<U256> = vec![
-            hex!("3162615369427500000000000000000000000000000000000000000000000000").into(),
-            hex!("62797465733332206e616d650000000000000000000000000000000000000000").into(),
-            hex!("62797465732033322076616c7565000000000000000000000000000000000000").into(),
-            hex!("77616c6c65740000000000000000000000000000000000000000000000000000").into(),
-            hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(),
-            hex!("737472696e67206e616d65000000000000000000000000000000000000000000").into(),
-            hex!("00000000000000000000000000000000000000000000000000000000000001a0").into(),
-            hex!("62616c616e636500000000000000000000000000000000000000000000000000").into(),
-            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into(),
-            hex!("6279746573206e616d6500000000000000000000000000000000000000000000").into(),
-            hex!("00000000000000000000000000000000000000000000000000000000000001e0").into(),
-            hex!("686f6c6465727300000000000000000000000000000000000000000000000000").into(),
-            hex!("000000000000000000000000000000000000000000000001158e460913d00000").into(),
-            hex!("000000000000000000000000000000000000000000000000000000000000000c").into(),
-            hex!("737472696e672076616c75650000000000000000000000000000000000000000").into(),
-            hex!("0000000000000000000000000000000000000000000000000000000000000003").into(),
-            hex!("123abc0000000000000000000000000000000000000000000000000000000000").into(),
+            hex!("3162615369427500000000000000000000000000000000000000000000000000").into(), //:00, 1baSiBu
+            hex!("62797465733332206e616d650000000000000000000000000000000000000000").into(), //:20
+            hex!("62797465732033322076616c7565000000000000000000000000000000000000").into(), //:40
+            hex!("77616c6c65740000000000000000000000000000000000000000000000000000").into(), //:60
+            hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(), //:80
+            hex!("737472696e67206e616d65000000000000000000000000000000000000000000").into(), //:a0
+            hex!("00000000000000000000000000000000000000000000000000000000000001a0").into(), //:c0
+            hex!("62616c616e636500000000000000000000000000000000000000000000000000").into(), //:e0
+            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into(), //:10
+            hex!("6279746573206e616d6500000000000000000000000000000000000000000000").into(), //:12
+            hex!("00000000000000000000000000000000000000000000000000000000000001e0").into(), //:14
+            hex!("686f6c6465727300000000000000000000000000000000000000000000000000").into(), //:16
+            hex!("000000000000000000000000000000000000000000000001158e460913d00000").into(), //:18
+            hex!("000000000000000000000000000000000000000000000000000000000000000c").into(), //:1a
+            hex!("737472696e672076616c75650000000000000000000000000000000000000000").into(), //:1c
+            hex!("0000000000000000000000000000000000000000000000000000000000000003").into(), //:1e
+            hex!("123abc0000000000000000000000000000000000000000000000000000000000").into(), //:20
         ];
         let res = ABI::decode(data).unwrap();
         let bytes32_val = "bytes 32 value".as_bytes();
@@ -449,9 +489,21 @@ mod tests {
 
     #[test]
     #[should_panic]
-
-    fn it_fails_on_zero() {
+    fn it_shouldnt_decode_zero() {
         let data: Vec<U256> = vec![U256::from(0)];
         ABI::decode(data).unwrap();
+    }
+
+    #[test]
+    fn it_shouldnt_decode_invalid_version() {
+        // checking every number except the valid version
+        for i in 0..255 {
+            if i != 0x31 {
+                let data: Vec<U256> = vec![U256::from(i)];
+                if let Ok(_) = ABI::decode(data) {
+                    panic!("decodes data, started with 0x{:x}", i);
+                }
+            }
+        }
     }
 }
