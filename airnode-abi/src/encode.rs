@@ -1,11 +1,12 @@
 use ethereum_types::{H160, U256, U512};
-use std::str::FromStr;
 use std::convert::TryInto;
+use std::str::FromStr;
 
 /// converts array of bytes into fixed array of 32 or panic
 /// Fix of the size must be at compile time! use carefully, this function panics.
 pub fn into32(src: &[u8]) -> [u8; 32] {
-    src.try_into().expect(format!("slice with incorrect length of {}", src.len()).as_str())
+    src.try_into()
+        .expect(format!("slice with incorrect length of {}", src.len()).as_str())
 }
 
 /// converts array of bytes into vector, padded by 32 bytes with 0 at the end
@@ -63,14 +64,16 @@ pub fn int_chunk(src: U256, sign: i32) -> U256 {
     if sign == 1 {
         U256::from(src)
     } else {
-        let a = U512::from_str("10000000000000000000000000000000000000000000000000000000000000000").unwrap() - U256::from(src);
+        let a = U512::from_str("10000000000000000000000000000000000000000000000000000000000000000")
+            .unwrap()
+            - U256::from(src);
         let U512(ref arr) = a;
         let mut ret = [0; 4];
-		ret[0] = arr[0];
-		ret[1] = arr[1];
-		ret[2] = arr[2];
+        ret[0] = arr[0];
+        ret[1] = arr[1];
+        ret[2] = arr[2];
         ret[3] = arr[3];
-		U256(ret)
+        U256(ret)
     }
 }
 
@@ -88,21 +91,26 @@ mod tests {
     #[test]
     fn it_can_encode_negative_int256() {
         let encoded = int_chunk(U256::from_dec_str("10000000000000000000").unwrap(), -1);
-        let expected: U256 = hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into();
+        let expected: U256 =
+            hex!("ffffffffffffffffffffffffffffffffffffffffffffffff7538dcfb76180000").into();
         assert_eq!(encoded, expected);
     }
 
     #[test]
     fn it_can_rpad32() {
-        let padded = rpad32(&vec![ 0x31, 0x75 ]);
+        let padded = rpad32(&vec![0x31, 0x75]);
         assert_eq!(padded.len(), 32);
-        let expected: U256 = hex!("3175000000000000000000000000000000000000000000000000000000000000").into();
+        let expected: U256 =
+            hex!("3175000000000000000000000000000000000000000000000000000000000000").into();
         assert_eq!(U256::from(padded.as_slice()), expected);
     }
     #[test]
     fn it_pads_hello() {
         let res = str_chunk32("hello");
-        let expected = U256::from(hex!("68656c6c6f000000000000000000000000000000000000000000000000000000")).into();
+        let expected = U256::from(hex!(
+            "68656c6c6f000000000000000000000000000000000000000000000000000000"
+        ))
+        .into();
         assert_eq!(res, expected);
     }
 
@@ -121,5 +129,4 @@ mod tests {
         ];
         assert_eq!(res, expected);
     }
-
 }
