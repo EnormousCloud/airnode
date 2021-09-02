@@ -1,10 +1,11 @@
-mod helpers;
+mod decode;
+mod encode;
 
-#[allow(unused_variables)]
 use ethereum_types::{H160, U256};
 use std::fmt;
 use serde::{Deserialize, Serialize};
-use helpers::{str_chunks, str_chunk32, address_chunk, int_chunk, chunks};
+use encode::{str_chunks, str_chunk32, address_chunk, int_chunk, chunks};
+use decode::{chunk_to_str, chunk_to_int, chunk_to_address, chunk_to_vec};
 use std::collections::HashMap;
 
 /// All Airnode ABI parameters, represended as a map.
@@ -130,9 +131,37 @@ impl Param {
     /// and using type from `ch` character.
     /// Returns `Param` instance and updates `offset` with the bigger value.
     pub fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize) -> Result<Self, ()>  {
-        let name_chunk = arr[*offset];
+        let name: String = chunk_to_str(arr[*offset]);
         *offset += 1;
-        Ok(Self::Bytes { name: "todo".to_string(), value: vec![] })
+        if ch == 'b' {
+            let value = arr[*offset];
+            *offset += 1;
+            return Ok(Self::Bytes32 { name, value })
+        } else if ch == 'u' {
+            let value = arr[*offset];
+            *offset += 1;
+            return Ok(Self::Uint256{ name, value })
+        } else if ch == 'a' {
+            let value = chunk_to_address(arr[*offset]);
+            *offset += 1;
+            return Ok(Self::Address{ name, value })
+        } else if ch == 'i' {
+            let (value, sign) = chunk_to_int(arr[*offset]);
+            *offset += 1;
+            return Ok(Self::Int256{ name, value, sign })
+        } else if ch == 'B' || ch == 'S' {
+            let value_index: usize = arr[*offset].as_usize() / 32;
+            *offset += 1;
+            let value_size: usize = arr[*offset].as_usize();
+            *offset += 1;
+            let value = chunk_to_vec(arr, value_index, value_size);
+            if ch == 'B' {
+                return Ok(Self::Bytes{ name, value })
+            }
+            let s = String::from_utf8(value).unwrap();
+            return Ok(Self::String{ name, value: s });
+        }
+        Err(())
     }
 }
 
@@ -242,6 +271,7 @@ impl ABI {
 
     /// decodes ABI from the vector or 256 bit values
     pub fn decode(input: Vec<U256>) -> Result<Self, ()> {
+        // TODO: 
         Err(())
     }
 }
@@ -252,7 +282,7 @@ mod tests {
     use ethereum_types::{H160, U256};
     use hex_literal::hex;
     use rand::{thread_rng, Rng};
-    use helpers::into32;
+    use encode::into32;
 
     fn rand_str() -> String {
         thread_rng()
