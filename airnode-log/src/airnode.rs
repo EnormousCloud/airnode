@@ -1,13 +1,14 @@
+use crate::logreader::{EventParseError, LogReader};
+use airnode_abi::ABI;
 use hex_literal::hex;
-use web3::types::{H160, U256};
-use serde::{Deserialize, Serialize};
-use crate::logreader::{LogReader, EventParseError};
 use phf::phf_map;
+use serde::{Deserialize, Serialize};
+use web3::types::{H160, U256};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum AirnodeEvent {
-    ClientEndorsementStatusUpdated{
+    ClientEndorsementStatusUpdated {
         requester_index: U256,
         client_address: H160,
         endorsement_status: bool,
@@ -22,25 +23,25 @@ pub enum AirnodeEvent {
         designated_wallet: H160,
         fulfill_address: H160,
         fulfill_function_id: U256,
-        parameters: Vec<U256>,
+        parameters: ABI,
     },
     ClientRequestFulfilled {
         provider_id: U256,
         request_id: U256,
         status_code: U256,
-        data: U256,
+        data: Vec<U256>,
     },
-    EndpointUpdated{ 
+    EndpointUpdated {
         provider_id: U256,
         endpoint_id: U256,
         authorizers: Vec<H160>,
     },
-    ProviderCreated{
+    ProviderCreated {
         provider_id: U256,
         admin: H160,
         xpub: String,
     },
-    RequesterCreated{
+    RequesterCreated {
         requester_index: U256,
         admin: H160,
     },
@@ -120,64 +121,90 @@ impl AirnodeEvent {
 
         if t0 == hex!("59e98f4c18a6c92efe8c23bcbd74f0d71e271eebf9a95f9edefdbee17c01f270").into() {
             let mut r = LogReader::new(&log, 1, Some(1)).unwrap();
-            return Ok(Self::RequesterCreated{
+            return Ok(Self::RequesterCreated {
                 requester_index: r.value(),
                 admin: r.address(),
-            })
-        } else if t0 == hex!("8acbd28af1fec329994543393007c74ebc717caab62689ba09fbf938f015d3fc").into() {
+            });
+        } else if t0
+            == hex!("8acbd28af1fec329994543393007c74ebc717caab62689ba09fbf938f015d3fc").into()
+        {
             let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
-            return Ok(Self::ClientEndorsementStatusUpdated{
+            return Ok(Self::ClientEndorsementStatusUpdated {
                 requester_index: r.value(),
                 client_address: r.address(),
                 endorsement_status: r.bool(),
-            })
-        } else if t0 == hex!("775e78a8e7375d14ad03d31edd0a27b29a055f732bca987abfe8082c16ed7e44").into() {
+            });
+        } else if t0
+            == hex!("775e78a8e7375d14ad03d31edd0a27b29a055f732bca987abfe8082c16ed7e44").into()
+        {
             let mut r = LogReader::new(&log, 2, None).unwrap();
-            return Ok(Self::ClientFullRequestCreated{
-                provider_id: r.value(),
-                request_id: r.value(),
-                no_requests: r.value(),
-                client_address: r.address(),
-                endpoint_id: r.value(),
-                requester_index: r.value(),
-                designated_wallet: r.address(),
-                fulfill_address: r.address(),
-                fulfill_function_id: r.value(), //.as_u64(),
-                parameters: r.values(),
-            })
-        } else if t0 == hex!("1bdbe9e5d42a025a741fc3582eb3cad4ef61ac742d83cc87e545fbd481b926b5").into() {
+            let provider_id = r.value();
+            let request_id = r.value();
+            let no_requests = r.value();
+            let client_address = r.address();
+            let endpoint_id = r.value();
+            let requester_index = r.value();
+            let designated_wallet = r.address();
+            let fulfill_address = r.address();
+            let fulfill_function_id = r.value();
+            r.skip();
+            r.skip();
+            let chunks = r.values();
+            // chunks.iter().enumerate().for_each(|(i, u)| println!("{:04x?}: {}", i*0x20, serde_json::to_string(u).unwrap()));
+            // println!("ClientFullRequestCreated decoded: {:#?}", ABI::decode(&chunks));
+            // todo: isolate schema, save schema in a separate endpoint
+            return Ok(Self::ClientFullRequestCreated {
+                provider_id,
+                request_id,
+                no_requests,
+                client_address,
+                endpoint_id,
+                requester_index,
+                designated_wallet,
+                fulfill_address,
+                fulfill_function_id, //.as_u64(),
+                parameters: ABI::decode(&chunks).unwrap(),
+                // parameters: ABI::none(),
+            });
+        } else if t0
+            == hex!("1bdbe9e5d42a025a741fc3582eb3cad4ef61ac742d83cc87e545fbd481b926b5").into()
+        {
             let mut r = LogReader::new(&log, 2, Some(2)).unwrap();
-            return Ok(Self::ClientRequestFulfilled{
+            return Ok(Self::ClientRequestFulfilled {
                 provider_id: r.value(),
                 request_id: r.value(),
                 status_code: r.value(),
-                data: r.value(),
-            })
-        } else if t0 == hex!("e5687475d94be4622dec0d6fa4db8686e003947facd485b0f4685954b8e93aa8").into() {
+                data: r.values(),
+            });
+        } else if t0
+            == hex!("e5687475d94be4622dec0d6fa4db8686e003947facd485b0f4685954b8e93aa8").into()
+        {
             let mut r = LogReader::new(&log, 2, None).unwrap();
-            return Ok(Self::EndpointUpdated{
+            return Ok(Self::EndpointUpdated {
                 provider_id: r.value(),
                 endpoint_id: r.value(),
                 authorizers: r.addresses(),
-            })
-        } else if t0 == hex!("36ef18ad81b13124b66c80d27059d75bfadf09474c46aee8bb4ae998a921196d").into() {
+            });
+        } else if t0
+            == hex!("36ef18ad81b13124b66c80d27059d75bfadf09474c46aee8bb4ae998a921196d").into()
+        {
             let mut r = LogReader::new(&log, 1, None).unwrap();
-            return Ok(Self::ProviderCreated{
+            return Ok(Self::ProviderCreated {
                 provider_id: r.value(),
                 admin: r.address(),
                 xpub: r.text(),
-            })
+            });
         }
 
         let topic_str = format!("{:?}", t0).chars().skip(2).collect::<String>();
         match KNOWN_EVENTS.get(&topic_str) {
             Some(title) => {
                 tracing::info!("{} topic={:?}", title, t0);
-                return Ok(Self::Unclassified)
-            },
+                return Ok(Self::Unclassified);
+            }
             None => {
                 tracing::warn!("unknown topic {:?}", t0);
-            },
+            }
         }
         Ok(Self::Unknown)
     }

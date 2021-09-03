@@ -2,18 +2,16 @@ pub mod aircontracts;
 pub mod airnode;
 pub mod logreader;
 
-use hex_literal::hex;
-use tracing::info;
-use serde::{Serialize, Deserialize};
 use crate::airnode::AirnodeEvent;
-use crate::aircontracts::AirnodeInstance;
-use std::path::Path;
+use serde::{Deserialize, Serialize};
+use tracing::info;
+// use crate::aircontracts::AirnodeInstance;
+// use std::path::Path;
 use std::collections::BTreeMap;
 use web3::types::H256;
 
 #[derive(Default, Clone)]
-pub struct State {
-}
+pub struct State {}
 
 #[derive(Default, Clone, Serialize, Deserialize)]
 pub struct LogResponse {
@@ -38,17 +36,17 @@ async fn main() -> anyhow::Result<()> {
         .with(fmt_layer)
         .init();
 
-//     let rpc_endpoint = String::from("/home/.../.ethereum/rinkeby/geth.ipc");
-//     if !Path::new(rpc_endpoint.as_str()).exists() {
-//         return Err(anyhow::Error::msg("IPC file doesn't exists"));
-//     }
-//     let transport = web3::transports::Ipc::new(rpc_endpoint.as_str())
-//         .await
-//         .expect("Failed to connect to IPC");
-//     let web3 = web3::Web3::new(transport);
-//     // let chain_id = web3.eth().chain_id().await?.as_u64();
-//     let node = AirnodeInstance::new(&web3, hex!("F9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC").into());
-//     println!("templates={:?}", node.get_templates().await);
+    //     let rpc_endpoint = String::from("/home/.../.ethereum/rinkeby/geth.ipc");
+    //     if !Path::new(rpc_endpoint.as_str()).exists() {
+    //         return Err(anyhow::Error::msg("IPC file doesn't exists"));
+    //     }
+    //     let transport = web3::transports::Ipc::new(rpc_endpoint.as_str())
+    //         .await
+    //         .expect("Failed to connect to IPC");
+    //     let web3 = web3::Web3::new(transport);
+    //     // let chain_id = web3.eth().chain_id().await?.as_u64();
+    //     let node = AirnodeInstance::new(&web3, hex!("F9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC").into());
+    //     println!("templates={:?}", node.get_templates().await);
 
     let b = include_bytes!("../mocks/rinkeby-airnode.json");
     let logs: Vec<LogResponse> = serde_json::from_slice(b).unwrap();
@@ -62,18 +60,23 @@ async fn main() -> anyhow::Result<()> {
                     // info!("{:?}", serde_json::to_string(&l).unwrap());
                     // info!("{:?} {:?} {:?}", l.block_number.unwrap(), l.transaction_hash.unwrap(), evt);
                     unknown.insert(l.topics[0], l.transaction_hash.unwrap());
-                },
+                }
                 AirnodeEvent::Unclassified => {
                     // info!("{:?} {:?} {:?}", l.block_number.unwrap(), l.transaction_hash.unwrap(), evt);
-                },
+                }
                 _ => {
-                    info!("{:?} {:?} {:?}", l.block_number.unwrap(), l.transaction_hash.unwrap(), evt);
-                },
+                    info!(
+                        "{:?} {:?} {:?}",
+                        l.block_number.unwrap(),
+                        l.transaction_hash.unwrap(),
+                        evt
+                    );
+                }
             }
         }
     }
     for (topic, tx) in &unknown {
-         tracing::warn!("unknown topic={:?} tx={:?}", topic, tx);
+        tracing::warn!("unknown topic={:?} tx={:?}", topic, tx);
     }
     Ok(())
 }
