@@ -48,10 +48,6 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 
-/// All Airnode ABI parameters, represended as a map.
-/// In fact, this is just an alias to `BTreeMap<String, Param>`
-pub type DecodedMap = std::collections::BTreeMap<String, Param>;
-
 /// Atomic parameter in the Airnode ABI
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -248,15 +244,6 @@ impl ABI {
         } else {
             None
         }
-    }
-
-    /// turn all parameters into map by parameters name (for debugging and testing)
-    pub fn into_map(&self) -> DecodedMap {
-        let mut map = DecodedMap::new();
-        for p in &self.params {
-            map.insert(p.get_name().to_owned(), p.clone());
-        }
-        map
     }
 
     /// encodes ABI into vector or 256 bit values
