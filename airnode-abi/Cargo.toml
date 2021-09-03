@@ -17,6 +17,7 @@ hex-literal = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 ethereum-types = { version = "0.11" }
+thiserror = "1.0"
 
 [dev-dependencies]
 rand = "0.8"
