@@ -47,6 +47,28 @@ use ethereum_types::{H160, U256};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
+use thiserror::Error;
+
+
+#[derive(Debug, Error, Serialize)]
+pub enum EncodingError {
+    #[error("too many parameters, max is 31")]
+    TooManyParams,
+}
+
+#[derive(Debug, Clone, Error, Serialize, Deserialize)]
+pub enum DecodingError {
+    #[error("no input")]
+    NoInput,
+    #[error("schema is missing")]
+    NoSchema,
+    #[error("schema version is invalid")]
+    InvalidVersion,
+    #[error("invalid schema character {0}")]
+    InvalidSchemaCharacter(char),
+    #[error("invalid utf8 string")]
+    InvalidUtf8String(String),
+}
 
 /// Atomic parameter in the Airnode ABI
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -248,9 +270,9 @@ impl ABI {
 
     /// encodes ABI into vector or 256 bit values
     /// The function can encode up to 31 parameters (and 1 byte is used to encode the encoding version).
-    pub fn encode(&self) -> Result<Vec<U256>, ()> {
+    pub fn encode(&self) -> Result<Vec<U256>, EncodingError> {
         if self.params.len() > 31 {
-            return Err(());
+            return Err(EncodingError::TooManyParams);
         }
         let mut out = vec![str_chunk32(encode_schema(0x31, &self.params).as_str())];
         let mut m: HashMap<usize, usize> = HashMap::new();
@@ -278,7 +300,7 @@ impl ABI {
     }
 
     /// decodes ABI from the vector or 256 bit values. Data should not contain schema
-    pub fn decode_with_schema(schema: String, data: &Vec<U256>) -> Result<Self, ()> {
+    pub fn decode_with_schema(schema: String, data: &Vec<U256>) -> Result<Self, DecodingError> {
         let input: Vec<U256> = vec![str_chunk32(&schema)]
             .into_iter()
             .chain(data.clone().into_iter())
@@ -287,27 +309,33 @@ impl ABI {
     }
 
     /// decodes ABI from the vector or 256 bit values
-    pub fn decode(input: &Vec<U256>) -> Result<Self, ()> {
+    pub fn decode(input: &Vec<U256>) -> Result<Self, DecodingError> {
         if input.len() < 1 {
-            return Err(());
+            return Err(DecodingError::NoInput);
         }
         let schema_chunk = input.get(0).unwrap();
         if schema_chunk.is_zero() {
-            return Err(());
+            return Err(DecodingError::NoSchema);
         }
 
-        let schema: String = chunk_to_str(input.get(0).unwrap().clone());
+        let schema: String = chunk_to_str(*schema_chunk);
         let mut params: Vec<Param> = vec![];
         if schema.len() > 1 {
             let ch_version = schema.chars().nth(0).unwrap();
             if ch_version != '1' {
-                return Err(());
+                return Err(DecodingError::InvalidVersion);
             }
             let mut offs: usize = 1;
+            let mut errors: Vec<DecodingError> = vec![];
             schema.chars().skip(1).for_each(|ch| {
-                let p = Self::from_chunks(ch, &input, &mut offs).unwrap();
-                params.push(p);
+                match Self::from_chunks(ch, &input, &mut offs) {
+                    Ok(p) => params.push(p),
+                    Err(e) => errors.push(e),
+                }
             });
+            if errors.len() > 0 {
+                return Err(errors[0].clone());
+            }
         }
         Ok(Self::new(params))
     }
@@ -315,7 +343,7 @@ impl ABI {
     /// decodes name and value from array of chunks, starting at the given `offset`
     /// and using type from `ch` character.
     /// Returns `Param` instance and updates `offset` with the bigger value.
-    fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize) -> Result<Param, ()> {
+    fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize) -> Result<Param, crate::DecodingError> {
         let name: String = chunk_to_str(arr[*offset]);
         *offset += 1;
         if ch == 'b' {
@@ -343,10 +371,13 @@ impl ABI {
             if ch == 'B' {
                 return Ok(Param::Bytes { name, value });
             }
-            let s = String::from_utf8(value).unwrap();
+            let s = match String::from_utf8(value) {
+                Ok(s) => s,
+                Err(e) => return Err(DecodingError::InvalidUtf8String(format!("{}", e))),
+            };
             return Ok(Param::String { name, value: s });
         }
-        Err(())
+        Err(DecodingError::InvalidSchemaCharacter(ch))
     }
 }
 
