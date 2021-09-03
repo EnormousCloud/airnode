@@ -239,7 +239,7 @@ impl ABI {
     pub fn none() -> Self {
         Self {
             version: 0x31,
-            schema: "".to_owned(),
+            schema: "1".to_owned(),
             params: vec![],
         }
     }
