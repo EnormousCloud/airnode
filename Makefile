@@ -3,3 +3,6 @@ test-airnode-abi:
 
 doc-airnode-abi:
 	cargo doc --package airnode-abi && basic-http-server ./target/doc
+
+test-airnode-log:
+	cargo run --package airnode-log --release

@@ -295,8 +295,8 @@ impl ABI {
             let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
             *offset += 1;
             let data_offset = value_index / 32;
-            let value_size: usize = arr[data_offset].as_usize();  // todo: handle failure
-            let value = chunk_to_vec(arr, data_offset  + 1, value_size);
+            let value_size: usize = arr[data_offset].as_usize(); // todo: handle failure
+            let value = chunk_to_vec(arr, data_offset + 1, value_size);
             if ch == 'B' {
                 return Ok(Param::Bytes { name, value });
             }

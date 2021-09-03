@@ -75,7 +75,7 @@ impl LogReader {
 
     // pop meta data as text
     pub fn text(&mut self) -> String {
-        let _hex_size = self.next32(); // first byte is number 
+        let _hex_size = self.next32(); // first byte is number
         let _str_size = self.next32(); // second piece is actual size of the string
         let mut s = String::from("");
         while self.has_data() {
@@ -124,6 +124,10 @@ impl LogReader {
         let hex_str = self.next32();
         // println!("offset={} data={}", offs, hex_str);
         U256::from_str(hex_str.as_str()).unwrap()
+    }
+
+    pub fn skip(&mut self) {
+        let _ = self.value();
     }
 
     // pop all remaining values
