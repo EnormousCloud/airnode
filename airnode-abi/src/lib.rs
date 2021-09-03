@@ -1,3 +1,43 @@
+//! This library allows to encode and decode different types of data
+//! during interaction between API3 Airnode and Ethereum smart contracts
+//!
+//! See details of protocol are at [Airnode Specification](https://github.com/api3dao/api3-docs/blob/master/airnode/airnode-abi-specifications.md)
+//!
+//! Parameters from contract event logs are consumed as `Vec<U256>`, which avoids reading 
+//! random raw bytes and provides guarantee of a proper data alignment on input.
+//!
+//! ### decoding example
+//! ```
+//! use airnode_abi::ABI;
+//! use ethereum_types::U256;
+//!
+//! fn main() {
+//!     let data: Vec<U256> = vec![
+//!         hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
+//!         hex!("54657374427974657333324e616d650000000000000000000000000000000000").into(),
+//!         hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
+//!     ];
+//!     let res: ABI = ABI::decode(&data).unwrap();
+//!     println!("{}", res);
+//! }
+//! ```
+//!
+//! ### encoding example
+//! ```
+//! use airnode_abi::{ABI, Param};
+//! use ethereum_types::U256;
+//!
+//! fn main() {
+//!     let param = Param::String {
+//!         name: "hello".to_owned(),
+//!         value: "world".to_owned(),
+//!     };
+//!     let res: Vec<U256> = ABI::new(vec![param]).encode().unwrap();
+//!     println!("{}", res);
+//! }
+//! ```
+//! Please see more examples for each type of the parameter in unit tests.
+
 mod decode;
 mod encode;
 
@@ -14,6 +54,7 @@ pub type DecodedMap = std::collections::BTreeMap<String, Param>;
 
 /// Atomic parameter in the Airnode ABI
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum Param {
     /// parameter that embeds array of bytes (dynamic size)
     Bytes { name: String, value: Vec<u8> },
@@ -27,7 +68,7 @@ pub enum Param {
     Int256 {
         name: String,
         value: U256,
-        sign: i32, // we need to store the sign separately as we don't have
+        sign: i32, // we need to store the sign separately as we don't have that type
     },
     /// parameters that embeds unsigned 256 bits value
     Uint256 { name: String, value: U256 },
@@ -152,8 +193,18 @@ impl fmt::Display for Param {
 pub struct ABI {
     /// Id of the ABI version. It is always "1" so far
     pub version: u8,
+    /// Schema string. Each parameter is represented by a char
+    pub schema: String,
     /// List of ABI parameters.
     pub params: Vec<Param>,
+}
+
+/// get parameters encoded into schema string.
+/// Each parameter type will be represented by a char.
+/// The first character, 1, represents the encoding version.
+fn encode_schema(version: u8, params: &Vec<Param>) -> String {
+    let s: String = params.iter().map(|p| p.get_char()).collect();
+    format!("{}{}", version as char, s)
 }
 
 impl ABI {
@@ -161,6 +212,7 @@ impl ABI {
     pub fn new(params: Vec<Param>) -> Self {
         Self {
             version: 0x31,
+            schema: encode_schema(0x31, &params),
             params,
         }
     }
@@ -169,15 +221,18 @@ impl ABI {
     pub fn none() -> Self {
         Self {
             version: 0x31,
+            schema: "".to_owned(),
             params: vec![],
         }
     }
 
-    /// constructor of Airnode ABI
-    pub fn only(params: Param) -> Self {
+    /// constructor of Airnode ABI with a single parameter
+    pub fn only(param: Param) -> Self {
+        let params = vec![param];
         Self {
             version: 0x31,
-            params: vec![params],
+            schema: encode_schema(0x31, &params),
+            params: params,
         }
     }
 
@@ -204,21 +259,13 @@ impl ABI {
         map
     }
 
-    /// get parameters encoded into schema string.
-    /// Each parameter type will be represented by a char.
-    // The first character, 1, represents the encoding version.
-    pub fn schema(&self) -> String {
-        let s: String = self.params.iter().map(|p| p.get_char()).collect();
-        format!("1{}", s)
-    }
-
     /// encodes ABI into vector or 256 bit values
     /// The function can encode up to 31 parameters (and 1 byte is used to encode the encoding version).
     pub fn encode(&self) -> Result<Vec<U256>, ()> {
         if self.params.len() > 31 {
             return Err(());
         }
-        let mut out = vec![str_chunk32(self.schema().as_str())];
+        let mut out = vec![str_chunk32(encode_schema(0x31, &self.params).as_str())];
         let mut m: HashMap<usize, usize> = HashMap::new();
         // first loop - pushing chunks of the fixed size
         self.params.iter().enumerate().for_each(|(i, p)| {
@@ -241,6 +288,15 @@ impl ABI {
             offset = out.len() * 0x20;
         });
         Ok(out)
+    }
+
+    /// decodes ABI from the vector or 256 bit values. Data should not contain schema
+    pub fn decode_with_schema(schema: String, data: &Vec<U256>) -> Result<Self, ()> {
+        let input: Vec<U256> = vec![str_chunk32(&schema)]
+            .into_iter()
+            .chain(data.clone().into_iter())
+            .collect();
+        Self::decode(&input)
     }
 
     /// decodes ABI from the vector or 256 bit values
