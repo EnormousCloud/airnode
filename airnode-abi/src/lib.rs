@@ -6,6 +6,9 @@
 //! Parameters from contract event logs are consumed as `Vec<U256>`, which avoids reading 
 //! random raw bytes and provides guarantee of a proper data alignment on input.
 //!
+//! `strict` flag defines whether decoding could be done into extended types (`String32`) 
+//! that are actually represented as `Bytes32` on a protocol level
+//!
 //! ### decoding example
 //! ```
 //! use airnode_abi::ABI;
@@ -17,7 +20,7 @@
 //!         hex!("54657374427974657333324e616d650000000000000000000000000000000000").into(),
 //!         hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
 //!     ];
-//!     let res: ABI = ABI::decode(&data).unwrap();
+//!     let res: ABI = ABI::decode(&data, true).unwrap();
 //!     println!("{}", res);
 //! }
 //! ```
@@ -66,7 +69,7 @@ pub enum DecodingError {
     InvalidVersion,
     #[error("invalid schema character {0}")]
     InvalidSchemaCharacter(char),
-    #[error("invalid utf8 string")]
+    #[error("invalid UTF-8 string")]
     InvalidUtf8String(String),
 }
 
@@ -80,16 +83,19 @@ pub enum Param {
     String { name: String, value: String },
     /// parameter that embeds EVM address (160 bits, H160)
     Address { name: String, value: H160 },
-    /// parameters that embeds single 256 bits value
+    /// parameter that embeds single 256 bits value
     Bytes32 { name: String, value: U256 },
-    /// parameters that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
+    /// parameter that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
     Int256 {
         name: String,
         value: U256,
         sign: i32, // we need to store the sign separately as we don't have that type
     },
-    /// parameters that embeds unsigned 256 bits value
+    /// parameter that embeds unsigned 256 bits value
     Uint256 { name: String, value: U256 },
+    /// parameter that embeds string as single Bytes32 value. The length of the string should not exceed 32 bytes
+    /// it will be decoded correctly if this is non-empty valid Utf-8 string
+    String32 { name: String, value: String },
 }
 
 impl Param {
@@ -98,6 +104,7 @@ impl Param {
         match &self {
             Self::Bytes { name, value: _ } => name,
             Self::String { name, value: _ } => name,
+            Self::String32 { name, value: _ } => name,
             Self::Address { name, value: _ } => name,
             Self::Bytes32 { name, value: _ } => name,
             Self::Uint256 { name, value: _ } => name,
@@ -114,6 +121,7 @@ impl Param {
         match &self {
             Self::Bytes { name: _, value } => format!("{:x?}", value),
             Self::String { name: _, value } => value.clone(),
+            Self::String32 { name: _, value } => value.clone(),
             Self::Address { name: _, value } => format!("{:?}", value),
             Self::Bytes32 { name: _, value } => format!("{:x?}", value),
             Self::Uint256 { name: _, value } => format!("{:x?}", value),
@@ -134,10 +142,12 @@ impl Param {
     /// returns character of the parameter for encoding
     /// - Upper case letters refer to dynamically sized types
     /// - Lower case letters refer to statically sized types
+    /// - String32 is encoded into Bytes32
     pub fn get_char(&self) -> char {
         match &self {
             Self::Bytes { name: _, value: _ } => 'B',
             Self::String { name: _, value: _ } => 'S',
+            Self::String32 { name: _, value: _ } => 'B',
             Self::Address { name: _, value: _ } => 'a',
             Self::Bytes32 { name: _, value: _ } => 'b',
             Self::Uint256 { name: _, value: _ } => 'u',
@@ -173,6 +183,7 @@ impl Param {
             }
             Self::Address { name, value } => vec![str_chunk32(name), address_chunk(*value)],
             Self::Bytes32 { name, value } => vec![str_chunk32(name), value.clone()],
+            Self::String32 { name, value } => vec![str_chunk32(name), str_chunk32(value)],
             Self::Uint256 { name, value } => vec![str_chunk32(name), value.clone()],
             Self::Int256 { name, value, sign } => vec![str_chunk32(name), int_chunk(*value, *sign)],
         }
@@ -210,6 +221,7 @@ impl fmt::Display for Param {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ABI {
     /// Id of the ABI version. It is always "1" so far
+    #[serde(skip_serializing)]
     pub version: u8,
     /// Schema string. Each parameter is represented by a char
     pub schema: String,
@@ -299,17 +311,18 @@ impl ABI {
         Ok(out)
     }
 
-    /// decodes ABI from the vector or 256 bit values. Data should not contain schema
-    pub fn decode_with_schema(schema: String, data: &Vec<U256>) -> Result<Self, DecodingError> {
+    /// decodes ABI from the vector or 256 bit values. 
+    /// This function can be used when data doesn't contain schema, but you know it from the other source.
+    pub fn decode_with_schema(schema: String, data: &Vec<U256>, strict: bool) -> Result<Self, DecodingError> {
         let input: Vec<U256> = vec![str_chunk32(&schema)]
             .into_iter()
             .chain(data.clone().into_iter())
             .collect();
-        Self::decode(&input)
+        Self::decode(&input, strict)
     }
 
     /// decodes ABI from the vector or 256 bit values
-    pub fn decode(input: &Vec<U256>) -> Result<Self, DecodingError> {
+    pub fn decode(input: &Vec<U256>, strict: bool) -> Result<Self, DecodingError> {
         if input.len() < 1 {
             return Err(DecodingError::NoInput);
         }
@@ -318,7 +331,10 @@ impl ABI {
             return Err(DecodingError::NoSchema);
         }
 
-        let schema: String = chunk_to_str(*schema_chunk);
+        let schema: String = match chunk_to_str(*schema_chunk)  {
+            Ok(x) => x,
+            Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
+        };
         let mut params: Vec<Param> = vec![];
         if schema.len() > 1 {
             let ch_version = schema.chars().nth(0).unwrap();
@@ -328,7 +344,7 @@ impl ABI {
             let mut offs: usize = 1;
             let mut errors: Vec<DecodingError> = vec![];
             schema.chars().skip(1).for_each(|ch| {
-                match Self::from_chunks(ch, &input, &mut offs) {
+                match Self::from_chunks(ch, &input, &mut offs, strict) {
                     Ok(p) => params.push(p),
                     Err(e) => errors.push(e),
                 }
@@ -343,12 +359,21 @@ impl ABI {
     /// decodes name and value from array of chunks, starting at the given `offset`
     /// and using type from `ch` character.
     /// Returns `Param` instance and updates `offset` with the bigger value.
-    fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize) -> Result<Param, crate::DecodingError> {
-        let name: String = chunk_to_str(arr[*offset]);
+    fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize, strict: bool) -> Result<Param, DecodingError> {
+        let name: String = match chunk_to_str(arr[*offset]) {
+            Ok(x) => x,
+            Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
+        };
         *offset += 1;
         if ch == 'b' {
             let value = arr[*offset];
             *offset += 1;
+            if !strict {
+                // if we are not in the strict mode
+                if let Ok(v) = chunk_to_str(value) {
+                    return Ok(Param::String32 { name, value: v });
+                }
+            }
             return Ok(Param::Bytes32 { name, value });
         } else if ch == 'u' {
             let value = arr[*offset];
@@ -411,7 +436,7 @@ mod tests {
             value: rand_vec(16),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -422,7 +447,7 @@ mod tests {
             value: rand_str(),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -434,7 +459,7 @@ mod tests {
             value: U256::from(into32(&r)),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -446,7 +471,7 @@ mod tests {
             value: H160::from(H160::from_slice(&r)),
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -459,7 +484,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -473,7 +498,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -487,7 +512,7 @@ mod tests {
             value: input,
         };
         let value = ABI::only(param);
-        let decoded = ABI::decode(&value.encode().unwrap()).unwrap();
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
         assert_eq!(decoded, value);
     }
 
@@ -503,7 +528,7 @@ mod tests {
     fn it_decodes_empty() {
         let data: Vec<U256> =
             vec![hex!("3100000000000000000000000000000000000000000000000000000000000000").into()];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         assert_eq!(res, ABI::none());
     }
 
@@ -514,7 +539,7 @@ mod tests {
             hex!("54657374416464726573734e616d650000000000000000000000000000000000").into(),
             hex!("0000000000000000000000004128922394c63a204dd98ea6fbd887780b78bb7d").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::only(Param::Address {
             name: "TestAddressName".to_owned(),
             value: hex!("4128922394C63A204Dd98ea6fbd887780b78bb7d").into(),
@@ -529,7 +554,7 @@ mod tests {
             hex!("54657374496e744e616d65000000000000000000000000000000000000000000").into(),
             hex!("fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc18").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::only(Param::Int256 {
             name: "TestIntName".to_owned(),
             value: U256::from(1000),
@@ -545,7 +570,7 @@ mod tests {
             hex!("5465737455496e744e616d650000000000000000000000000000000000000000").into(),
             hex!("00000000000000000000000000000000000000000000000000000000000007d0").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::only(Param::Uint256 {
             name: "TestUIntName".to_owned(),
             value: U256::from(2000),
@@ -562,7 +587,7 @@ mod tests {
             hex!("0000000000000000000000000000000000000000000000000000000000000003").into(),
             hex!("123abc0000000000000000000000000000000000000000000000000000000000").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::only(Param::Bytes {
             name: "TestBytesName".to_owned(),
             value: vec![0x12, 0x3a, 0xbc],
@@ -577,10 +602,25 @@ mod tests {
             hex!("54657374427974657333324e616d650000000000000000000000000000000000").into(),
             hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap(); // strict mode "on" is importnant
         let expected = ABI::only(Param::Bytes32 {
             name: "TestBytes32Name".to_owned(),
             value: hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
+        });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_decodes_string32() {
+        let data: Vec<U256> = vec![
+            hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
+            hex!("54657374427974657333324e616d650000000000000000000000000000000000").into(),
+            hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
+        ];
+        let res = ABI::decode(&data, false).unwrap(); // strict mode "off" is importnant
+        let expected = ABI::only(Param::String32 {
+            name: "TestBytes32Name".to_owned(),
+            value: "Some bytes32 value".to_owned(),
         });
         assert_eq!(res, expected);
     }
@@ -594,7 +634,7 @@ mod tests {
             hex!("0000000000000000000000000000000000000000000000000000000000000011").into(),
             hex!("536f6d6520737472696e672076616c7565000000000000000000000000000000").into(),
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::only(Param::String {
             name: "TestStringName".to_owned(),
             value: "Some string value".to_owned(),
@@ -623,7 +663,7 @@ mod tests {
             hex!("0000000000000000000000000000000000000000000000000000000000000003").into(), //:1e  size: 3 bytes     [15]
             hex!("123abc0000000000000000000000000000000000000000000000000000000000").into(), //:20  [0x12, 0x3a, 0xbc]
         ];
-        let res = ABI::decode(&data).unwrap();
+        let res = ABI::decode(&data, true).unwrap();
         let expected = ABI::new(vec![
             Param::Bytes32 {
                 name: "bytes32 name".to_owned(),
@@ -658,7 +698,7 @@ mod tests {
     #[should_panic]
     fn it_shouldnt_decode_zero() {
         let data: Vec<U256> = vec![U256::from(0)];
-        ABI::decode(&data).unwrap();
+        ABI::decode(&data, true).unwrap();
     }
 
     #[test]
@@ -672,7 +712,7 @@ mod tests {
             let mut b = rand_vec(32);
             b[0] = i;
             let data: Vec<U256> = vec![U256::from(into32(&b))];
-            if let Ok(_) = ABI::decode(&data) {
+            if let Ok(_) = ABI::decode(&data, true) {
                 panic!("decodes data, started with 0x{:x} {:?}", i, data);
             }
         }
