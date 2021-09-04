@@ -57,6 +57,8 @@ use thiserror::Error;
 pub enum EncodingError {
     #[error("too many parameters, max is 31")]
     TooManyParams,
+    #[error("string should not exceed 32 bytes")]
+    StringTooLong,
 }
 
 #[derive(Debug, Clone, Error, Serialize, Deserialize)]
@@ -65,11 +67,13 @@ pub enum DecodingError {
     NoInput,
     #[error("schema is missing")]
     NoSchema,
+    #[error("invalid schema {0}")]
+    InvalidSchema(String),
     #[error("schema version is invalid")]
     InvalidVersion,
     #[error("invalid schema character {0}")]
     InvalidSchemaCharacter(char),
-    #[error("invalid UTF-8 string")]
+    #[error("invalid UTF-8 string {0}")]
     InvalidUtf8String(String),
 }
 
@@ -169,23 +173,23 @@ impl Param {
     }
 
     /// returns encoded version of fixed size chunks
-    pub fn fixed_chunks(&self) -> Vec<U256> {
+    pub fn fixed_chunks(&self) -> Result<Vec<U256>, EncodingError> {
         match &self {
             Self::Bytes { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
-                vec![str_chunk32(name), U256::from(0)]
+                Ok(vec![str_chunk32(name)?, U256::from(0)])
             }
             Self::String { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
-                vec![str_chunk32(name), U256::from(0)]
+                Ok(vec![str_chunk32(name)?, U256::from(0)])
             }
-            Self::Address { name, value } => vec![str_chunk32(name), address_chunk(*value)],
-            Self::Bytes32 { name, value } => vec![str_chunk32(name), value.clone()],
-            Self::String32 { name, value } => vec![str_chunk32(name), str_chunk32(value)],
-            Self::Uint256 { name, value } => vec![str_chunk32(name), value.clone()],
-            Self::Int256 { name, value, sign } => vec![str_chunk32(name), int_chunk(*value, *sign)],
+            Self::Address { name, value } => Ok(vec![str_chunk32(name)?, address_chunk(*value)]),
+            Self::Bytes32 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
+            Self::String32 { name, value } => Ok(vec![str_chunk32(name)?, str_chunk32(value)?]),
+            Self::Uint256 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
+            Self::Int256 { name, value, sign } => Ok(vec![str_chunk32(name)?, int_chunk(*value, *sign)]),
         }
     }
 
@@ -286,17 +290,18 @@ impl ABI {
         if self.params.len() > 31 {
             return Err(EncodingError::TooManyParams);
         }
-        let mut out = vec![str_chunk32(encode_schema(0x31, &self.params).as_str())];
+        let mut out = vec![str_chunk32(encode_schema(0x31, &self.params).as_str())?];
         let mut m: HashMap<usize, usize> = HashMap::new();
         // first loop - pushing chunks of the fixed size
-        self.params.iter().enumerate().for_each(|(i, p)| {
+        for (i, p) in self.params.iter().enumerate() {
             if !p.is_fixed_size() {
                 m.insert(i, out.len() + 1);
             }
-            p.fixed_chunks().iter().for_each(|chunk| {
+            let chunks = p.fixed_chunks()?;
+            chunks.iter().for_each(|chunk| {
                 out.push(chunk.clone());
             });
-        });
+        }
 
         // second loop - pushing chunks of dynamic size and adjusting their offsets
         let mut offset: usize = out.len() * 0x20;
@@ -314,7 +319,11 @@ impl ABI {
     /// decodes ABI from the vector or 256 bit values. 
     /// This function can be used when data doesn't contain schema, but you know it from the other source.
     pub fn decode_with_schema(schema: String, data: &Vec<U256>, strict: bool) -> Result<Self, DecodingError> {
-        let input: Vec<U256> = vec![str_chunk32(&schema)]
+        let schema_chunk = match str_chunk32(&schema) {
+            Ok(x) => x,
+            Err(e) => return Err(DecodingError::InvalidSchema(e.to_string()))
+        };
+        let input: Vec<U256> = vec![schema_chunk]
             .into_iter()
             .chain(data.clone().into_iter())
             .collect();
@@ -667,7 +676,7 @@ mod tests {
         let expected = ABI::new(vec![
             Param::Bytes32 {
                 name: "bytes32 name".to_owned(),
-                value: encode::str_chunk32("bytes 32 value"),
+                value: encode::str_chunk32("bytes 32 value").unwrap(),
             },
             Param::Address {
                 name: "wallet".to_owned(),
