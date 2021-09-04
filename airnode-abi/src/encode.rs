@@ -23,12 +23,12 @@ pub fn rpad32(src: &[u8]) -> Vec<u8> {
 
 /// convert string less than 31 characters long.
 /// string is padded with 0 to the right.
-pub fn str_chunk32(src: &str) -> U256 {
-    if src.len() > 31 {
-        panic!("string length {} is over 31 bytes", src.len());
+pub fn str_chunk32(src: &str) -> Result<U256, crate::EncodingError> {
+    if src.len() > 32 {
+        return Err(crate::EncodingError::StringTooLong)
     }
     let out = rpad32(src.as_bytes());
-    U256::from(into32(&out))
+    Ok(U256::from(into32(&out)))
 }
 
 /// convert string of unlimited length into array of 256 bits
@@ -106,7 +106,7 @@ mod tests {
     }
     #[test]
     fn it_pads_hello() {
-        let res = str_chunk32("hello");
+        let res = str_chunk32("hello").unwrap();
         let expected = U256::from(hex!(
             "68656c6c6f000000000000000000000000000000000000000000000000000000"
         ))
@@ -117,7 +117,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn it_fails_on_chunk_over32() {
-        str_chunk32("12345678901234567890123456789012345");
+        str_chunk32("12345678901234567890123456789012345").unwrap();
     }
 
     #[test]
