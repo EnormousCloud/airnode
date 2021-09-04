@@ -1,22 +1,25 @@
 use ethereum_types::{H160, U256, U512};
-use std::str::FromStr;
+use std::str::{self, FromStr, Utf8Error};
 
 /// decode chunk into string (it is right padded with zeros)
-pub fn chunk_to_str(src: U256) -> String {
-    let mut s = String::from("");
+pub fn chunk_to_str(src: U256) -> Result<String, Utf8Error> {
+    let mut arr: Vec<u8> = vec![];
     let mut i = 31;
     loop {
         let b = src.byte(i);
         if b == 0u8 {
             break;
         }
-        s.push(b as char);
+        arr.push(b);
         if i == 0 {
             break;
         }
         i -= 1;
     }
-    s
+    match str::from_utf8(&arr) {
+        Ok(s) => Ok(s.to_string()),
+        Err(e) => Err(e),
+    }
 }
 
 /// decode chunk into signed integer
@@ -82,14 +85,26 @@ mod tests {
     use hex_literal::hex;
 
     #[test]
-    fn it_can_decode_str() {
+    fn it_can_decode_ascii_str() {
         let expected = "hello";
         let res = chunk_to_str(
             U256::from(hex!(
                 "68656c6c6f000000000000000000000000000000000000000000000000000000"
             ))
             .into(),
-        );
+        ).unwrap();
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_can_decode_utf8_str() {
+        let expected = "你好世界";
+        let res = chunk_to_str(
+            U256::from(hex!(
+                "E4BDA0E5A5BDE4B896E7958C0000000000000000000000000000000000000000"
+            ))
+            .into(),
+        ).unwrap();
         assert_eq!(res, expected);
     }
 
