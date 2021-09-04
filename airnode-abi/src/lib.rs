@@ -3,17 +3,18 @@
 //!
 //! See details of protocol are at [Airnode Specification](https://github.com/api3dao/api3-docs/blob/master/airnode/airnode-abi-specifications.md)
 //!
-//! Parameters from contract event logs are consumed as `Vec<U256>`, which avoids reading 
+//! Parameters from contract event logs are consumed as `Vec<U256>`, which avoids reading
 //! random raw bytes and provides guarantee of a proper data alignment on input.
 //!
-//! Second parameter of decoding is `strict` flag, which defines whether decoding 
-//! could be done into extended types (`String32`,`Bool`) 
+//! Second parameter of decoding is `strict` flag, which defines whether decoding
+//! could be done into extended types (`String32`,`Bool`,`Date`)
 //! that are actually represented as `Bytes32` on a protocol level.
 //!
 //! ### decoding example
 //! ```
 //! use airnode_abi::ABI;
 //! use ethereum_types::U256;
+//! use hex_literal::hex;
 //!
 //! fn main() {
 //!     let data: Vec<U256> = vec![
@@ -22,7 +23,7 @@
 //!         hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
 //!     ];
 //!     let res: ABI = ABI::decode(&data, true).unwrap();
-//!     println!("{}", res);
+//!     println!("{:#?}", res);
 //! }
 //! ```
 //!
@@ -30,6 +31,7 @@
 //! ```
 //! use airnode_abi::{ABI, Param};
 //! use ethereum_types::U256;
+//! use hex_literal::hex;
 //!
 //! fn main() {
 //!     let param = Param::String {
@@ -37,7 +39,7 @@
 //!         value: "world".to_owned(),
 //!     };
 //!     let res: Vec<U256> = ABI::new(vec![param]).encode().unwrap();
-//!     println!("{}", res);
+//!     println!("{:#?}", res);
 //! }
 //! ```
 //! Please see more examples for each type of the parameter in unit tests.
@@ -45,14 +47,13 @@
 mod decode;
 mod encode;
 
-use decode::{chunk_to_address, chunk_to_int, chunk_to_str, chunk_to_vec};
-use encode::{address_chunk, chunks, int_chunk, str_chunk32, str_chunks};
+use decode::{chunk_to_address, chunk_to_int, chunk_to_str, chunk_to_vec, str_to_date};
+use encode::{address_chunk, chunks, date_chunk, int_chunk, str_chunk32, str_chunks};
 use ethereum_types::{H160, U256};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
 use thiserror::Error;
-
 
 #[derive(Debug, Error, Serialize)]
 pub enum EncodingError {
@@ -60,6 +61,12 @@ pub enum EncodingError {
     TooManyParams,
     #[error("string should not exceed 32 bytes")]
     StringTooLong,
+    #[error("invalid year")]
+    InvalidYear,
+    #[error("invalid month")]
+    InvalidMonth,
+    #[error("invalid day")]
+    InvalidDay,
 }
 
 #[derive(Debug, Clone, Error, Serialize, Deserialize)]
@@ -84,12 +91,19 @@ pub enum DecodingError {
 pub enum Param {
     /// parameter that embeds EVM address (160 bits, H160)
     Address { name: String, value: H160 },
-    /// (non-strict) parameter that embeds boolean value, stored as single Bytes32 value, encoded as bytes of "true" or "false" strings
+    /// (non-strict) parameter that embeds boolean value, stored as single Bytes32 value, encoded as bytes of "true" or "false" string
     Bool { name: String, value: bool },
     /// parameter that embeds array of bytes (dynamic size)
     Bytes { name: String, value: Vec<u8> },
     /// parameter that embeds single 256 bits value
     Bytes32 { name: String, value: U256 },
+    /// (non-strict) parameter that embeds date value, stored as single Bytes32 value, encoded as bytes ISO-8601 string
+    Date {
+        name: String,
+        year: i32,
+        month: u32,
+        day: u32,
+    },
     /// parameter that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
     Int256 {
         name: String,
@@ -113,6 +127,12 @@ impl Param {
             Self::Bool { name, value: _ } => name,
             Self::Bytes { name, value: _ } => name,
             Self::Bytes32 { name, value: _ } => name,
+            Self::Date {
+                name,
+                year: _,
+                month: _,
+                day: _,
+            } => name,
             Self::Int256 {
                 name,
                 value: _,
@@ -131,6 +151,12 @@ impl Param {
             Self::Bool { name: _, value } => format!("{}", value),
             Self::Bytes { name: _, value } => format!("{:x?}", value),
             Self::Bytes32 { name: _, value } => format!("{:x?}", value),
+            Self::Date {
+                name: _,
+                year,
+                month,
+                day,
+            } => format!("{:04}-{:02}-{:02}", year, month, day),
             Self::Int256 {
                 name: _,
                 value,
@@ -141,7 +167,7 @@ impl Param {
                 } else {
                     format!("-{:x?}", value)
                 }
-            },
+            }
             Self::String { name: _, value } => value.clone(),
             Self::String32 { name: _, value } => value.clone(),
             Self::Uint256 { name: _, value } => format!("{:x?}", value),
@@ -155,9 +181,15 @@ impl Param {
     pub fn get_char(&self) -> char {
         match &self {
             Self::Address { name: _, value: _ } => 'a',
-            Self::Bool { name: _, value: _ } => 'B',
+            Self::Bool { name: _, value: _ } => 'b',
             Self::Bytes { name: _, value: _ } => 'B',
             Self::Bytes32 { name: _, value: _ } => 'b',
+            Self::Date {
+                name: _,
+                year: _,
+                month: _,
+                day: _,
+            } => 'b',
             Self::Int256 {
                 name: _,
                 value: _,
@@ -182,18 +214,29 @@ impl Param {
     fn fixed_chunks(&self) -> Result<Vec<U256>, EncodingError> {
         match &self {
             Self::Address { name, value } => Ok(vec![str_chunk32(name)?, address_chunk(*value)]),
-            Self::Bool { name, value } => Ok(vec![str_chunk32(name)?, if *value {
-                str_chunk32("true")?
-            } else {
-                str_chunk32("false")?
-            }]),
+            Self::Bool { name, value } => Ok(vec![
+                str_chunk32(name)?,
+                if *value {
+                    str_chunk32("true")?
+                } else {
+                    str_chunk32("false")?
+                },
+            ]),
             Self::Bytes { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
                 Ok(vec![str_chunk32(name)?, U256::from(0)])
             }
             Self::Bytes32 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
-            Self::Int256 { name, value, sign } => Ok(vec![str_chunk32(name)?, int_chunk(*value, *sign)]),
+            Self::Date {
+                name,
+                year,
+                month,
+                day,
+            } => Ok(vec![str_chunk32(name)?, date_chunk(*year, *month, *day)?]),
+            Self::Int256 { name, value, sign } => {
+                Ok(vec![str_chunk32(name)?, int_chunk(*value, *sign)])
+            }
             Self::String { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
@@ -327,12 +370,16 @@ impl ABI {
         Ok(out)
     }
 
-    /// decodes ABI from the vector or 256 bit values. 
+    /// decodes ABI from the vector or 256 bit values.
     /// This function can be used when data doesn't contain schema, but you know it from the other source.
-    pub fn decode_with_schema(schema: String, data: &Vec<U256>, strict: bool) -> Result<Self, DecodingError> {
+    pub fn decode_with_schema(
+        schema: String,
+        data: &Vec<U256>,
+        strict: bool,
+    ) -> Result<Self, DecodingError> {
         let schema_chunk = match str_chunk32(&schema) {
             Ok(x) => x,
-            Err(e) => return Err(DecodingError::InvalidSchema(e.to_string()))
+            Err(e) => return Err(DecodingError::InvalidSchema(e.to_string())),
         };
         let input: Vec<U256> = vec![schema_chunk]
             .into_iter()
@@ -351,7 +398,7 @@ impl ABI {
             return Err(DecodingError::NoSchema);
         }
 
-        let schema: String = match chunk_to_str(*schema_chunk)  {
+        let schema: String = match chunk_to_str(*schema_chunk) {
             Ok(x) => x,
             Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
         };
@@ -379,7 +426,12 @@ impl ABI {
     /// decodes name and value from array of chunks, starting at the given `offset`
     /// and using type from `ch` character.
     /// Returns `Param` instance and updates `offset` with the bigger value.
-    fn from_chunks(ch: char, arr: &Vec<U256>, offset: &mut usize, strict: bool) -> Result<Param, DecodingError> {
+    fn from_chunks(
+        ch: char,
+        arr: &Vec<U256>,
+        offset: &mut usize,
+        strict: bool,
+    ) -> Result<Param, DecodingError> {
         let name: String = match chunk_to_str(arr[*offset]) {
             Ok(x) => x,
             Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
@@ -395,6 +447,14 @@ impl ABI {
                         return Ok(Param::Bool { name, value: true });
                     } else if v == "false" {
                         return Ok(Param::Bool { name, value: false });
+                    }
+                    if let Some((year, month, day)) = str_to_date(&v) {
+                        return Ok(Param::Date {
+                            name,
+                            year,
+                            month,
+                            day,
+                        });
                     }
                     return Ok(Param::String32 { name, value: v });
                 }
@@ -648,6 +708,47 @@ mod tests {
             value: "Some bytes32 value".to_owned(),
         });
         assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_decodes_date() {
+        let data: Vec<U256> = vec![
+            hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
+            hex!("73746172745F6461746500000000000000000000000000000000000000000000").into(),
+            hex!("323032312D30312D313900000000000000000000000000000000000000000000").into(),
+        ];
+        let res = ABI::decode(&data, false).unwrap(); // strict mode "off" is importnant
+        let expected = ABI::only(Param::Date {
+            name: "start_date".to_owned(),
+            year: 2021,
+            month: 1,
+            day: 19,
+        });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_encodes_decodes_date() {
+        let param = Param::Date {
+            name: "start_date".to_owned(),
+            year: 2021,
+            month: 1,
+            day: 19,
+        };
+        let value = ABI::only(param);
+        let decoded = ABI::decode(&value.encode().unwrap(), false).unwrap();
+        assert_eq!(decoded, value);
+    }
+
+    #[test]
+    fn it_encodes_decodes_bool() {
+        let param = Param::Bool {
+            name: "some bool".to_owned(),
+            value: true,
+        };
+        let value = ABI::only(param);
+        let decoded = ABI::decode(&value.encode().unwrap(), false).unwrap();
+        assert_eq!(decoded, value);
     }
 
     #[test]

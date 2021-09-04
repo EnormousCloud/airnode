@@ -22,6 +22,28 @@ pub fn chunk_to_str(src: U256) -> Result<String, Utf8Error> {
     }
 }
 
+/// attempt to find pattern of YYYY-MM-DD date in that string
+pub fn str_to_date(src: &str) -> Option<(i32, u32, u32)> {
+    if src.len() != 10 {
+        return None;
+    }
+    let parts: Vec<&str> = src.split("-").collect();
+    if parts.len() != 3 {
+        return None;
+    }
+    if let Ok(year) = parts.get(0).unwrap().parse::<i32>() {
+        if let Ok(month) = parts.get(1).unwrap().parse::<u32>() {
+            if let Ok(day) = parts.get(2).unwrap().parse::<u32>() {
+                // there is not much of date validation here
+                if year > 0 && month > 0 && day > 0 {
+                    return Some((year, month, day));
+                }
+            }
+        }
+    }
+    None
+}
+
 /// decode chunk into signed integer
 pub fn chunk_to_int(src: U256) -> (U256, i32) {
     if src.bit(32 * 8 - 1) {
@@ -92,7 +114,8 @@ mod tests {
                 "68656c6c6f000000000000000000000000000000000000000000000000000000"
             ))
             .into(),
-        ).unwrap();
+        )
+        .unwrap();
         assert_eq!(res, expected);
     }
 
@@ -104,7 +127,8 @@ mod tests {
                 "E4BDA0E5A5BDE4B896E7958C0000000000000000000000000000000000000000"
             ))
             .into(),
-        ).unwrap();
+        )
+        .unwrap();
         assert_eq!(res, expected);
     }
 
