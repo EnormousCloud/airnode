@@ -6,8 +6,9 @@
 //! Parameters from contract event logs are consumed as `Vec<U256>`, which avoids reading 
 //! random raw bytes and provides guarantee of a proper data alignment on input.
 //!
-//! `strict` flag defines whether decoding could be done into extended types (`String32`) 
-//! that are actually represented as `Bytes32` on a protocol level
+//! Second parameter of decoding is `strict` flag, which defines whether decoding 
+//! could be done into extended types (`String32`,`Bool`) 
+//! that are actually represented as `Bytes32` on a protocol level.
 //!
 //! ### decoding example
 //! ```
@@ -81,12 +82,12 @@ pub enum DecodingError {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum Param {
-    /// parameter that embeds array of bytes (dynamic size)
-    Bytes { name: String, value: Vec<u8> },
-    /// parameter that embeds UTF-8 string (dynamic size)
-    String { name: String, value: String },
     /// parameter that embeds EVM address (160 bits, H160)
     Address { name: String, value: H160 },
+    /// (non-strict) parameter that embeds boolean value, stored as single Bytes32 value, encoded as bytes of "true" or "false" strings
+    Bool { name: String, value: bool },
+    /// parameter that embeds array of bytes (dynamic size)
+    Bytes { name: String, value: Vec<u8> },
     /// parameter that embeds single 256 bits value
     Bytes32 { name: String, value: U256 },
     /// parameter that embeds signed 256 bits value (there is no type of I256 in Ethereum primitives)
@@ -95,40 +96,41 @@ pub enum Param {
         value: U256,
         sign: i32, // we need to store the sign separately as we don't have that type
     },
-    /// parameter that embeds unsigned 256 bits value
-    Uint256 { name: String, value: U256 },
-    /// parameter that embeds string as single Bytes32 value. The length of the string should not exceed 32 bytes
+    /// parameter that embeds UTF-8 string (dynamic size)
+    String { name: String, value: String },
+    /// (non-strict) parameter that embeds string as single Bytes32 value. The length of the string should not exceed 32 bytes
     /// it will be decoded correctly if this is non-empty valid Utf-8 string
     String32 { name: String, value: String },
+    /// parameter that embeds unsigned 256 bits value
+    Uint256 { name: String, value: U256 },
 }
 
 impl Param {
     /// returns name of the parameter
     pub fn get_name(&self) -> &str {
         match &self {
-            Self::Bytes { name, value: _ } => name,
-            Self::String { name, value: _ } => name,
-            Self::String32 { name, value: _ } => name,
             Self::Address { name, value: _ } => name,
+            Self::Bool { name, value: _ } => name,
+            Self::Bytes { name, value: _ } => name,
             Self::Bytes32 { name, value: _ } => name,
-            Self::Uint256 { name, value: _ } => name,
             Self::Int256 {
                 name,
                 value: _,
                 sign: _,
             } => name,
+            Self::String { name, value: _ } => name,
+            Self::String32 { name, value: _ } => name,
+            Self::Uint256 { name, value: _ } => name,
         }
     }
 
     /// returns value of the parameter as string (for debugging purposes only)
     pub fn get_value(&self) -> String {
         match &self {
-            Self::Bytes { name: _, value } => format!("{:x?}", value),
-            Self::String { name: _, value } => value.clone(),
-            Self::String32 { name: _, value } => value.clone(),
             Self::Address { name: _, value } => format!("{:?}", value),
+            Self::Bool { name: _, value } => format!("{}", value),
+            Self::Bytes { name: _, value } => format!("{:x?}", value),
             Self::Bytes32 { name: _, value } => format!("{:x?}", value),
-            Self::Uint256 { name: _, value } => format!("{:x?}", value),
             Self::Int256 {
                 name: _,
                 value,
@@ -139,7 +141,10 @@ impl Param {
                 } else {
                     format!("-{:x?}", value)
                 }
-            }
+            },
+            Self::String { name: _, value } => value.clone(),
+            Self::String32 { name: _, value } => value.clone(),
+            Self::Uint256 { name: _, value } => format!("{:x?}", value),
         }
     }
 
@@ -149,17 +154,18 @@ impl Param {
     /// - String32 is encoded into Bytes32
     pub fn get_char(&self) -> char {
         match &self {
-            Self::Bytes { name: _, value: _ } => 'B',
-            Self::String { name: _, value: _ } => 'S',
-            Self::String32 { name: _, value: _ } => 'B',
             Self::Address { name: _, value: _ } => 'a',
+            Self::Bool { name: _, value: _ } => 'B',
+            Self::Bytes { name: _, value: _ } => 'B',
             Self::Bytes32 { name: _, value: _ } => 'b',
-            Self::Uint256 { name: _, value: _ } => 'u',
             Self::Int256 {
                 name: _,
                 value: _,
                 sign: _,
             } => 'i',
+            Self::String { name: _, value: _ } => 'S',
+            Self::String32 { name: _, value: _ } => 'B',
+            Self::Uint256 { name: _, value: _ } => 'u',
         }
     }
 
@@ -173,28 +179,33 @@ impl Param {
     }
 
     /// returns encoded version of fixed size chunks
-    pub fn fixed_chunks(&self) -> Result<Vec<U256>, EncodingError> {
+    fn fixed_chunks(&self) -> Result<Vec<U256>, EncodingError> {
         match &self {
+            Self::Address { name, value } => Ok(vec![str_chunk32(name)?, address_chunk(*value)]),
+            Self::Bool { name, value } => Ok(vec![str_chunk32(name)?, if *value {
+                str_chunk32("true")?
+            } else {
+                str_chunk32("false")?
+            }]),
             Self::Bytes { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
                 Ok(vec![str_chunk32(name)?, U256::from(0)])
             }
+            Self::Bytes32 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
+            Self::Int256 { name, value, sign } => Ok(vec![str_chunk32(name)?, int_chunk(*value, *sign)]),
             Self::String { name, value: _ } => {
                 // dynamic structure, second parameter is reserved to be overwritten later
                 // it will contain the offset of the data
                 Ok(vec![str_chunk32(name)?, U256::from(0)])
             }
-            Self::Address { name, value } => Ok(vec![str_chunk32(name)?, address_chunk(*value)]),
-            Self::Bytes32 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
             Self::String32 { name, value } => Ok(vec![str_chunk32(name)?, str_chunk32(value)?]),
             Self::Uint256 { name, value } => Ok(vec![str_chunk32(name)?, value.clone()]),
-            Self::Int256 { name, value, sign } => Ok(vec![str_chunk32(name)?, int_chunk(*value, *sign)]),
         }
     }
 
     /// returns encoded version of dynamic size chunks
-    pub fn dynamic_chunks(&self) -> Vec<U256> {
+    fn dynamic_chunks(&self) -> Vec<U256> {
         match &self {
             Self::Bytes { name: _, value } => vec![U256::from(value.len())]
                 .into_iter()
@@ -378,8 +389,13 @@ impl ABI {
             let value = arr[*offset];
             *offset += 1;
             if !strict {
-                // if we are not in the strict mode
+                // if we are not in the strict mode, we will be trying to parse to a string or to some known type
                 if let Ok(v) = chunk_to_str(value) {
+                    if v == "true" {
+                        return Ok(Param::Bool { name, value: true });
+                    } else if v == "false" {
+                        return Ok(Param::Bool { name, value: false });
+                    }
                     return Ok(Param::String32 { name, value: v });
                 }
             }
@@ -630,6 +646,36 @@ mod tests {
         let expected = ABI::only(Param::String32 {
             name: "TestBytes32Name".to_owned(),
             value: "Some bytes32 value".to_owned(),
+        });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_decodes_true() {
+        let data: Vec<U256> = vec![
+            hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
+            hex!("54657374426F6F6C000000000000000000000000000000000000000000000000").into(),
+            hex!("7472756500000000000000000000000000000000000000000000000000000000").into(),
+        ];
+        let res = ABI::decode(&data, false).unwrap(); // strict mode "off" is importnant
+        let expected = ABI::only(Param::Bool {
+            name: "TestBool".to_owned(),
+            value: true,
+        });
+        assert_eq!(res, expected);
+    }
+
+    #[test]
+    fn it_decodes_false() {
+        let data: Vec<U256> = vec![
+            hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
+            hex!("54657374426F6F6C000000000000000000000000000000000000000000000000").into(),
+            hex!("66616C7365000000000000000000000000000000000000000000000000000000").into(),
+        ];
+        let res = ABI::decode(&data, false).unwrap(); // strict mode "off" is importnant
+        let expected = ABI::only(Param::Bool {
+            name: "TestBool".to_owned(),
+            value: false,
         });
         assert_eq!(res, expected);
     }
