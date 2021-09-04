@@ -25,10 +25,44 @@ pub fn rpad32(src: &[u8]) -> Vec<u8> {
 /// string is padded with 0 to the right.
 pub fn str_chunk32(src: &str) -> Result<U256, crate::EncodingError> {
     if src.len() > 32 {
-        return Err(crate::EncodingError::StringTooLong)
+        return Err(crate::EncodingError::StringTooLong);
     }
     let out = rpad32(src.as_bytes());
     Ok(U256::from(into32(&out)))
+}
+
+fn is_leap_year(year: i32) -> bool {
+    return (year % 4 == 0) && (year % 100 != 0 || year % 400 == 0);
+}
+
+fn days_in_month(year: i32, month: u32) -> u32 {
+    return match month {
+        2 => {
+            if is_leap_year(year) {
+                29
+            } else {
+                28
+            }
+        }
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
+    };
+}
+
+/// convert date into chunk as string32
+pub fn date_chunk(year: i32, month: u32, day: u32) -> Result<U256, crate::EncodingError> {
+    if year <= 0 {
+        return Err(crate::EncodingError::InvalidYear);
+    }
+    if month > 12 {
+        return Err(crate::EncodingError::InvalidMonth);
+    }
+    if day > days_in_month(year, month) {
+        return Err(crate::EncodingError::InvalidDay);
+    }
+    let s = format!("{:04}-{:02}-{:02}", year, month, day);
+    println!("date_chunk={}", &s);
+    str_chunk32(&s)
 }
 
 /// convert string of unlimited length into array of 256 bits
