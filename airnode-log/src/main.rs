@@ -66,10 +66,10 @@ async fn main() -> anyhow::Result<()> {
                 }
                 _ => {
                     info!(
-                        "{:?} {:?} {:?}",
+                        "{:?} {:?} {}",
                         l.block_number.unwrap(),
                         l.transaction_hash.unwrap(),
-                        evt
+                        serde_json::to_string(&evt).unwrap(),
                     );
                 }
             }
