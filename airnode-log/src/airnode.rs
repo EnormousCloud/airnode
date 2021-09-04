@@ -1,5 +1,5 @@
 use crate::logreader::{EventParseError, LogReader};
-use airnode_abi::ABI;
+use airnode_abi::{ABI, DecodingError};
 use hex_literal::hex;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
@@ -16,19 +16,24 @@ pub enum AirnodeEvent {
     ClientFullRequestCreated {
         provider_id: U256,
         request_id: U256,
-        no_requests: U256,
+        no_requests: u64,
         client_address: H160,
         endpoint_id: U256,
         requester_index: U256,
         designated_wallet: H160,
         fulfill_address: H160,
         fulfill_function_id: U256,
-        parameters: ABI,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     ClientRequestFulfilled {
         provider_id: U256,
         request_id: U256,
-        status_code: U256,
+        status_code: u64,
         data: Vec<U256>,
     },
     EndpointUpdated {
@@ -140,16 +145,20 @@ impl AirnodeEvent {
             let mut r = LogReader::new(&log, 2, None).unwrap();
             let provider_id = r.value();
             let request_id = r.value();
-            let no_requests = r.value();
+            let no_requests = r.value().as_u64();
             let client_address = r.address();
             let endpoint_id = r.value();
             let requester_index = r.value();
             let designated_wallet = r.address();
             let fulfill_address = r.address();
-            let fulfill_function_id = r.value();
+            let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000);
             r.skip();
             r.skip();
             let chunks = r.values();
+            let (parameters, error, data) = match ABI::decode(&chunks, false) {
+                Ok(x) => (Some(x), None, None),
+                Err(e) => (None, Some(e), Some(chunks)),
+            };
             // chunks.iter().enumerate().for_each(|(i, u)| println!("{:04x?}: {}", i*0x20, serde_json::to_string(u).unwrap()));
             // println!("ClientFullRequestCreated decoded: {:#?}", ABI::decode(&chunks));
             // todo: isolate schema, save schema in a separate endpoint
@@ -163,8 +172,9 @@ impl AirnodeEvent {
                 designated_wallet,
                 fulfill_address,
                 fulfill_function_id, //.as_u64(),
-                parameters: ABI::decode(&chunks).unwrap(),
-                // parameters: ABI::none(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("1bdbe9e5d42a025a741fc3582eb3cad4ef61ac742d83cc87e545fbd481b926b5").into()
@@ -173,7 +183,7 @@ impl AirnodeEvent {
             return Ok(Self::ClientRequestFulfilled {
                 provider_id: r.value(),
                 request_id: r.value(),
-                status_code: r.value(),
+                status_code: r.value().as_u64(),
                 data: r.values(),
             });
         } else if t0
