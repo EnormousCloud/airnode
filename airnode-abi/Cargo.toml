@@ -1,12 +1,13 @@
 [package]
 name = "airnode-abi"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["EnormousCloud"]
 edition = "2018"
 license = "MIT"
 repository = "https://github.com/EnormousCloud/airnode/"
 homepage = "https://github.com/EnormousCloud/airnode/"
 description = "Airnode ABI (API3.org) encoder/decoder"
+readme = "README.md"
 
 [badges]
 maintenance = { status = "actively-developed" }
