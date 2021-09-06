@@ -31,7 +31,6 @@
 //! ```
 //! use airnode_abi::{ABI, Param};
 //! use ethereum_types::U256;
-//! use hex_literal::hex;
 //!
 //! fn main() {
 //!     let param = Param::String {
