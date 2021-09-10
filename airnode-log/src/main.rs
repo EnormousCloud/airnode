@@ -1,12 +1,6 @@
-pub mod aircontracts;
-pub mod airnode;
-pub mod logreader;
-
-use crate::airnode::AirnodeEvent;
+use airnode_events::AirnodeEvent;
 use serde::{Deserialize, Serialize};
 use tracing::info;
-// use crate::aircontracts::AirnodeInstance;
-// use std::path::Path;
 use std::collections::BTreeMap;
 use web3::types::H256;
 
@@ -36,19 +30,7 @@ async fn main() -> anyhow::Result<()> {
         .with(fmt_layer)
         .init();
 
-    //     let rpc_endpoint = String::from("/home/.../.ethereum/rinkeby/geth.ipc");
-    //     if !Path::new(rpc_endpoint.as_str()).exists() {
-    //         return Err(anyhow::Error::msg("IPC file doesn't exists"));
-    //     }
-    //     let transport = web3::transports::Ipc::new(rpc_endpoint.as_str())
-    //         .await
-    //         .expect("Failed to connect to IPC");
-    //     let web3 = web3::Web3::new(transport);
-    //     // let chain_id = web3.eth().chain_id().await?.as_u64();
-    //     let node = AirnodeInstance::new(&web3, hex!("F9C39ec11055508BddA0Bc2a0234aBbbC09a3DeC").into());
-    //     println!("templates={:?}", node.get_templates().await);
-
-    let b = include_bytes!("../mocks/rinkeby-airnode.json");
+    let b = include_bytes!("../../mocks/xdai-airnode.json");
     let logs: Vec<LogResponse> = serde_json::from_slice(b).unwrap();
 
     let mut unknown: BTreeMap<H256, H256> = BTreeMap::new();
@@ -79,4 +61,5 @@ async fn main() -> anyhow::Result<()> {
         tracing::warn!("unknown topic={:?} tx={:?}", topic, tx);
     }
     Ok(())
+
 }

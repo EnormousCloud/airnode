@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 [[package]]
 name = "airnode-abi"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ethereum-types",
  "hex",
@@ -10,6 +10,22 @@ dependencies = [
  "rand 0.8.4",
  "serde",
  "serde_json",
+ "thiserror",
+]
+
+[[package]]
+name = "airnode-events"
+version = "0.1.0"
+dependencies = [
+ "airnode-abi",
+ "async-trait",
+ "hex",
+ "hex-literal",
+ "phf 0.9.0",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "web3",
 ]
 
 [[package]]
@@ -17,6 +33,7 @@ name = "airnode-log"
 version = "0.1.0"
 dependencies = [
  "airnode-abi",
+ "airnode-events",
  "anyhow",
  "async-trait",
  "chrono",
