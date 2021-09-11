@@ -210,7 +210,7 @@ impl AirnodeEvent {
 
         let topic_str = format!("{:?}", t0).chars().skip(2).collect::<String>();
         match KNOWN_EVENTS.get(&topic_str) {
-            Some(title) => {
+            Some(_title) => {
                 // println!("{} topic={:?}", title, t0);
                 return Ok(Self::Unclassified);
             }
