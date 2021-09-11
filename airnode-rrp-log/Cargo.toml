@@ -3,31 +3,26 @@ name = "airnode-log"
 version = "0.1.0"
 authors = ["EnormousCloud"]
 edition = "2018"
+license = "MIT"
+repository = "https://github.com/EnormousCloud/airnode/"
+homepage = "https://github.com/EnormousCloud/airnode/"
+description = "Airnode RRP Log command-line interface"
+readme = "README.md"
 
 [dependencies]
 airnode-abi = { path = "../airnode-abi" }
 airnode-events = { path = "../airnode-events" }
 anyhow = { version = "1.0" }
-async-trait = { version = "0.1" }
-chrono = { version = "0.4", features = ["serde"] }
-clap = { version = "2.33", default-features = false }
-crc32fast = "1.2.1"
 dotenv = "0.15"
 futures = "0.3.13"
 hex = "0.4"
 hex-literal = "0.3"
-lazy_static = "1.0"
-nipper = "0.1.9"
-phf = { version = "0.9", default-features = false, features = ["macros"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0" }
 structopt = { version = "0.3", default-features = false }
-thiserror = { version = "1.0" }
-tiny-keccak = { version = "2.0", default-features = false, features = ["keccak"] }
 tokio = { version = "1.8.0", features = ["full"] }
 tokio-stream = { version = "0.1" }
 tracing = { version = "0.1" }
 tracing-futures =  { version = "0.2" }
 tracing-subscriber = { version = "0.2" }
-warp = { version = "0.3" }
 web3 = { version = "0.16.0" }

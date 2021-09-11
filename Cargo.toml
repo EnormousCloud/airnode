@@ -3,6 +3,6 @@ resolver = "2"
 members = [
 	"airnode-abi",
 	"airnode-events",
-	"airnode-log",
+	"airnode-rrp-log",
 	"airnode-rrp-explorer"
 ]
