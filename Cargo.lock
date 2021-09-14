@@ -51,6 +51,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "airnode-ois"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "airnode-rrp-explorer"
 version = "0.1.0"
 dependencies = [
@@ -58,7 +66,9 @@ dependencies = [
  "log",
  "serde",
  "serde_derive",
+ "wasm-bindgen",
  "wasm-logger",
+ "web3",
  "yew",
 ]
 
@@ -498,6 +508,10 @@ name = "futures-timer"
 version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e64b03909df88034c26dc1547e8970b91f98bdb65165d6a4e9110d94263dbb2c"
+dependencies = [
+ "gloo-timers",
+ "send_wrapper",
+]
 
 [[package]]
 name = "futures-util"
@@ -548,8 +562,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fcd999463524c52659517fe2cea98493cfe485d10565e7b0fb07dbba7ad2753"
 dependencies = [
  "cfg-if 1.0.0",
+ "js-sys",
  "libc",
  "wasi 0.10.2+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -641,6 +657,8 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47204a46aaff920a1ea58b11d03dec6f704287d27561724a4631e450654a891f"
 dependencies = [
+ "futures-channel",
+ "futures-core",
  "js-sys",
  "wasm-bindgen",
  "web-sys",
@@ -1594,6 +1612,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "send_wrapper"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f638d531eccd6e23b980caf34876660d38e265409d8e99b397ab71eb3612fad0"
+
+[[package]]
 name = "serde"
 version = "1.0.130"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2234,12 +2258,15 @@ dependencies = [
  "ethereum-types",
  "futures",
  "futures-timer",
+ "getrandom 0.2.3",
  "headers",
  "hex",
+ "js-sys",
  "jsonrpc-core",
  "log",
  "parking_lot",
  "pin-project",
+ "rand 0.8.4",
  "reqwest",
  "rlp",
  "secp256k1",
@@ -2251,6 +2278,8 @@ dependencies = [
  "tokio-stream",
  "tokio-util",
  "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web3-async-native-tls",
 ]
 
