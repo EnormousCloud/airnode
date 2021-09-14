@@ -1,71 +1,41 @@
-use yew::prelude::*;
-use yew::web_sys::{Event, HtmlInputElement};
-use yew::{html, Component, ComponentLink, Context, Html};
+pub mod entry;
+pub mod footer;
+pub mod header;
+pub mod results;
 
-// use yew::{classes, html, Callback, Component, Context, Html, Properties, TargetCast};
+use yew::{html, Component, Context, Html};
 
 #[derive(Debug)]
-enum Msg {
-    UpdateNetwork(String),
+enum Msg {}
+
+struct App {
+    // TODO: embed the full state of the application
 }
 
-struct Model {
-    // `ComponentLink` is like a reference to a component.
-    // It can be used to send messages to the component
-    link: ComponentLink<Self>,
-    network: String,
-}
-
-impl Component for Model {
+impl Component for App {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self) -> Self {
-        Self {
-            link,
-            network: "http://localhost:8545/".to_owned(),
-        }
+    fn create(_: &Context<Self>) -> Self {
+        Self {}
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        match msg {
-            Msg::UpdateNetwork(s) => {
-                self.network = s.clone();
-                true // re-render 
-            }
-        }
-    }
-
-    fn change(&mut self, _props: Self::Properties, _ctx: &Context<Self>) -> ShouldRender {
-        // Should only return "true" if new properties are different to
-        // previously received properties.
-        // This component has no properties so we will always return "false".
+    fn update(&mut self, _: &Context<Self>, _: Self::Message) -> bool {
         false
     }
 
-    fn view(&self, _ctx: &Context<Self>) -> Html {
-        let link = self.link;
-        // let Self { client, .. } = self;
-        
-        let update_name = |f: fn(String) -> Msg| {
-            link.callback(move |e: Event| {
-                let input = e.target().unwrap();
-                f(input.value())
-            })
-        };
-
+    fn view(&self, _: &Context<Self>) -> Html {
         html! {
-            <div style="text-align: center">
-                <input
-                    style="width: 70%"
-                    onchange={update_name(Msg::UpdateNetwork)}
-                />
-                <p>{ self.network }</p>
+            <div>
+                <header::Header />
+                <entry::EntryForm />
+                <results::ResultsView />
+                <footer::Footer />
             </div>
         }
     }
 }
 
 fn main() {
-    yew::start_app::<Model>();
+    yew::start_app::<App>();
 }
