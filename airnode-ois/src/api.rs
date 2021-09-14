@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+#[serde(tag = "in")]
 pub enum OperationParameter {
     Query { name: String },
     Header { name: String },
@@ -48,50 +50,3 @@ pub struct Specification {
     security: security::Requirement,
     servers: Vec<Server>,
 }
-
-/*
-
-// ===========================================
-// API Specification
-// ===========================================
-export interface Server {
-  url: string;
-}
-
-export interface SecurityRequirement {
-  [key: string]: string[];
-}
-
-export interface Operation {
-  parameters: OperationParameter[];
-}
-
-export interface Path {
-  [key: string]: Operation;
-}
-
-export type SecuritySchemeName = 'bearer' | 'basic';
-export type SecuritySchemeType = 'apiKey' | 'http'; // | 'oauth2' | 'openIdConnect';
-export type SecuritySchemeTarget = 'query' | 'header' | 'cookie';
-
-export interface ApiSecurityScheme {
-  in?: SecuritySchemeTarget;
-  name?: string;
-  scheme?: SecuritySchemeName;
-  type: SecuritySchemeType;
-}
-
-export interface ApiComponents {
-  securitySchemes: {
-    [key: string]: ApiSecurityScheme;
-  };
-}
-
-export interface ApiSpecification {
-  components: ApiComponents;
-  paths: { [key: string]: Path };
-  security: SecurityRequirement;
-  servers: Server[];
-}
-
-*/
