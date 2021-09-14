@@ -25,7 +25,7 @@ pub struct Parameter {
     description: Option<String>,
     example: Option<String>,
     name: String,
-    operation_arameter: OperationParameter,
+    operation_parameter: OperationParameter,
     required: Option<bool>,
 }
 
