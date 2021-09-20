@@ -1,11 +1,34 @@
 # Protocol Events
 
-This document contains the list that can be recognized by this library
+This document contains the list of events that can be recognized by this library (collected from multiple branches)
 
-### beta protocol
+### beta-protocol
 
 ```
-TBD... 
+CreatedTemplate(bytes32 indexed templateId,address airnode,bytes32 endpointId,bytes parameters)
+DecreasedSelfRank(address indexed admin, uint256 newRank)
+DecreasedSelfRank(address indexed adminned,address indexed admin,uint256 newRank)
+ErroredBeaconUpdate(bytes32 indexed templateId,bytes32 requestId,uint256 statusCode)
+ExtendedWhitelistExpiration(address indexed airnode,bytes32 endpointId,address indexed user,address indexed admin,uint256 expiration)
+ExtendedWhitelistExpiration(bytes32 indexed templateId,address indexed user,address indexed admin,uint256 expiration)
+FailedRequest(address indexed airnode, bytes32 indexed requestId)
+FulfilledRequest(address indexed airnode,bytes32 indexed requestId,uint256 statusCode,bytes data)
+FulfilledWithdrawal(address indexed airnode,address indexed sponsor,bytes32 indexed withdrawalRequestId,address sponsorWallet,uint256 amount);
+MadeFullRequest(address indexed airnode,bytes32 indexed requestId,uint256 requesterRequestCount,uint256 chainId,address requester,bytes32 endpointId,address sponsor,address sponsorWallet,address fulfillAddress,bytes4 fulfillFunctionId,bytes parameters)
+MadeTemplateRequest(address indexed airnode,bytes32 indexed requestId,uint256 requesterRequestCount,uint256 chainId,address requester,bytes32 templateId,address sponsor,address sponsorWallet,address fulfillAddress,bytes4 fulfillFunctionId,bytes parameters)
+RequestedBeaconUpdate(bytes32 indexed templateId,address indexed sponsor,address indexed requester,bytes32 requestId,address sponsorWallet)
+RequestedWithdrawal(address indexed airnode,address indexed sponsor,bytes32 indexed withdrawalRequestId,address sponsorWallet)
+SetAirnodeXpub(address indexed airnode, string xpub)
+SetRank(address indexed adminned,address indexed callerAdmin,address indexed targetAdmin,uint256 newRank)
+SetRank(address indexed callerAdmin,address indexed targetAdmin,uint256 newRank)
+SetSponsorshipStatus(address indexed sponsor,address indexed requester,bool sponsorshipStatus)
+SetUpdatePermissionStatus(address indexed sponsor,address indexed updateRequester,bool status)
+SetWhitelistExpiration(address indexed airnode,bytes32 endpointId,address indexed user,address indexed admin,uint256 expiration)
+SetWhitelistExpiration(bytes32 indexed templateId,address indexed user,address indexed admin,uint256 expiration)
+SetWhitelistStatusPastExpiration(address indexed airnode,bytes32 endpointId,address indexed user,address indexed admin,bool status)
+SetWhitelistStatusPastExpiration(bytes32 indexed templateId,address indexed user,address indexed admin,bool status)
+TransferredMetaAdminStatus(address indexed metaAdmin)
+UpdatedBeacon(bytes32 indexed templateId,bytes32 requestId,int224 value,uint32 timestamp)
 ```
 
 ### pre-alpha
