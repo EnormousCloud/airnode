@@ -2,6 +2,7 @@ pub mod entry;
 pub mod footer;
 pub mod header;
 pub mod results;
+pub mod components;
 
 use yew::{html, Component, Context, Html};
 
