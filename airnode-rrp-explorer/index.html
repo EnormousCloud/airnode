@@ -1,7 +1,137 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Airnode RRP Explorer</title>
-  </head>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+  <title>API3 Airnode RRP Explorer</title>
+  
+  <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0" />
+  <meta name="description" content="API3 Airnode Request Response Protocol Explorer. Airnode RRP" />
+
+  <meta property="og:locale" content="en_US" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="API3 Airnode RRP Explorer" />
+	<meta property="og:description" content="API3 Airnode Request Response Protocol Explorer" />
+	<meta property="og:site_name" content="Enormous Cloud" />
+	<meta property="og:image" content="https://enormous.cloud/favicon-17b88549a4840abb.jpg" />
+	<meta property="og:image:width" content="64" />
+	<meta property="og:image:height" content="64" />
+
+  <link data-trunk rel="css" href="src/assets/style.css" />
+  <link rel="icon" href="https://enormous.cloud/favicon-17b88549a4840abb.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+  <base data-trunk-public-url />
+
+  <style id="color-theme" class="dark" type="text/css">
+    :root {
+    --color-bk: #000;
+    --color-bk-highlight: #444;
+    --color-text: #ddd;
+    --color-link: #7ce3cb;
+    --color-accent: #7ce3cb;
+    --color-warning: pink;
+    --color-body: #000;
+    --color-well: #666;
+    --color-error: #db3742;
+    --color-success: #50b83c;
+    --color-success-dark: #329b1e;
+    --color-grey: #8c8d9c;
+    --color-grey-light: #ced3dc;
+    --color-cell-title: #c3c4c3;
+    --color-cell-border: #404141;
+    --color-panel-title: #fff;
+    --color-panel-border: #878888;
+    }
+  </style>
+  <style type="text/css">
+    body, html {
+      background: var(--color-bk);
+      color: var(--color-text);
+    }
+    body {
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+    }
+    a {
+      color: var(--color-link);
+    }
+    .preload_spinner {
+      top: 100px;
+      left: 50%;
+      position: relative;
+      z-index: 1000;
+      display: block;
+      opacity: 1;
+      min-height: 90px;
+      width: 96px;
+      transition: all 250ms ease-out;
+    }
+
+    .preload_spinner::before,
+    .preload_spinner::after {
+      content: '';
+      border-top: 5px solid var(--color-link);
+      border-bottom: 5px solid var(--color-link);
+      box-shadow: 0 0 8px var(--color-link);
+      display: block;
+      position: absolute;
+      transition: all 250ms ease-out;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-radius: 50%;
+      background-color: transparent;
+    }
+
+    .preload_spinner::before {
+      width: 50px;
+      height: 50px;
+      animation: preload_spinner-circle1 750ms infinite linear;
+      margin-top: -25px;
+      margin-left: -25px;
+    }
+
+    .preload_spinner::after {
+      width: 30px;
+      height: 30px;
+      animation: preload_spinner-circle2 750ms infinite linear;
+      margin-top: -15px;
+      margin-left: -15px;
+    }
+
+    @keyframes preload_spinner-circle1 {
+      0% {
+        transform: rotate(160deg);
+        opacity: 0;
+      }
+
+      50% {
+        transform: rotate(145deg);
+        opacity: 1;
+      }
+
+      100% {
+        transform: rotate(-320deg);
+        opacity: 0;
+      }
+    }
+
+    @keyframes preload_spinner-circle2 {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <div class="preload_spinner"></div>
+  </main>
+</body>
 </html>

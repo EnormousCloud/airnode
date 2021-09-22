@@ -19,9 +19,7 @@ impl Component for Header {
 
     fn view(&self, _: &Context<Self>) -> Html {
         html! {
-            <div>
-                <h1>{ "Airnode: Requests and Responses" }</h1>
-            </div>
+            <div class="hd"></div>
         }
     }
 }
