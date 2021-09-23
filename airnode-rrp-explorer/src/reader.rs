@@ -50,7 +50,6 @@ pub struct Scanner<T> where T: Transport {
     pub max_block: Option<u64>,
     pub batch_size: u64,
     pub batches: Vec<BlockBatch>,
-    pub current_batch: usize,
 }
 
 impl<T> Scanner<T> where T: Transport {
@@ -72,32 +71,25 @@ impl<T> Scanner<T> where T: Transport {
             max_block,
             batch_size,
             batches,
-            current_batch: 0,
         })
     }
 
-    pub fn current(&self) -> Option<BlockBatch> {
-        if self.current_batch >= self.batches.len() {
-            return None
-        }
-        Some(self.batches[self.current_batch].clone())
-    }
-  
-    pub async fn pick(
-        &mut self,
-        address: H160,
+    pub async fn query(
+        &self,
+        address: &H160,
+        current_batch: usize,
     ) -> anyhow::Result<Option<Vec<Log>>>{
-        if self.current_batch >= self.batches.len() {
+        if current_batch >= self.batches.len() {
             return Ok(None)
         }
-        let b = self.batches[self.current_batch].clone();
+        let b = self.batches[current_batch].clone();
         let filter = FilterBuilder::default()
             .from_block(b.from.into())
             .to_block(b.to.into())
-            .address(vec![address])
+            .address(vec![address.clone()])
             .build();
         let logs = self.web3.eth().logs(filter).await?;
-        self.current_batch += 1;
+        
         Ok(Some(logs))
     }
 }
