@@ -1,4 +1,4 @@
-#[allow(missing_unsafe)]
+#[allow(unused_unsafe)]
 
 use gloo::console as console;
 use web3::types::H160;

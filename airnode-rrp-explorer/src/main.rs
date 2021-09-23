@@ -82,39 +82,35 @@ impl Component for App {
                     match web3::transports::Http::new(&input.network) {
                         Ok(transport) => {
                             // There can be a failure on the block number height detection
-                            // let w3 = web3::Web3::new(transport);
-                            // let rs = Scanner::new(
-                            //     &w3,
-                            //     input.min_block, 
-                            //     input.max_block, 
-                            //     input.batch_size,
-                            // ).await;
-                            // let mut s = match rs {
-                            //     Ok(s) => s,
-                            //     Err(e) => { return Msg::Fail(format!("{}", e)); }
-                            // };
-                            // let contract = input.address;
-                            // let chain_id = s.chain_id;
-                            // let rc: Rc<Scanner<web3::transports::Http>> = Rc::new(s);
-                            // loop {
-                            //     let s = rc.clone();
-                            //     if let Some(batch) = s.current() {
-                            //         link.send_message(Msg::Started(chain_id, batch.clone()));
-                            //         link.clone().send_future(async move {
-                            //             let s = rc.clone();
-                            //             match s.as_ref().pick(contract.clone()).await {
-                            //                 Ok(x) => {
-                            //                     Msg::BatchDone(x.unwrap())
-                            //                 },
-                            //                 Err(e) => {
-                            //                     Msg::Fail(format!("{}", e))
-                            //                 },
-                            //             }
-                            //         });
-                            //     } else {
-                            //         break;
-                            //     }
-                            // }
+                            let w3 = web3::Web3::new(transport);
+                            let rs = Scanner::new(
+                                &w3,
+                                input.min_block, 
+                                input.max_block, 
+                                input.batch_size,
+                            ).await;
+                            let s = match rs {
+                                Ok(s) => s,
+                                Err(e) => { return Msg::Fail(format!("{}", e)); }
+                            };
+                            let contract = input.address;
+                            let chain_id = s.chain_id;
+                            let batches = s.batches.clone();
+                            let rc: Rc<Scanner<web3::transports::Http>> = Rc::new(s);
+                            batches.iter().enumerate().for_each(|(i, batch)| {
+                                let s = rc.clone();
+                                link.send_message(Msg::Started(chain_id, batch.clone()));
+                                link.clone().send_future(async move {
+                                    match s.query(&contract, i).await {
+                                        Ok(x) => {
+                                            Msg::BatchDone(x.unwrap().clone())
+                                        },
+                                        Err(e) => {
+                                            Msg::Fail(format!("{}", e))
+                                        },
+                                    }
+                                });
+                            });
                             return Msg::Completed;
                         },
                         Err(e) => {
