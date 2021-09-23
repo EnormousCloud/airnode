@@ -1,10 +1,15 @@
+#[allow(missing_unsafe)]
+
 use gloo::console as console;
 use web3::types::H160;
+use std::str::FromStr;
 use yew::web_sys::{Event, HtmlInputElement};
-use yew::{html, Component, Context, Html, TargetCast};
+use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
 use crate::components::panel::Panel;
+use serde::Serialize;
 
-#[derive(Debug, Clone)]
+/// structure that will be passed to the parent when 
+#[derive(Debug, Clone, Serialize)]
 pub struct Entry {
     pub network: String,
     pub address: H160,
@@ -13,16 +18,39 @@ pub struct Entry {
     pub batch_size: u64,
 }
 
+impl Default for Entry {
+    fn default() -> Self {
+        Self { 
+            network: "http://localhost:8545/".to_owned(),
+            address: H160::from_str("0").unwrap(),
+            min_block: 0,
+            max_block: None,
+            batch_size: 1000, 
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Properties)]
+pub struct Props {
+    pub on_submit: Callback<Entry>,
+}
+
 #[derive(Debug)]
 pub enum Msg {
     UpdateNetwork(String),
+    UpdateAddress(String),
     UpdateMinBlock(String),
     UpdateMaxBlock(String),
     UpdateBatchSize(String),
 }
 
+// state is Entry + whether each field is valid
+#[derive(Debug, Clone, Serialize)]
 pub struct EntryForm {
+    pub can_submit: bool,
+
     pub network: String,
+    pub address: Option<H160>,
     pub min_block: u64,
     pub max_block: Option<u64>,
     pub batch_size: u64,
@@ -30,14 +58,16 @@ pub struct EntryForm {
 
 impl Component for EntryForm {
     type Message = Msg;
-    type Properties = ();
+    type Properties = Props;
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
             network: "http://localhost:8545/".to_owned(),
+            address: None,
             min_block: 0,
             max_block: None,
             batch_size: 1000,
+            can_submit: false,
         }
     }
 
@@ -47,16 +77,20 @@ impl Component for EntryForm {
                 self.network = s.clone();
                 true // re-render
             }
+            Msg::UpdateAddress(s) => {
+                unsafe { console::log!("UpdateAddress {}", s); }
+                false // re-render
+            }
             Msg::UpdateMinBlock(s) => {
-                console::log!("UpdateMinBlock {}", s);
+                unsafe { console::log!("UpdateMinBlock {}", s); }
                 false // re-render
             }
             Msg::UpdateMaxBlock(s) => {
-                console::log!("UpdateMaxBlock {}", s);
+                unsafe { console::log!("UpdateMaxBlock {}", s); }
                 false // re-render
             }
             Msg::UpdateBatchSize(s) => {
-                console::log!("UpdateBatchSize {}", s);
+                unsafe { console::log!("UpdateBatchSize {}", s); }
                 false // re-render
             }
         }
@@ -85,7 +119,7 @@ impl Component for EntryForm {
                         <label>
                             <h3 class="cell-title">{ "Network RPC URL:" }</h3>
                             <input
-                                style="width: 60%; max-width: 400px; text-align: center;"
+                                style="width: 480px; text-align: center;"
                                 placeholder="Network RPC URL"
                                 value={self.network.clone()}
                                 onchange={update_name(Msg::UpdateNetwork)}
@@ -93,13 +127,30 @@ impl Component for EntryForm {
                         </label>
                     </div>
                 </div>
-                
+                <div class="dash-row" style="margin-bottom: 20px;">
+                <div class="dash-col-100">
+                    <label>
+                        <h3 class="cell-title">{ "Contract Address: " }</h3>
+                        <input
+                            style="width: 480px; text-align: center;"
+                            placeholder=""
+                            value={
+                                match self.max_block {
+                                    Some(x) => format!("{:?}", x),
+                                    None => "".to_owned()
+                                }
+                            }
+                            onchange={update_name(Msg::UpdateAddress)}
+                        />
+                    </label>
+                </div>
+            </div>
                 <div class="dash-row" style="margin-bottom: 20px;">
                     <div class="cell dash-col-3">
                         <h3 class="cell-title">{ "Min Block:" }</h3>
                         <input
                             style="width: 120px; text-align: center"
-                            placeholder=""
+                            placeholder="0"
                             value={format!("{}", self.min_block)}
                             onchange={update_u64(Msg::UpdateMinBlock)}
                         />
@@ -136,7 +187,7 @@ impl Component for EntryForm {
                                 style="width: 100%; text-align: center;"
                                 onchange={update_name(Msg::UpdateNetwork)}
                             >
-                                {"Scan JSON+RPC"}
+                                {"Scan Logs"}
                             </button>
                             <div class="underline"></div>
                         </div>
@@ -148,7 +199,7 @@ impl Component for EntryForm {
         html!{
             <div>
                 <Panel title="Airnode RRP Explorer" content={form} />
-                <p>{ self.network.clone() }</p>
+                <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
             </div>
         }
     }

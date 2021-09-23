@@ -1,13 +1,19 @@
-use yew::{html, Component, Context, Html};
+use yew::{html, Component, Context, Properties, Html};
+use web3::types::Log;
 
 #[derive(Debug)]
 pub enum Msg {}
+
+#[derive(Clone, Debug, PartialEq, Properties)]
+pub struct Props {
+    pub input: Vec<Log>
+}
 
 pub struct ResultsView;
 
 impl Component for ResultsView {
     type Message = Msg;
-    type Properties = ();
+    type Properties = Props;
 
     fn create(_: &Context<Self>) -> Self {
         Self
@@ -17,10 +23,17 @@ impl Component for ResultsView {
         false
     }
 
-    fn view(&self, _: &Context<Self>) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
                 { "results..." }
+                <ol>
+                {
+                    for ctx.props().input.iter().map(|log| html! { 
+                        <li>{ serde_json::to_string(log).unwrap() }</li> 
+                    })
+                }
+                </ol>
             </div>
         }
     }
