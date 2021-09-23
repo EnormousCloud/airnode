@@ -43,7 +43,10 @@ pub async fn get_batches<T: Transport>(
 }
 
 #[derive(Debug, Clone)]
-pub struct Scanner<T> where T: Transport {
+pub struct Scanner<T>
+where
+    T: Transport,
+{
     pub web3: Web3<T>,
     pub chain_id: u64,
     pub min_block: u64,
@@ -52,18 +55,21 @@ pub struct Scanner<T> where T: Transport {
     pub batches: Vec<BlockBatch>,
 }
 
-impl<T> Scanner<T> where T: Transport {
+impl<T> Scanner<T>
+where
+    T: Transport,
+{
     pub async fn new(
         web3: &Web3<T>,
         min_block: u64,
         max_block: Option<u64>,
-        batch_size: u64
+        batch_size: u64,
     ) -> anyhow::Result<Self> {
         let chain_id = match web3.eth().chain_id().await {
             Ok(x) => x.as_u64(),
             Err(e) => return Err(anyhow::Error::msg(format!("{}", e))),
         };
-        let batches = get_batches(web3.eth(), min_block, max_block, batch_size ).await;
+        let batches = get_batches(web3.eth(), min_block, max_block, batch_size).await;
         Ok(Self {
             web3: web3.clone(),
             chain_id,
@@ -78,9 +84,9 @@ impl<T> Scanner<T> where T: Transport {
         &self,
         address: &H160,
         current_batch: usize,
-    ) -> anyhow::Result<Option<Vec<Log>>>{
+    ) -> anyhow::Result<Option<Vec<Log>>> {
         if current_batch >= self.batches.len() {
-            return Ok(None)
+            return Ok(None);
         }
         let b = self.batches[current_batch].clone();
         let filter = FilterBuilder::default()
@@ -89,7 +95,7 @@ impl<T> Scanner<T> where T: Transport {
             .address(vec![address.clone()])
             .build();
         let logs = self.web3.eth().logs(filter).await?;
-        
+
         Ok(Some(logs))
     }
 }

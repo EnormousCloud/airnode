@@ -16,9 +16,7 @@ impl Component for Panel {
     type Properties = Props;
 
     fn create(_: &Context<Self>) -> Self {
-        Self {
-
-        }
+        Self {}
     }
 
     fn update(&mut self, _: &Context<Self>, _: Self::Message) -> bool {

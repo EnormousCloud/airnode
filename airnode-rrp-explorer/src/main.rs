@@ -1,20 +1,18 @@
+pub mod components;
 pub mod entry;
 pub mod footer;
 pub mod header;
 pub mod reader;
 pub mod results;
-pub mod components;
 
-use std::rc::Rc;
-use yew::{html, Component, Context, Html};
-use web3::types::Log;
 use crate::entry::Entry;
 use crate::reader::{BlockBatch, Scanner};
-// use wasm_bindgen_futures::JsFuture;
+use std::rc::Rc;
+use web3::types::Log;
+use yew::{html, Component, Context, Html};
 
 #[derive(Debug, Clone)]
 enum Msg {
-    Reset,
     Submit(Entry),
     Started(u64, BlockBatch),
     BatchDone(Vec<Log>),
@@ -28,7 +26,7 @@ enum Mode {
     Connecting,
     InProgress,
     Failure(String),
-    Done
+    Done,
 }
 
 struct App {
@@ -55,21 +53,15 @@ impl Component for App {
         match msg {
             Msg::Fail(s) => {
                 self.mode = Mode::Failure(s);
-            },
+            }
             Msg::Completed => {
                 self.mode = Mode::Done;
-            },
+            }
             Msg::Started(chain_id, batch) => {
                 self.mode = Mode::InProgress;
                 self.batch = Some(batch);
                 self.chain_id = chain_id;
-            },
-            Msg::Reset => {
-                self.mode = Mode::Input;
-                self.logs = vec![];
-                self.batch = None;
-                self.chain_id = 0;
-            },
+            }
             Msg::BatchDone(logs) => {
                 for l in logs {
                     self.logs.push(l.clone());
@@ -85,13 +77,16 @@ impl Component for App {
                             let w3 = web3::Web3::new(transport);
                             let rs = Scanner::new(
                                 &w3,
-                                input.min_block, 
-                                input.max_block, 
+                                input.min_block,
+                                input.max_block,
                                 input.batch_size,
-                            ).await;
+                            )
+                            .await;
                             let s = match rs {
                                 Ok(s) => s,
-                                Err(e) => { return Msg::Fail(format!("{}", e)); }
+                                Err(e) => {
+                                    return Msg::Fail(format!("{}", e));
+                                }
                             };
                             let contract = input.address;
                             let chain_id = s.chain_id;
@@ -102,22 +97,16 @@ impl Component for App {
                                 link.send_message(Msg::Started(chain_id, batch.clone()));
                                 link.clone().send_future(async move {
                                     match s.query(&contract, i).await {
-                                        Ok(x) => {
-                                            Msg::BatchDone(x.unwrap().clone())
-                                        },
-                                        Err(e) => {
-                                            Msg::Fail(format!("{}", e))
-                                        },
+                                        Ok(x) => Msg::BatchDone(x.unwrap().clone()),
+                                        Err(e) => Msg::Fail(format!("{}", e)),
                                     }
                                 });
                             });
                             return Msg::Completed;
-                        },
-                        Err(e) => {
-                            return Msg::Fail(format!("{}", e))
                         }
+                        Err(e) => return Msg::Fail(format!("{}", e)),
                     };
-                });  
+                });
             }
         }
         true
@@ -131,10 +120,10 @@ impl Component for App {
                     Mode::Input => html!{
                         <entry::EntryForm on_submit={ctx.link().callback(Msg::Submit)} />
                     },
-                    Mode::Connecting => html!{ 
-                        <div style="max-width: 480px; text-align: center;"> {"Connecting to RPC..."} </div> 
+                    Mode::Connecting => html!{
+                        <div style="max-width: 480px; text-align: center;"> {"Connecting to RPC..."} </div>
                     },
-                    Mode::InProgress => html!{ 
+                    Mode::InProgress => html!{
                         <>
                             <div style="max-width: 480px; text-align: center;">
                                 {format!("PROCESSING {} (chain_id: {})", self.batch.clone().unwrap().status(), self.chain_id)}
@@ -142,9 +131,9 @@ impl Component for App {
                             <results::ResultsView input={self.logs.clone()} />
                         </>
                     },
-                    Mode::Failure(e) => html!{ 
+                    Mode::Failure(e) => html!{
                         <>
-                            <entry::EntryForm on_submit={ctx.link().callback(Msg::Submit)} /> 
+                            <entry::EntryForm on_submit={ctx.link().callback(Msg::Submit)} />
                             <div style="max-width: 480px; text-align: center;"> {"ERROR: "} {e.clone()} </div>
                         </>
                     },
