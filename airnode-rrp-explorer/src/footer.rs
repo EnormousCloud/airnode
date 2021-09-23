@@ -22,7 +22,7 @@ impl Component for Footer {
             <footer>
                 <div class="inner">
                     { "© 2021 Enormous Cloud | " }
-                    <a 
+                    <a
                         target="_blank"
                         rel="nofollow noopener noreferrer"
                         href="https://github.com/EnormousCloud/airnode/tree/main/airnode-rrp-explorer"

@@ -1,14 +1,13 @@
+use crate::components::panel::Panel;
 #[allow(unused_unsafe)]
-
-use gloo::console as console;
-use web3::types::H160;
+use gloo::console;
+use serde::Serialize;
 use std::str::FromStr;
+use web3::types::H160;
 use yew::web_sys::{Event, HtmlInputElement};
 use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
-use crate::components::panel::Panel;
-use serde::Serialize;
 
-/// structure that will be passed to the parent when 
+/// structure that will be passed to the parent when
 #[derive(Debug, Clone, Serialize)]
 pub struct Entry {
     pub network: String,
@@ -20,12 +19,12 @@ pub struct Entry {
 
 impl Default for Entry {
     fn default() -> Self {
-        Self { 
+        Self {
             network: "http://localhost:8545/".to_owned(),
             address: H160::from_str("0").unwrap(),
             min_block: 0,
             max_block: None,
-            batch_size: 1000, 
+            batch_size: 10000,
         }
     }
 }
@@ -63,10 +62,10 @@ impl Component for EntryForm {
     fn create(_ctx: &Context<Self>) -> Self {
         Self {
             network: "http://localhost:8545/".to_owned(),
-            address: None,
-            min_block: 0,
+            address: Some(H160::from_str("32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE").unwrap()),
+            min_block: 13796900,
             max_block: None,
-            batch_size: 1000,
+            batch_size: 10000,
             can_submit: false,
         }
     }
@@ -78,19 +77,27 @@ impl Component for EntryForm {
                 true // re-render
             }
             Msg::UpdateAddress(s) => {
-                unsafe { console::log!("UpdateAddress {}", s); }
+                unsafe {
+                    console::log!("UpdateAddress {}", s);
+                }
                 false // re-render
             }
             Msg::UpdateMinBlock(s) => {
-                unsafe { console::log!("UpdateMinBlock {}", s); }
+                unsafe {
+                    console::log!("UpdateMinBlock {}", s);
+                }
                 false // re-render
             }
             Msg::UpdateMaxBlock(s) => {
-                unsafe { console::log!("UpdateMaxBlock {}", s); }
+                unsafe {
+                    console::log!("UpdateMaxBlock {}", s);
+                }
                 false // re-render
             }
             Msg::UpdateBatchSize(s) => {
-                unsafe { console::log!("UpdateBatchSize {}", s); }
+                unsafe {
+                    console::log!("UpdateBatchSize {}", s);
+                }
                 false // re-render
             }
         }
@@ -196,7 +203,7 @@ impl Component for EntryForm {
             </div>
         };
 
-        html!{
+        html! {
             <div>
                 <Panel title="Airnode RRP Explorer" content={form} />
                 <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
