@@ -481,7 +481,7 @@ input:focus {
   text-align: center;
 }
 
-button {
+button, input[type="submit"] {
   background-color: transparent;
   margin: 0px auto;
   display: flex;
@@ -496,7 +496,15 @@ button {
   font-size: 1rem;
 }
 
-button.primary {
+button:disabled,
+input[type="submit"]:disabled {
+  color: #666;
+  cursor: disabled;
+}
+
+button.primary,
+input.primary[type="submit"]
+{
   border-image-source: linear-gradient(270deg,#7ce3cb,#7963b2);
   border-image-slice: 1;
 }
@@ -509,4 +517,12 @@ button.primary {
   height: 1px;
   width: 100%;
   background: linear-gradient(270deg,#7ce3cb,#7963b2);
+}
+
+.button-wrapper .underline.disabled {
+  background: #666;
+}
+.input-warn {
+  color: var(--color-error);
+  font-size: 0.8rem;
 }
