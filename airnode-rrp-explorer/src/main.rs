@@ -1,5 +1,6 @@
 pub mod components;
 pub mod entry;
+pub mod input;
 pub mod footer;
 pub mod header;
 pub mod reader;

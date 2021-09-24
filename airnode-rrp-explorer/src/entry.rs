@@ -1,10 +1,11 @@
 use crate::components::panel::Panel;
+use crate::input::Input;
+
 #[allow(unused_unsafe)]
-use gloo::console;
 use serde::Serialize;
 use std::str::FromStr;
 use web3::types::H160;
-use yew::web_sys::{Event, HtmlInputElement};
+use yew::web_sys::{Event, InputEvent, HtmlInputElement};
 use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
 
 /// structure that will be passed to the parent when
@@ -13,6 +14,7 @@ pub struct Entry {
     pub network: String,
     pub address: H160,
     pub min_block: u64,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub max_block: Option<u64>,
     pub batch_size: u64,
 }
@@ -36,6 +38,7 @@ pub struct Props {
 
 #[derive(Debug)]
 pub enum Msg {
+    Submit,
     UpdateNetwork(String),
     UpdateAddress(String),
     UpdateMinBlock(String),
@@ -46,167 +49,242 @@ pub enum Msg {
 // state is Entry + whether each field is valid
 #[derive(Debug, Clone, Serialize)]
 pub struct EntryForm {
-    pub can_submit: bool,
-
-    pub network: String,
-    pub address: Option<H160>,
-    pub min_block: u64,
-    pub max_block: Option<u64>,
-    pub batch_size: u64,
+    network: Input<String>,
+    address: Input<H160>,
+    min_block: Input<u64>,
+    max_block: Input<Option<u64>>,
+    batch_size: Input<u64>,
 }
+
+impl EntryForm {
+    pub fn entry(&self) -> Option<Entry> {
+        let network = match self.network.msg {
+            Some(_) => return None,
+            None => self.network.value.clone(),
+        };
+        let address = match self.address.msg {
+            Some(_) => return None,
+            None => self.address.value,
+        };
+        let min_block = match self.min_block.msg {
+            Some(_) => return None,
+            None => self.min_block.value,
+        };
+        let max_block = match self.max_block.msg {
+            Some(_) => return None,
+            None => self.max_block.value,
+        };
+        let batch_size = match self.batch_size.msg {
+            Some(_) => return None,
+            None => self.batch_size.value,
+        };
+        Some(Entry{
+            network, address, min_block, max_block, batch_size,
+        })
+    }
+
+    fn check_range(&mut self) {
+        if let None = self.min_block.msg {
+            if let None = self.max_block.msg {
+                if let Some(max_value) = self.max_block.value {
+                    if self.min_block.value > max_value {
+                        self.min_block.msg = Some("Invalid Range".to_owned());
+                        self.max_block.msg = Some("Invalid Range".to_owned());
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 impl Component for EntryForm {
     type Message = Msg;
     type Properties = Props;
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(_: &Context<Self>) -> Self {
         Self {
-            network: "http://localhost:8545/".to_owned(),
-            address: Some(H160::from_str("32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE").unwrap()),
-            min_block: 13796900,
-            max_block: None,
-            batch_size: 10000,
-            can_submit: false,
+            network: Input::str("http://localhost:8545/"),
+            address: Input::address(H160::from_str("32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE").unwrap()),
+            min_block: Input::u64(13796900u64),
+            max_block: Input::opt_u64(),
+            batch_size: Input::u64(10000u64),
         }
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            Msg::Submit => {
+                if let Some(entry) = &self.entry() {
+                    ctx.props().on_submit.emit(entry.clone());
+                }
+                true
+            }
             Msg::UpdateNetwork(s) => {
-                self.network = s.clone();
-                true // re-render
+                self.network.parse_url(&s)
             }
             Msg::UpdateAddress(s) => {
-                unsafe {
-                    console::log!("UpdateAddress {}", s);
-                }
-                false // re-render
+                self.address.parse_address(&s)
             }
             Msg::UpdateMinBlock(s) => {
-                unsafe {
-                    console::log!("UpdateMinBlock {}", s);
-                }
-                false // re-render
+                self.min_block.parse_u64(&s);
+                self.check_range();
+                true
             }
             Msg::UpdateMaxBlock(s) => {
-                unsafe {
-                    console::log!("UpdateMaxBlock {}", s);
-                }
-                false // re-render
+                self.max_block.parse_opt_u64(&s);
+                self.check_range();
+                true
             }
             Msg::UpdateBatchSize(s) => {
-                unsafe {
-                    console::log!("UpdateBatchSize {}", s);
-                }
-                false // re-render
+                self.batch_size.parse_u64(&s)
             }
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
-        let update_name = |f: fn(String) -> Msg| {
-            link.callback(move |e: Event| {
-                let input: HtmlInputElement = e.target_unchecked_into();
-                // info!("input {}", input.value());
-                f(input.value())
-            })
-        };
-        let update_u64 = |f: fn(String) -> Msg| {
-            link.callback(move |e: Event| {
-                let input: HtmlInputElement = e.target_unchecked_into();
-                // info!("input {}", input.value());
-                f(input.value())
-            })
-        };
         let form = html! {
-            <div style="text-align: center">
-                <div class="dash-row" style="margin-bottom: 20px;">
-                    <div class="dash-col-100">
-                        <label>
-                            <h3 class="cell-title">{ "Network RPC URL:" }</h3>
+            <form spellcheck="false">
+                <div style="text-align: center">
+                    <div class="dash-row" style="margin-bottom: 20px;">
+                        <div class="dash-col-100">
+                            <label>
+                                <h3 class="cell-title">{ "Network RPC URL:" }</h3>
+                                <input
+                                    name="jsonrpc"
+                                    style="width: 480px; text-align: center;"
+                                    placeholder="Network RPC URL"
+                                    value={self.network.s.clone()}
+                                    oninput={link.callback(move |e: InputEvent| {
+                                        Msg::UpdateNetwork(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                    onchange={link.callback(move |e: Event| {
+                                        Msg::UpdateNetwork(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                />
+                                {for self.network.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="dash-row" style="margin-bottom: 20px;">
+                        <div class="dash-col-100">
+                            <label>
+                                <h3 class="cell-title">{ "Contract Address: " }</h3>
+                                <input
+                                    name="contract"
+                                    style="width: 480px; text-align: center;"
+                                    placeholder=""
+                                    value={self.address.s.clone()}
+                                    oninput={link.callback(move |e: InputEvent| {
+                                        Msg::UpdateAddress(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                    onchange={link.callback(move |e: Event| {
+                                        Msg::UpdateAddress(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                />
+                                {for self.address.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                            </label>
+                        </div>
+                    </div>
+                    <div class="dash-row" style="margin-bottom: 20px;">
+                        <div class="cell dash-col-3" style="width: 120px;">
+                            <h3 class="cell-title">{ "Min Block:" }</h3>
                             <input
-                                style="width: 480px; text-align: center;"
-                                placeholder="Network RPC URL"
-                                value={self.network.clone()}
-                                onchange={update_name(Msg::UpdateNetwork)}
+                                name="min_block"
+                                style="width: 120px; text-align: center"
+                                placeholder="0"
+                                value={self.min_block.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateMinBlock(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateMinBlock(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
                             />
-                        </label>
+                            {for self.min_block.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </div>
+                        <div class="cell dash-col-3" style="width: 120px;">
+                            <h3 class="cell-title">{ "Max Block:" }</h3>
+                            <input
+                                name="max_block"
+                                style="width: 120px; text-align: center"
+                                placeholder="HEAD"
+                                value={self.max_block.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateMaxBlock(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateMaxBlock(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.max_block.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </div>
+                        <div class="cell dash-col-3" style="width: 120px;">
+                            <h3 class="cell-title">{ "Batch Size:" }</h3>
+                            <input
+                                name="batch_size"
+                                style="width: 120px; text-align: center"
+                                placeholder=""
+                                value={self.batch_size.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateBatchSize(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateBatchSize(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.batch_size.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </div>
                     </div>
-                </div>
-                <div class="dash-row" style="margin-bottom: 20px;">
-                <div class="dash-col-100">
-                    <label>
-                        <h3 class="cell-title">{ "Contract Address: " }</h3>
-                        <input
-                            style="width: 480px; text-align: center;"
-                            placeholder=""
-                            value={
-                                match self.max_block {
-                                    Some(x) => format!("{:?}", x),
-                                    None => "".to_owned()
-                                }
-                            }
-                            onchange={update_name(Msg::UpdateAddress)}
-                        />
-                    </label>
-                </div>
-            </div>
-                <div class="dash-row" style="margin-bottom: 20px;">
-                    <div class="cell dash-col-3">
-                        <h3 class="cell-title">{ "Min Block:" }</h3>
-                        <input
-                            style="width: 120px; text-align: center"
-                            placeholder="0"
-                            value={format!("{}", self.min_block)}
-                            onchange={update_u64(Msg::UpdateMinBlock)}
-                        />
-                    </div>
-                    <div class="cell dash-col-3">
-                        <h3 class="cell-title">{ "Max Block:" }</h3>
-                        <input
-                            style="width: 120px; text-align: center"
-                            placeholder="HEAD"
-                            value={
-                                match self.max_block {
-                                    Some(x) => format!("{}", x),
-                                    None => "".to_owned()
-                                }
-                            }
-                            onchange={update_u64(Msg::UpdateMaxBlock)}
-                        />
-                    </div>
-                    <div class="cell dash-col-3">
-                        <h3 class="cell-title">{ "Batch Size:" }</h3>
-                        <input
-                            style="width: 120px; text-align: center"
-                            placeholder=""
-                            value={format!("{}", self.batch_size)}
-                            onchange={update_u64(Msg::UpdateBatchSize)}
-                        />
-                    </div>
-                </div>
-                <div class="dash-row" style="margin-bottom: 20px;">
-                    <div class="dash-col-3">
-                        <div class="button-wrapper primary" style="width: 60%; margin: 0px auto; max-width: 240px; text-align: center;">
-                            <button
-                                class="button primary"
-                                style="width: 100%; text-align: center;"
-                                onchange={update_name(Msg::UpdateNetwork)}
+                    <div class="dash-row" style="margin-bottom: 20px;">
+                        <div class="dash-col-3">
+                            <div
+                                class="button-wrapper primary"
+                                style="width: 60%; margin: 0px auto; max-width: 240px; text-align: center;"
                             >
-                                {"Scan Logs"}
-                            </button>
-                            <div class="underline"></div>
+                                {match self.entry() {
+                                    Some(_) => {
+                                        html! {
+                                            <>
+                                                <input
+                                                    type="submit"
+                                                    class="button primary" style="width: 100%; text-align: center;"
+                                                    onclick={link.callback(move |_| Msg::Submit)}
+                                                    value={"Scan Logs"}
+                                                />
+                                                <div class="underline"></div>
+                                            </>
+                                        }
+                                    },
+                                    None => {
+                                        html! {
+                                            <>
+                                                <button
+                                                    class="button disabled" 
+                                                    disabled={true}
+                                                    style="width: 100%; text-align: center;"
+                                                >
+                                                    {"Scan Logs"}
+                                                </button>
+                                                <div class="underline disabled"></div>
+                                            </>
+                                        }
+                                    }
+                                }}
+                                
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         };
 
         html! {
             <div>
                 <Panel title="Airnode RRP Explorer" content={form} />
                 <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
+                <pre style="color: darkgreen">{ serde_json::to_string_pretty(&self.entry()).unwrap() }</pre>
             </div>
         }
     }
