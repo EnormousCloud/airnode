@@ -2,7 +2,7 @@ use web3::api::Eth;
 use web3::types::{FilterBuilder, Log, H160};
 use web3::{Transport, Web3};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct BlockBatch {
     pub from: u64,
     pub to: u64,
