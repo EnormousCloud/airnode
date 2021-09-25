@@ -64,7 +64,8 @@ async fn main() -> anyhow::Result<()> {
     let transport = reader::get_transport(&args.rpc_endpoint).await;
     let web3 = web3::Web3::new(transport);
     let chain_id = web3.eth().chain_id().await?.as_u64();
-    let addr_contract = H160::from_str(args.address_contract.as_str()).expect("ADDR_CONTRACT");
+    let addr_contract =
+        H160::from_str(args.address_contract.as_str()).expect("ADDR_CONTRACT is missing");
 
     let mut state = State::new();
     let mut scanner = reader::Scanner::new(

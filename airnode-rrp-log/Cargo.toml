@@ -1,5 +1,5 @@
 [package]
-name = "airnode-log"
+name = "airnode-rrp-log"
 version = "0.1.0"
 authors = ["EnormousCloud"]
 edition = "2018"

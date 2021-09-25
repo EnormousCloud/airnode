@@ -1,8 +1,7 @@
 pub mod components;
 pub mod entry;
-pub mod input;
 pub mod footer;
-pub mod header;
+pub mod input;
 pub mod reader;
 pub mod results;
 
@@ -19,6 +18,8 @@ enum Msg {
     BatchDone(Vec<Log>),
     Completed,
     Fail(String),
+    Back,
+    NOP, //no operation
 }
 
 #[derive(Debug, Clone)]
@@ -52,6 +53,13 @@ impl Component for App {
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
+            Msg::NOP => {} // no operation
+            Msg::Back => {
+                self.mode = Mode::Input;
+                self.batch = None;
+                self.chain_id = 0;
+                self.logs = vec![];
+            }
             Msg::Fail(s) => {
                 self.mode = Mode::Failure(s);
             }
@@ -86,26 +94,43 @@ impl Component for App {
                             let s = match rs {
                                 Ok(s) => s,
                                 Err(e) => {
-                                    return Msg::Fail(format!("{}", e));
+                                    return Msg::Fail(
+                                        format!("Connection {}", e).replace("\n", " "),
+                                    );
                                 }
                             };
                             let contract = input.address;
                             let chain_id = s.chain_id;
                             let batches = s.batches.clone();
+                            let num_batches = batches.len();
                             let rc: Rc<Scanner<web3::transports::Http>> = Rc::new(s);
                             batches.iter().enumerate().for_each(|(i, batch)| {
+                                let b = batch.clone();
+                                // todo: we still get this all at once
+                                link.clone()
+                                    .send_future(async move { Msg::Started(chain_id, b) });
+
                                 let s = rc.clone();
-                                link.send_message(Msg::Started(chain_id, batch.clone()));
+                                let l = link.clone();
                                 link.clone().send_future(async move {
                                     match s.query(&contract, i).await {
-                                        Ok(x) => Msg::BatchDone(x.unwrap().clone()),
-                                        Err(e) => Msg::Fail(format!("{}", e)),
+                                        Ok(x) => {
+                                            if num_batches == i + 1 {
+                                                l.send_future(async move { Msg::Completed });
+                                            } else {
+                                                l.send_future(async move {
+                                                    Msg::BatchDone(x.unwrap().clone())
+                                                });
+                                            }
+                                            Msg::NOP
+                                        }
+                                        Err(e) => Msg::Fail(format!("{:?}", e).replace("\n", " ")),
                                     }
                                 });
                             });
-                            return Msg::Completed;
+                            return Msg::NOP;
                         }
-                        Err(e) => return Msg::Fail(format!("{}", e)),
+                        Err(e) => return Msg::Fail(format!("{:?}", e).replace("\n", " ")),
                     };
                 });
             }
@@ -116,30 +141,41 @@ impl Component for App {
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
-                <header::Header />
                 {match &self.mode {
                     Mode::Input => html!{
-                        <entry::EntryForm on_submit={ctx.link().callback(Msg::Submit)} />
+                        <entry::EntryForm
+                            on_submit={ctx.link().callback(Msg::Submit)}
+                        />
                     },
                     Mode::Connecting => html!{
-                        <div style="max-width: 480px; text-align: center;"> {"Connecting to RPC..."} </div>
+                        <div class="results-status">
+                            <div class="cell-title">{"Airnode RRP Explorer"}</div>
+                            <div class="cell-title">{"Connecting to RPC..."}</div>
+                        </div>
                     },
                     Mode::InProgress => html!{
-                        <>
-                            <div style="max-width: 480px; text-align: center;">
-                                {format!("PROCESSING {} (chain_id: {})", self.batch.clone().unwrap().status(), self.chain_id)}
-                            </div>
-                            <results::ResultsView input={self.logs.clone()} />
-                        </>
+                        <results::ResultsView
+                            batch={self.batch.clone()}
+                            chain_id={self.chain_id}
+                            on_back={ctx.link().callback(|_| Msg::Back)}
+                            input={self.logs.clone()} />
                     },
                     Mode::Failure(e) => html!{
                         <>
                             <entry::EntryForm on_submit={ctx.link().callback(Msg::Submit)} />
-                            <div style="max-width: 480px; text-align: center;"> {"ERROR: "} {e.clone()} </div>
+                            <div class="results-error"> {"ERROR: "} {e.clone()} </div>
                         </>
                     },
-                    Mode::Done => html!{ <results::ResultsView input={self.logs.clone()} /> },
+                    Mode::Done => html!{
+                        <results::ResultsView
+                            batch={self.batch.clone()}
+                            chain_id={self.chain_id}
+                            on_back={ctx.link().callback(|_| Msg::Back)}
+                            input={self.logs.clone()}
+                        />
+                    },
                 }}
+                <div class="pre-footer"></div>
                 <footer::Footer />
             </div>
         }

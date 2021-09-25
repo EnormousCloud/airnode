@@ -29,7 +29,31 @@ dependencies = [
 ]
 
 [[package]]
-name = "airnode-log"
+name = "airnode-ois"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "airnode-rrp-explorer"
+version = "0.1.0"
+dependencies = [
+ "airnode-events",
+ "anyhow",
+ "gloo",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "url",
+ "wasm-bindgen",
+ "web3",
+ "yew",
+]
+
+[[package]]
+name = "airnode-rrp-log"
 version = "0.1.0"
 dependencies = [
  "airnode-abi",
@@ -48,28 +72,6 @@ dependencies = [
  "tracing-futures",
  "tracing-subscriber",
  "web3",
-]
-
-[[package]]
-name = "airnode-ois"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "airnode-rrp-explorer"
-version = "0.1.0"
-dependencies = [
- "gloo",
- "log",
- "serde",
- "serde_derive",
- "wasm-bindgen",
- "wasm-logger",
- "web3",
- "yew",
 ]
 
 [[package]]
@@ -2222,17 +2224,6 @@ name = "wasm-bindgen-shared"
 version = "0.2.76"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "acdb075a845574a1fa5f09fd77e43f7747599301ea3417a9fbffdeedfc1f4a29"
-
-[[package]]
-name = "wasm-logger"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "074649a66bb306c8f2068c9016395fa65d8e08d2affcbf95acf3c24c3ab19718"
-dependencies = [
- "log",
- "wasm-bindgen",
- "web-sys",
-]
 
 [[package]]
 name = "web-sys"

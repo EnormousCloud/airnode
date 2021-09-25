@@ -1,11 +1,10 @@
 use crate::components::panel::Panel;
 use crate::input::Input;
 
-#[allow(unused_unsafe)]
 use serde::Serialize;
 use std::str::FromStr;
 use web3::types::H160;
-use yew::web_sys::{Event, InputEvent, HtmlInputElement};
+use yew::web_sys::{Event, HtmlInputElement, InputEvent};
 use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
 
 /// structure that will be passed to the parent when
@@ -62,6 +61,11 @@ impl EntryForm {
             Some(_) => return None,
             None => self.network.value.clone(),
         };
+        if self.address.value
+            == H160::from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+        {
+            return None;
+        }
         let address = match self.address.msg {
             Some(_) => return None,
             None => self.address.value,
@@ -78,8 +82,12 @@ impl EntryForm {
             Some(_) => return None,
             None => self.batch_size.value,
         };
-        Some(Entry{
-            network, address, min_block, max_block, batch_size,
+        Some(Entry {
+            network,
+            address,
+            min_block,
+            max_block,
+            batch_size,
         })
     }
 
@@ -97,7 +105,6 @@ impl EntryForm {
     }
 }
 
-
 impl Component for EntryForm {
     type Message = Msg;
     type Properties = Props;
@@ -105,10 +112,10 @@ impl Component for EntryForm {
     fn create(_: &Context<Self>) -> Self {
         Self {
             network: Input::str("http://localhost:8545/"),
-            address: Input::address(H160::from_str("32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE").unwrap()),
-            min_block: Input::u64(13796900u64),
+            address: Input::no_address(),
+            min_block: Input::u64(7812260),
             max_block: Input::opt_u64(),
-            batch_size: Input::u64(10000u64),
+            batch_size: Input::u64(50000),
         }
     }
 
@@ -120,12 +127,8 @@ impl Component for EntryForm {
                 }
                 true
             }
-            Msg::UpdateNetwork(s) => {
-                self.network.parse_url(&s)
-            }
-            Msg::UpdateAddress(s) => {
-                self.address.parse_address(&s)
-            }
+            Msg::UpdateNetwork(s) => self.network.parse_url(&s),
+            Msg::UpdateAddress(s) => self.address.parse_address(&s),
             Msg::UpdateMinBlock(s) => {
                 self.min_block.parse_u64(&s);
                 self.check_range();
@@ -136,16 +139,14 @@ impl Component for EntryForm {
                 self.check_range();
                 true
             }
-            Msg::UpdateBatchSize(s) => {
-                self.batch_size.parse_u64(&s)
-            }
+            Msg::UpdateBatchSize(s) => self.batch_size.parse_u64(&s),
         }
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         let link = ctx.link();
         let form = html! {
-            <form spellcheck="false">
+            <form spellcheck="false" autocomplete="on">
                 <div style="text-align: center">
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="dash-col-100">
@@ -173,7 +174,7 @@ impl Component for EntryForm {
                                 <h3 class="cell-title">{ "Contract Address: " }</h3>
                                 <input
                                     name="contract"
-                                    style="width: 480px; text-align: center;"
+                                    style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
                                     placeholder=""
                                     value={self.address.s.clone()}
                                     oninput={link.callback(move |e: InputEvent| {
@@ -261,7 +262,7 @@ impl Component for EntryForm {
                                         html! {
                                             <>
                                                 <button
-                                                    class="button disabled" 
+                                                    class="button disabled"
                                                     disabled={true}
                                                     style="width: 100%; text-align: center;"
                                                 >
@@ -272,7 +273,7 @@ impl Component for EntryForm {
                                         }
                                     }
                                 }}
-                                
+
                             </div>
                         </div>
                     </div>
@@ -283,9 +284,10 @@ impl Component for EntryForm {
         html! {
             <div>
                 <Panel title="Airnode RRP Explorer" content={form} />
-                <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
-                <pre style="color: darkgreen">{ serde_json::to_string_pretty(&self.entry()).unwrap() }</pre>
             </div>
         }
     }
 }
+
+// <pre>{ serde_json::to_string_pretty(self).unwrap() }</pre>
+// <pre style="color: darkgreen">{ serde_json::to_string_pretty(&self.entry()).unwrap() }</pre>
