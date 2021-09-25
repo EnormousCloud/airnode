@@ -187,6 +187,11 @@ pub enum AirnodeEvent {
         airnode: H160,
         request_id: U256,
     },
+    FailedRequestMsg {
+        airnode: H160,
+        request_id: U256,
+        error_message: String,
+    },
     FulfilledRequest {
         airnode: H160,
         request_id: U256,
@@ -345,6 +350,7 @@ static KNOWN_EVENTS: phf::Map<&'static str, &'static str> = phf_map! {
     "f9b174be67f83278d4516865d1b9ba4576b73e523ea0c2f124ea29152bb1b676" => "ExtendedWhitelistExpiration(address,bytes32,address,address,uint256)",
     "a9e0c89b898eb7a904617915dc5b5510d539c899810042e9248569b54b9cc2ed" => "ExtendedWhitelistExpiration(bytes32,address,address,uint256)",
     "8c087e42b178608800a2ea8b3d009bdbbf75e0d23426510c2edd447d4f8b8ebd" => "FailedRequest(address,bytes32)",
+    "c7143b2270cddda57e0087ca5e2a4325657dcab10d10f6b1f9d5ce6b41cb97fc" => "FailedRequest(address,bytes32,string)",
     "d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066" => "FulfilledRequest(address,bytes32,uint256,bytes)",
     "adb4840bbd5f924665ae7e0e0c83de5c0fb40a98c9b57dba53a6c978127a622e" => "FulfilledWithdrawal(address,address,bytes32,address,uint256)",
     "3a52c462346de2e9436a3868970892956828a11b9c43da1ed43740b12e1125ae" => "MadeFullRequest(address,bytes32,uint256,uint256,address,bytes32,address,address,address,bytes4,bytes)",
