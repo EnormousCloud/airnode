@@ -31,9 +31,9 @@ airnode-rrp-log
 
 ### See Also
 
-Same functionality 
-Demo: https://enormous.cloud/dao/api3/rrp-explorer
-Source: https://github.com/EnormousCloud/airnode/tree/main/airnode-rrp-explorer
+UI with the same functionality: 
+- Demo: https://enormous.cloud/dao/api3/rrp-explorer
+- Source: https://github.com/EnormousCloud/airnode/tree/main/airnode-rrp-explorer
 
 ### License
 MIT
