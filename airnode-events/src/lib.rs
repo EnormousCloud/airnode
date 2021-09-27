@@ -174,20 +174,16 @@ pub enum AirnodeEvent {
         airnode: H160,
         endpoint_id: U256,
         user: H160,
-        admin: U256,
-        expiration: U256,
+        admin: H160,
+        expiration: u64,
     },
     ExtendedWhitelistExpirationTpl {
         template_id: U256,
         user: H160,
         admin: H160,
-        expiration: U256,
+        expiration: u64,
     },
     FailedRequest {
-        airnode: H160,
-        request_id: U256,
-    },
-    FailedRequestMsg {
         airnode: H160,
         request_id: U256,
         error_message: String,
@@ -284,13 +280,13 @@ pub enum AirnodeEvent {
         endpoint_id: U256,
         user: H160,
         admin: H160,
-        expiration: U256,
+        expiration: u64,
     },
     SetWhitelistExpirationTpl {
         template_id: U256,
         user: H160,
         admin: H160,
-        expiration: U256,
+        expiration: u64,
     },
     SetWhitelistStatusPastExpiration {
         airnode: H160,
@@ -662,18 +658,323 @@ impl AirnodeEvent {
                 destination: r.address(),
                 amount: r.value(),
             });
+        } else if t0
+            == hex!("dfa496c578099ee263f6fbdc842c01815924953f92c186099d640f910c1f92de").into()
+        {
+            let mut r = LogReader::new(&log, 1, None).unwrap();
+            let template_id = r.value();
+            let airnode = r.address();
+            let endpoint_id = r.value();
+            r.skip();
+            r.skip();
+            let chunks = r.values();
+            let (parameters, error, data) = match ABI::decode(&chunks, false) {
+                Ok(x) => (Some(x), None, None),
+                Err(e) => (None, Some(e), Some(chunks)),
+            };
+            return Ok(Self::CreatedTemplate {
+                template_id,
+                airnode,
+                endpoint_id,
+                parameters,
+                data,
+                error,
+            });
+        } else if t0
+            == hex!("b4a13e8a5b83b6572fd11170aa28965f4b16ce6ed228501322a428b48e34230c").into()
+        {
+            let mut r = LogReader::new(&log, 1, Some(1)).unwrap();
+            return Ok(Self::DecreasedSelfRank {
+                admin: r.address(),
+                new_rank: r.value(),
+            });
+        } else if t0
+            == hex!("907b7436750d9bb04b635c837b151be449230b1975dac4ba31b01343b41eb75c").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            return Ok(Self::DecreasedSelfRankAdminned {
+                adminned: r.address(),
+                admin: r.address(),
+                new_rank: r.value(),
+            });
+        } else if t0
+            == hex!("df7c6cf6c7d32bf473537bcf24259094d6e7cb863700e071f65a4d8a05b6ce5e").into()
+        {
+            let mut r = LogReader::new(&log, 1, Some(2)).unwrap();
+            return Ok(Self::ErroredBeaconUpdate {
+                template_id: r.value(),
+                request_id: r.value(),
+                status_code: r.value().as_u64(),
+            });
+        } else if t0
+            == hex!("f9b174be67f83278d4516865d1b9ba4576b73e523ea0c2f124ea29152bb1b676").into()
+        {
+            let mut r = LogReader::new(&log, 1, Some(1)).unwrap();
+            return Ok(Self::ExtendedWhitelistExpiration {
+                airnode: r.address(),
+                endpoint_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                expiration: r.value().as_u64(),
+            });
+        } else if t0
+            == hex!("a9e0c89b898eb7a904617915dc5b5510d539c899810042e9248569b54b9cc2ed").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::ExtendedWhitelistExpirationTpl {
+                template_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                expiration: r.value().as_u64(),
+            });
+        } else if t0
+            == hex!("8c087e42b178608800a2ea8b3d009bdbbf75e0d23426510c2edd447d4f8b8ebd").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(0)).unwrap();
+            return Ok(Self::FailedRequest {
+                airnode: r.address(),
+                request_id: r.value(),
+                error_message: "".to_owned(),
+            });
+        } else if t0
+            == hex!("c7143b2270cddda57e0087ca5e2a4325657dcab10d10f6b1f9d5ce6b41cb97fc").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            return Ok(Self::FailedRequest {
+                airnode: r.address(),
+                request_id: r.value(),
+                error_message: r.text(),
+            });
+        } else if t0
+            == hex!("d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066").into()
+        {
+            let mut r = LogReader::new(&log, 2, None).unwrap();
+            return Ok(Self::FulfilledRequest {
+                airnode: r.address(),
+                request_id: r.value(),
+                status_code: r.value().as_u64(),
+                data: r.values(),
+            });
+        } else if t0
+            == hex!("adb4840bbd5f924665ae7e0e0c83de5c0fb40a98c9b57dba53a6c978127a622e").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(2)).unwrap();
+            return Ok(Self::FulfilledWithdrawal {
+                airnode: r.address(),
+                sponsor: r.address(),
+                withdrawal_request_id: r.value(),
+                sponsor_wallet: r.address(),
+                amount: r.value(),
+            });
+        } else if t0
+            == hex!("3a52c462346de2e9436a3868970892956828a11b9c43da1ed43740b12e1125ae").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(2)).unwrap();
+            let airnode = r.address();
+            let request_id = r.value();
+            let requester_request_count = r.value().as_u64();
+            let chain_id = r.value().as_u64();
+            let requester = r.address();
+            let endpoint_id = r.value();
+            let sponsor = r.address();
+            let sponsor_wallet = r.address();
+            let fulfill_address = r.address();
+            let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
+            r.skip();
+            r.skip();
+            let chunks = r.values();
+            let (parameters, error, data) = match ABI::decode(&chunks, false) {
+                Ok(x) => (Some(x), None, None),
+                Err(e) => (None, Some(e), Some(chunks)),
+            };
+            return Ok(Self::MadeFullRequest {
+                airnode,
+                request_id,
+                requester_request_count,
+                chain_id,
+                requester,
+                endpoint_id,
+                sponsor,
+                sponsor_wallet,
+                fulfill_address,
+                fulfill_function_id,
+                parameters,
+                error,
+                data,
+            });
+        } else if t0
+            == hex!("eb39930cdcbb560e6422558a2468b93a215af60063622e63cbb165eba14c3203").into()
+        {
+            let mut r = LogReader::new(&log, 2, None).unwrap();
+            let airnode = r.address();
+            let request_id = r.value();
+            let requester_request_count = r.value().as_u64();
+            let chain_id = r.value().as_u64();
+            let requester = r.address();
+            let template_id = r.value();
+            let sponsor = r.address();
+            let sponsor_wallet = r.address();
+            let fulfill_address = r.address();
+            let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
+            r.skip();
+            r.skip();
+            let chunks = r.values();
+            let (parameters, error, data) = match ABI::decode(&chunks, false) {
+                Ok(x) => (Some(x), None, None),
+                Err(e) => (None, Some(e), Some(chunks)),
+            };
+            return Ok(Self::MadeTemplateRequest {
+                airnode,
+                request_id,
+                requester_request_count,
+                chain_id,
+                requester,
+                template_id,
+                sponsor,
+                sponsor_wallet,
+                fulfill_address,
+                fulfill_function_id,
+                parameters,
+                error,
+                data,
+            });
+        } else if t0
+            == hex!("db6e5ad2f932677d9abcb868239c24d484d5512caf71029b8b7c2309aeee760a").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(2)).unwrap();
+            return Ok(Self::RequestedBeaconUpdate {
+                template_id: r.value(),
+                sponsor: r.address(),
+                requester: r.address(),
+                request_id: r.value(),
+                sponsor_wallet: r.address(),
+            });
+        } else if t0
+            == hex!("d48d52c7c6d0c940f3f8d07591e1800ef3a70daf79929a97ccd80b4494769fc7").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::RequestedWithdrawal {
+                airnode: r.address(),
+                sponsor: r.address(),
+                withdrawal_request_id: r.value(),
+                sponsor_wallet: r.address(),
+            });
+        } else if t0
+            == hex!("ebace4380f1ba3ccf701db78879a937b0ad2a9370e98baaba922228f632383e0").into()
+        {
+            let mut r = LogReader::new(&log, 1, None).unwrap();
+            return Ok(Self::SetAirnodeXpub {
+                airnode: r.address(),
+                xpub: r.text(),
+            });
+        } else if t0
+            == hex!("584a7e3e68feb90397faadcb0af28a855e0268ddedf9fce510b4cf57770b9410").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::SetRankAdminned {
+                adminned: r.address(),
+                caller_admin: r.address(),
+                target_admin: r.address(),
+                new_rank: r.value(),
+            });
+        } else if t0
+            == hex!("07048cabcdd89c62fecf542621231579eae613db4aeb83794e9c3abf428840ca").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            return Ok(Self::SetRank {
+                caller_admin: r.address(),
+                target_admin: r.address(),
+                new_rank: r.value(),
+            });
+        } else if t0
+            == hex!("c2e532a12bbcce2bfa2ef9e4bee80180e4e1b1f78618f0d20bc49a648b577c56").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            return Ok(Self::SetSponsorshipStatus {
+                sponsor: r.address(),
+                requester: r.address(),
+                sponsorship_status: r.bool(),
+            });
+        } else if t0
+            == hex!("5a3b1968640fbb8b12349ea1a58be5c61eaec6e38c11c38652f1d250207103ab").into()
+        {
+            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            return Ok(Self::SetUpdatePermissionStatus {
+                sponsor: r.address(),
+                update_requester: r.address(),
+                status: r.bool(),
+            });
+        } else if t0
+            == hex!("375ee45428e158031095010484fd6451af89c501c79d75e390da4e91eb480ce1").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::SetWhitelistExpiration {
+                airnode: r.address(),
+                endpoint_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                expiration: r.value().as_u64(),
+            });
+        } else if t0
+            == hex!("d19e89b7d547ccf349211588a9a1d29461e2ce984b1b1cdbe7150976528b86f1").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::SetWhitelistExpirationTpl {
+                template_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                expiration: r.value().as_u64(),
+            });
+        } else if t0
+            == hex!("0e8af304f7f920661493a5051df03a3947d58b4f655581e51ab0c014d768d8eb").into()
+        {
+            let mut r = LogReader::new(&log, 4, Some(1)).unwrap();
+            return Ok(Self::SetWhitelistStatusPastExpiration {
+                airnode: r.address(),
+                endpoint_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                status: r.bool(),
+            });
+        } else if t0
+            == hex!("527f03e7cb13db04fc83c2332106b6087c66d253bca13289f5d91d8e73796d11").into()
+        {
+            let mut r = LogReader::new(&log, 3, Some(1)).unwrap();
+            return Ok(Self::SetWhitelistStatusPastExpirationTpl {
+                template_id: r.value(),
+                user: r.address(),
+                admin: r.address(),
+                status: r.bool(),
+            });
+        } else if t0
+            == hex!("c3dafe3cca75d9d099b1941e05b199870f55b853dd49784a96359ac26f01bf6d").into()
+        {
+            let mut r = LogReader::new(&log, 1, Some(0)).unwrap();
+            return Ok(Self::TransferredMetaAdminStatus {
+                meta_admin: r.address(),
+            });
+        } else if t0
+            == hex!("cb9c65e5f99c20826a331174f56e8c536161ecb0b5d598267e79c83567d477f1").into()
+        {
+            let mut r = LogReader::new(&log, 1, Some(2)).unwrap();
+            let template_id = r.value();
+            let request_id = r.value();
+            let (value, timestamp) = r.value224_32();
+            return Ok(Self::UpdatedBeacon {
+                template_id,
+                request_id,
+                value,
+                timestamp,
+            });
         }
 
         let topic_str = format!("{:?}", t0).chars().skip(2).collect::<String>();
         match KNOWN_EVENTS.get(&topic_str) {
             Some(_title) => {
                 // println!("{} topic={:?}", title, t0);
-                return Ok(Self::Unclassified);
+                Ok(Self::Unclassified)
             }
-            None => {
-                // println!("unknown topic {:?}", t0);
-            }
+            None => Ok(Self::Unknown),
         }
-        Ok(Self::Unknown)
     }
 }

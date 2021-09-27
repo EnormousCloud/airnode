@@ -126,6 +126,15 @@ impl LogReader {
         U256::from_str(hex_str.as_str()).unwrap()
     }
 
+    pub fn value224_32(&mut self) -> (U256, u64) {
+        // TODO: this must be properly decoded
+        let packed = self.value();
+        let mut value = packed;
+        value.0[0] = value.0[0] & 0xFFFFFFFF;
+        let timestamp = packed.0[0];
+        (value, timestamp)
+    }
+
     pub fn skip(&mut self) {
         let _ = self.value();
     }
