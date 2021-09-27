@@ -10,8 +10,8 @@ description = "Airnode RRP Log command-line interface"
 readme = "README.md"
 
 [dependencies]
-airnode-abi = { path = "../airnode-abi" }
-airnode-events = { path = "../airnode-events" }
+airnode-abi = { version = "0.1" }
+airnode-events = { version = "0.1" }
 anyhow = { version = "1.0" }
 dotenv = "0.15"
 futures = "0.3.13"
