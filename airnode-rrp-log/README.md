@@ -1,12 +1,29 @@
 # airnode-rrp-log
 
+### Installation
+
+```cargo install airnode-rrp-log```
+
+### Usage
 ```
 USAGE:
-    airnode-rrp-log \
-        --address-contract <address-contract> \
-        --min-block <min-block> \
-        --rpc-batch-size <rpc-batch-size> \
+    airnode-rrp-log [OPTIONS] --address-contract <address-contract>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+        --address-contract <address-contract>    API3 secondary voting agent address [env: ADDR_CONTRACT=]
+        --max-block <max-block>                  Max block to stop contract events listening [env: RPC_MAX_BLOCK=]
+        --min-block <min-block>
+            Number of the first block to start watching [env: RPC_MIN_BLOCK=]  [default: 1]
+
+        --rpc-batch-size <rpc-batch-size>
+            Ethereum JSON+RPC batch size for reading. Light clients will require smaller sizes [env: RPC_BATCH_SIZE=]
+            [default: 1000]
         --rpc-endpoint <rpc-endpoint>
+            Ethereum JSON+RPC HTTP address [env: RPC_ENDPOINT=]  [default: http://localhost:8545/]
 ```
 
 ### Testing with XDAI
