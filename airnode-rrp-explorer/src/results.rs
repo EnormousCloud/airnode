@@ -1,6 +1,6 @@
+use crate::logevent::LogEvent;
 use crate::reader::BlockBatch;
-use airnode_events::AirnodeEvent;
-use web3::types::Log;
+use web3::types::H256;
 use yew::{html, Callback, Component, Context, Html, Properties};
 
 #[derive(Debug)]
@@ -10,7 +10,7 @@ pub enum Msg {
 
 #[derive(Clone, Debug, PartialEq, Properties)]
 pub struct Props {
-    pub input: Vec<Log>,
+    pub input: Vec<LogEvent>,
     pub chain_id: u64,
     pub batch: Option<BlockBatch>,
     pub on_back: Callback<()>,
@@ -19,8 +19,8 @@ pub struct Props {
 pub struct ResultsView;
 
 impl ResultsView {
-    pub fn tx_link(&self, chain_id: u64, log: &web3::types::Log) -> Html {
-        let tx = format!("{:?}", log.transaction_hash.unwrap());
+    pub fn tx_link(&self, chain_id: u64, block_number: u64, hash: H256) -> Html {
+        let tx = format!("{:?}", hash);
         let href = match chain_id {
             1 => Some(format!("https://etherscan.io/tx/{}#eventlog", tx)),
             3 => Some(format!("https://ropsten.etherscan.io/tx/{}#eventlog", tx)),
@@ -31,7 +31,7 @@ impl ResultsView {
         };
         html! {
             <div>
-                {log.block_number.unwrap()}
+                {block_number}
                 {" "}
                 {
                     match href {
@@ -92,18 +92,17 @@ impl Component for ResultsView {
                 <div class="panel-results">
                     <ol>
                     {
-                        for ctx.props().input.iter().map(|log| {
-                            match AirnodeEvent::from_log(&log) {
-                                Ok(evt) => html!{
+                        for ctx.props().input.iter().map(|l| {
+                            match &l.event {
+                                Some(evt) => html!{
                                     <li>
-                                        {self.tx_link(chain_id, &log)}
+                                        {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
                                         {serde_json::to_string_pretty(&evt).unwrap() }
                                     </li>
                                 },
-                                Err(e) => html! {
-                                    <li class="err" title={format!("{}", e)}>
-                                        {self.tx_link(chain_id, &log)}
-                                        { serde_json::to_string(log).unwrap() }
+                                None => html! {
+                                    <li class="err" title={format!("{:?}", l.error)}>
+                                        {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
                                     </li>
                                 },
                             }

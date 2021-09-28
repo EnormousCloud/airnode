@@ -30,9 +30,10 @@ ADDR_CONTRACT=0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec
 ```
 
 ### Coming features
-- [ ]  highlight decoding errors with another color
-- [ ]  slowdown/hanging during the load: get rid of accumulative decoding on each render
-- [ ]  keep the submission form input state in the local storage
+- [ ]  highlight decoding/unclassified errors with another color
+- [x]  slowdown/hanging during the load: get rid of accumulative decoding on each render
+- [ ]  keep the submission form input state in the session storage
+- [ ]  adding Metamask option as a proxy
 - [ ]  no good indication of batches that are processing
 - [ ]  filtration: by provider ID
 - [ ]  filtration: by endpoint ID
