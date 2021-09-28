@@ -2,10 +2,12 @@ pub mod components;
 pub mod entry;
 pub mod footer;
 pub mod input;
+pub mod logevent;
 pub mod reader;
 pub mod results;
 
 use crate::entry::Entry;
+use crate::logevent::LogEvent;
 use crate::reader::{BlockBatch, Scanner};
 use std::rc::Rc;
 use web3::types::Log;
@@ -35,7 +37,7 @@ struct App {
     mode: Mode,
     chain_id: u64,
     batch: Option<BlockBatch>,
-    logs: Vec<Log>,
+    logs: Vec<LogEvent>,
 }
 
 impl Component for App {
@@ -73,7 +75,7 @@ impl Component for App {
             }
             Msg::BatchDone(logs) => {
                 for l in logs {
-                    self.logs.push(l.clone());
+                    self.logs.push(LogEvent::new(l));
                 }
             }
             Msg::Submit(input) => {
