@@ -1,7 +1,8 @@
 use crate::components::panel::Panel;
 use crate::input::Input;
 
-use serde::Serialize;
+use gloo::storage::{SessionStorage, Storage};
+use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use web3::types::H160;
 use yew::web_sys::{Event, HtmlInputElement, InputEvent};
@@ -46,13 +47,41 @@ pub enum Msg {
 }
 
 // state is Entry + whether each field is valid
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntryForm {
-    network: Input<String>,
-    address: Input<H160>,
-    min_block: Input<u64>,
-    max_block: Input<Option<u64>>,
-    batch_size: Input<u64>,
+    pub network: Input<String>,
+    pub address: Input<H160>,
+    pub min_block: Input<u64>,
+    pub max_block: Input<Option<u64>>,
+    pub batch_size: Input<u64>,
+}
+
+impl EntryForm {
+    const KEY: &'static str = "airnode.rrp.v20210929";
+
+    pub fn load() -> Self {
+        SessionStorage::get(Self::KEY).unwrap_or_default()
+    }
+
+    pub fn remove() {
+        SessionStorage::delete(Self::KEY);
+    }
+
+    pub fn store(&self) {
+        let _ = SessionStorage::set(Self::KEY, self);
+    }
+}
+
+impl Default for EntryForm {
+    fn default() -> Self {
+        Self {
+            network: Input::str("http://localhost:8545/"),
+            address: Input::no_address(),
+            min_block: Input::u64(7812260),
+            max_block: Input::opt_u64(),
+            batch_size: Input::u64(50000),
+        }
+    }
 }
 
 impl EntryForm {
@@ -110,13 +139,7 @@ impl Component for EntryForm {
     type Properties = Props;
 
     fn create(_: &Context<Self>) -> Self {
-        Self {
-            network: Input::str("http://localhost:8545/"),
-            address: Input::no_address(),
-            min_block: Input::u64(7812260),
-            max_block: Input::opt_u64(),
-            batch_size: Input::u64(50000),
-        }
+        Self::load()
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -124,6 +147,7 @@ impl Component for EntryForm {
             Msg::Submit => {
                 if let Some(entry) = &self.entry() {
                     ctx.props().on_submit.emit(entry.clone());
+                    self.store();
                 }
                 true
             }
