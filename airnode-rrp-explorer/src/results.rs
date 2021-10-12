@@ -93,15 +93,19 @@ impl Component for ResultsView {
                     <ol>
                     {
                         for ctx.props().input.iter().map(|l| {
+                            let (evt_class, err_text) = match &l.error {
+                                Some(txt) => ("warning", txt.clone()),
+                                None => ("", "".to_owned()),
+                            };
                             match &l.event {
                                 Some(evt) => html!{
-                                    <li>
+                                    <li class={evt_class}>
                                         {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
                                         {serde_json::to_string_pretty(&evt).unwrap() }
                                     </li>
                                 },
                                 None => html! {
-                                    <li class="err" title={format!("{:?}", l.error)}>
+                                    <li class={evt_class} title={err_text}>
                                         {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
                                     </li>
                                 },
