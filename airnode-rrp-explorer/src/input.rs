@@ -62,6 +62,47 @@ impl Input<Option<u64>> {
     }
 }
 
+
+impl Input<Option<H160>> {
+    pub fn address(value: Option<H160>) -> Self {
+        Self {
+            s: match value {
+                Some(v) => format!("{:x}", v),
+                None => "".to_owned(),
+            },
+            value,
+            msg: None,
+        }
+    }
+    pub fn none_address() -> Self {
+        Self {
+            s: "".to_owned(),
+            value: None,
+            msg: None,
+        }
+    }
+    pub fn parse_address(&mut self, s: &str) -> bool {
+        self.s = s.to_owned();
+        let no0x = s.clone().replace("0x", "");
+        if no0x == "" {
+            self.value = None;
+        } else {
+            match H160::from_str(&no0x) {
+                Ok(x) => {
+                    self.value = Some(x.clone());
+                    self.msg = None;
+                    return true;
+                }
+                Err(e) => {
+                    self.msg = Some(format!("{}", e));
+                }
+            }
+        }
+        true
+    }
+}
+
+
 impl Input<H160> {
     pub fn address(value: H160) -> Self {
         Self {
