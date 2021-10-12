@@ -30,7 +30,7 @@ ADDR_CONTRACT=0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec
 ```
 
 ### Coming features
-- [ ]  highlight decoding/unclassified errors with another color
+- [x]  highlight decoding/unclassified errors with another color
 - [x]  slowdown/hanging during the load: get rid of accumulative decoding on each render
 - [x]  keep the submission form input state in the session storage
 - [ ]  adding Metamask option as a proxy
