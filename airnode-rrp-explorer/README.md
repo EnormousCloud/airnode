@@ -39,6 +39,7 @@ ADDR_CONTRACT=0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec
 - [ ]  filtration: by endpoint ID
 - [ ]  filtration: by request ID
 - [ ]  filtration: by requester index
+- [ ]  filtration: by address (airnode, sponsor, requester, designatedWallet, clientAddress)
 - [ ]  export results as CSV and/or plain text
 
 ### License

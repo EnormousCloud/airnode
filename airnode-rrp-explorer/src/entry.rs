@@ -17,6 +17,14 @@ pub struct Entry {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_block: Option<u64>,
     pub batch_size: u64,
+
+    // provider ID was only in pre-alpha version of the protocol
+    pub by_provider_id: String,
+    pub by_endpoint_id: String,
+    pub by_request_id: String,
+    pub by_requester_index: String,
+    // by any address of RRP participants (airnode, sponsor, requester, designatedWallet, clientAddress)
+    pub by_address: Option<H160>,
 }
 
 impl Default for Entry {
@@ -27,6 +35,11 @@ impl Default for Entry {
             min_block: 0,
             max_block: None,
             batch_size: 10000,
+            by_provider_id: String::from(""),
+            by_endpoint_id: String::from(""),
+            by_request_id: String::from(""),
+            by_requester_index: String::from(""),
+            by_address: None,
         }
     }
 }
@@ -54,10 +67,15 @@ pub struct EntryForm {
     pub min_block: Input<u64>,
     pub max_block: Input<Option<u64>>,
     pub batch_size: Input<u64>,
+    pub by_provider_id: Input<String>,
+    pub by_endpoint_id: Input<String>,
+    pub by_request_id: Input<String>,
+    pub by_requester_index: Input<String>,
+    pub by_address: Input<Option<H160>>,
 }
 
 impl EntryForm {
-    const KEY: &'static str = "airnode.rrp.v20210929";
+    const KEY: &'static str = "airnode.rrp.v20211012";
 
     pub fn load() -> Self {
         SessionStorage::get(Self::KEY).unwrap_or_default()
@@ -80,6 +98,11 @@ impl Default for EntryForm {
             min_block: Input::u64(7812260),
             max_block: Input::opt_u64(),
             batch_size: Input::u64(50000),
+            by_provider_id: Input::str(""),
+            by_endpoint_id: Input::str(""),
+            by_request_id: Input::str(""),
+            by_requester_index: Input::str(""),
+            by_address: Input::none_address(),
         }
     }
 }
@@ -111,12 +134,37 @@ impl EntryForm {
             Some(_) => return None,
             None => self.batch_size.value,
         };
+        let by_provider_id = match self.by_provider_id.msg {
+            Some(_) => return None,
+            None => self.by_provider_id.value.clone(),
+        };
+        let by_endpoint_id = match self.by_endpoint_id.msg {
+            Some(_) => return None,
+            None => self.by_endpoint_id.value.clone(),
+        };
+        let by_request_id = match self.by_request_id.msg {
+            Some(_) => return None,
+            None => self.by_request_id.value.clone(),
+        };
+        let by_requester_index = match self.by_requester_index.msg {
+            Some(_) => return None,
+            None => self.by_requester_index.value.clone(),
+        };
+        let by_address = match self.by_address.msg {
+            Some(_) => return None,
+            None => self.by_address.value,
+        };
         Some(Entry {
             network,
             address,
             min_block,
             max_block,
             batch_size,
+            by_endpoint_id,
+            by_provider_id,
+            by_request_id,
+            by_requester_index,
+            by_address,
         })
     }
 
