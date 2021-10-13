@@ -98,11 +98,17 @@ impl Component for ResultsView {
                                 None => ("", "".to_owned()),
                             };
                             match &l.event {
-                                Some(evt) => html!{
-                                    <li class={evt_class}>
-                                        {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
-                                        {serde_json::to_string_pretty(&evt).unwrap() }
-                                    </li>
+                                Some(evt) => {
+                                    let cls = match evt.get_error() {
+                                        Some(_) => "warning",
+                                        None => evt_class,
+                                    };
+                                    html!{
+                                        <li class={cls}>
+                                            {self.tx_link(chain_id, l.block_number, l.transaction_hash)}
+                                            {serde_json::to_string_pretty(&evt).unwrap() }
+                                        </li>
+                                    }
                                 },
                                 None => html! {
                                     <li class={evt_class} title={err_text}>
