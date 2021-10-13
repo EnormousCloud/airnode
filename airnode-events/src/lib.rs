@@ -402,6 +402,26 @@ pub struct AirnodeState {
 }
 
 impl AirnodeEvent {
+    pub fn get_error(&self) -> Option<String> {
+        match self {
+            Self::ClientFullRequestCreatedA { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::ClientRequestCreatedA { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::ClientShortRequestCreatedA { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::CreatedTemplate { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::FailedRequest { error_message, .. } => {
+                if error_message.len() > 0 {
+                    Some(error_message.clone())
+                } else {
+                    None
+                }
+            }
+            Self::MadeFullRequest { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::MadeTemplateRequest { error, .. } => error.clone().map(|x| x.to_string()),
+            Self::TemplateCreatedA { error, .. } => error.clone().map(|x| x.to_string()),
+            _ => None,
+        }
+    }
+
     pub fn from_log(log: &web3::types::Log) -> Result<Self, EventParseError> {
         let t0 = log.topics[0];
 
