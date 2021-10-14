@@ -1,6 +1,27 @@
 use crate::AirnodeEvent;
 use web3::types::U256;
 
+pub fn get_provider_id(evt: &AirnodeEvent) -> Option<U256> {
+    match evt {
+        AirnodeEvent::ClientFullRequestCreatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ClientRequestCreatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ClientRequestFailedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ClientRequestFulfilledA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ClientRequestFulfilledWithBytesA { provider_id, .. } => {
+            Some(provider_id.clone())
+        }
+        AirnodeEvent::ClientShortRequestCreatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::EndpointUpdatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::MinBalanceUpdatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ProviderCreatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::ProviderUpdatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::TemplateCreatedA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::WithdrawalFulfilledA { provider_id, .. } => Some(provider_id.clone()),
+        AirnodeEvent::WithdrawalRequestedA { provider_id, .. } => Some(provider_id.clone()),
+        _ => None,
+    }
+}
+
 pub fn get_requester_index(evt: &AirnodeEvent) -> Option<U256> {
     match evt {
         AirnodeEvent::ClientEndorsementStatusUpdatedA {
