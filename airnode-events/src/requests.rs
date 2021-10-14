@@ -1,6 +1,36 @@
 use crate::AirnodeEvent;
 use web3::types::U256;
 
+pub fn get_requester_index(evt: &AirnodeEvent) -> Option<U256> {
+    match evt {
+        AirnodeEvent::ClientEndorsementStatusUpdatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::ClientFullRequestCreatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::ClientRequestCreatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::RequesterCreatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::RequesterUpdatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::TemplateCreatedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::WithdrawalFulfilledA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        AirnodeEvent::WithdrawalRequestedA {
+            requester_index, ..
+        } => Some(requester_index.clone()),
+        _ => None,
+    }
+}
+
 pub fn get_request_id(evt: &AirnodeEvent) -> Option<U256> {
     match evt {
         AirnodeEvent::ClientFullRequestCreatedA { request_id, .. } => Some(request_id.clone()),

@@ -432,6 +432,11 @@ impl AirnodeEvent {
         requests::get_request_id(self)
     }
 
+    // requester_index: only for pre-alpha
+    pub fn get_requester_index(&self) -> Option<U256> {
+        requests::get_requester_index(self)
+    }
+
     pub fn from_log(log: &web3::types::Log) -> Result<Self, EventParseError> {
         let t0 = log.topics[0];
 
