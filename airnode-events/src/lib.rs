@@ -1,5 +1,6 @@
 mod addresses;
 pub mod logreader;
+mod requests;
 
 use crate::logreader::{EventParseError, LogReader};
 use airnode_abi::{DecodingError, ABI};
@@ -425,6 +426,10 @@ impl AirnodeEvent {
 
     pub fn get_addresses(&self) -> Vec<H160> {
         addresses::get_addresses(self)
+    }
+
+    pub fn get_request_id(&self) -> Option<U256> {
+        requests::get_request_id(self)
     }
 
     pub fn from_log(log: &web3::types::Log) -> Result<Self, EventParseError> {
