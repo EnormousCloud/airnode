@@ -25,6 +25,8 @@ pub struct Entry {
     pub by_requester_index: String,
     // by any address of RRP participants (airnode, sponsor, requester, designatedWallet, clientAddress)
     pub by_address: Option<H160>,
+    // by airnode address (beta-version)
+    pub by_airnode: Option<H160>,
 }
 
 impl Default for Entry {
@@ -40,6 +42,7 @@ impl Default for Entry {
             by_request_id: String::from(""),
             by_requester_index: String::from(""),
             by_address: None,
+            by_airnode: None,
         }
     }
 }
@@ -72,6 +75,7 @@ pub struct EntryForm {
     pub by_request_id: Input<String>,
     pub by_requester_index: Input<String>,
     pub by_address: Input<Option<H160>>,
+    pub by_airnode: Input<Option<H160>>,
 }
 
 impl EntryForm {
@@ -103,6 +107,7 @@ impl Default for EntryForm {
             by_request_id: Input::str(""),
             by_requester_index: Input::str(""),
             by_address: Input::none_address(),
+            by_airnode: Input::none_address(),
         }
     }
 }
@@ -154,6 +159,10 @@ impl EntryForm {
             Some(_) => return None,
             None => self.by_address.value,
         };
+        let by_airnode = match self.by_airnode.msg {
+            Some(_) => return None,
+            None => self.by_airnode.value,
+        };
         Some(Entry {
             network,
             address,
@@ -165,6 +174,7 @@ impl EntryForm {
             by_request_id,
             by_requester_index,
             by_address,
+            by_airnode,
         })
     }
 
