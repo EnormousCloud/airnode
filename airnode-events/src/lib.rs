@@ -1,7 +1,7 @@
 pub mod logreader;
 
 use crate::logreader::{EventParseError, LogReader};
-use airnode_abi::{DecodingError, ABI};
+use airnode_abi::{DecodingError, Param, ABI};
 use hex_literal::hex;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
@@ -401,6 +401,18 @@ pub struct AirnodeState {
     events: Vec<AirnodeEvent>,
 }
 
+fn abi_addresses(parameters: &Option<ABI>) -> Vec<H160> {
+    let mut out = vec![];
+    if let Some(abi) = parameters {
+        for p in &abi.params {
+            if let Param::Address { value, .. } = p {
+                out.push(value.clone());
+            }
+        }
+    }
+    out
+}
+
 impl AirnodeEvent {
     pub fn get_error(&self) -> Option<String> {
         match self {
@@ -419,6 +431,195 @@ impl AirnodeEvent {
             Self::MadeTemplateRequest { error, .. } => error.clone().map(|x| x.to_string()),
             Self::TemplateCreatedA { error, .. } => error.clone().map(|x| x.to_string()),
             _ => None,
+        }
+    }
+
+    pub fn get_addresses(&self) -> Vec<H160> {
+        match self {
+            Self::ClientEndorsementStatusUpdatedA { client_address, .. } => {
+                vec![client_address.clone()]
+            }
+
+            Self::ClientFullRequestCreatedA {
+                client_address,
+                designated_wallet,
+                parameters,
+                ..
+            } => {
+                let a = vec![client_address.clone(), designated_wallet.clone()];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::ClientRequestCreatedA {
+                client_address,
+                designated_wallet,
+                parameters,
+                ..
+            } => {
+                let a = vec![client_address.clone(), designated_wallet.clone()];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::ClientShortRequestCreatedA {
+                client_address,
+                parameters,
+                ..
+            } => {
+                let a = vec![client_address.clone()];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::EndpointUpdatedA { authorizers, .. } => authorizers.clone(),
+            Self::ProviderCreatedA { admin, .. } => vec![admin.clone()],
+            Self::ProviderUpdatedA { admin, .. } => vec![admin.clone()],
+            Self::RequesterCreatedA { admin, .. } => vec![admin.clone()],
+            Self::RequesterUpdatedA { admin, .. } => vec![admin.clone()],
+            Self::TemplateCreatedA {
+                designated_wallet,
+                parameters,
+                ..
+            } => {
+                let a = vec![designated_wallet.clone()];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::WithdrawalFulfilledA {
+                designated_wallet,
+                destination,
+                ..
+            } => {
+                vec![designated_wallet.clone(), destination.clone()]
+            }
+            Self::WithdrawalRequestedA {
+                designated_wallet,
+                destination,
+                ..
+            } => {
+                vec![designated_wallet.clone(), destination.clone()]
+            }
+            Self::CreatedTemplate {
+                airnode,
+                parameters,
+                ..
+            } => {
+                let a = vec![airnode.clone()];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::DecreasedSelfRank { admin, .. } => vec![admin.clone()],
+            Self::DecreasedSelfRankAdminned {
+                adminned, admin, ..
+            } => vec![adminned.clone(), admin.clone()],
+
+            Self::ExtendedWhitelistExpiration {
+                airnode,
+                user,
+                admin,
+                ..
+            } => vec![airnode.clone(), user.clone(), admin.clone()],
+            Self::ExtendedWhitelistExpirationTpl { user, admin, .. } => {
+                vec![user.clone(), admin.clone()]
+            }
+            Self::FailedRequest { airnode, .. } => vec![airnode.clone()],
+            Self::FulfilledRequest { airnode, .. } => vec![airnode.clone()],
+            Self::FulfilledWithdrawal {
+                airnode,
+                sponsor,
+                sponsor_wallet,
+                ..
+            } => vec![airnode.clone(), sponsor.clone(), sponsor_wallet.clone()],
+            Self::MadeFullRequest {
+                airnode,
+                requester,
+                sponsor,
+                sponsor_wallet,
+                fulfill_address,
+                parameters,
+                ..
+            } => {
+                let a = vec![
+                    airnode.clone(),
+                    requester.clone(),
+                    sponsor.clone(),
+                    sponsor_wallet.clone(),
+                    fulfill_address.clone(),
+                ];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::MadeTemplateRequest {
+                airnode,
+                requester,
+                sponsor,
+                sponsor_wallet,
+                fulfill_address,
+                parameters,
+                ..
+            } => {
+                let a = vec![
+                    airnode.clone(),
+                    requester.clone(),
+                    sponsor.clone(),
+                    sponsor_wallet.clone(),
+                    fulfill_address.clone(),
+                ];
+                abi_addresses(parameters).iter().cloned().chain(a).collect()
+            }
+            Self::RequestedBeaconUpdate {
+                sponsor,
+                requester,
+                sponsor_wallet,
+                ..
+            } => {
+                vec![sponsor.clone(), requester.clone(), sponsor_wallet.clone()]
+            }
+            Self::RequestedWithdrawal {
+                airnode,
+                sponsor,
+                sponsor_wallet,
+                ..
+            } => {
+                vec![airnode.clone(), sponsor.clone(), sponsor_wallet.clone()]
+            }
+            Self::SetAirnodeXpub { airnode, .. } => vec![airnode.clone()],
+            Self::SetRankAdminned {
+                adminned,
+                caller_admin,
+                target_admin,
+                ..
+            } => vec![adminned.clone(), caller_admin.clone(), target_admin.clone()],
+            Self::SetRank {
+                caller_admin,
+                target_admin,
+                ..
+            } => vec![caller_admin.clone(), target_admin.clone()],
+            Self::SetSponsorshipStatus {
+                sponsor, requester, ..
+            } => vec![sponsor.clone(), requester.clone()],
+
+            Self::SetUpdatePermissionStatus {
+                sponsor,
+                update_requester,
+                ..
+            } => {
+                vec![sponsor.clone(), update_requester.clone()]
+            }
+            Self::SetWhitelistExpiration {
+                airnode,
+                user,
+                admin,
+                ..
+            } => {
+                vec![airnode.clone(), user.clone(), admin.clone()]
+            }
+            Self::SetWhitelistExpirationTpl { user, admin, .. } => {
+                vec![user.clone(), admin.clone()]
+            }
+            Self::SetWhitelistStatusPastExpiration {
+                airnode,
+                user,
+                admin,
+                ..
+            } => vec![airnode.clone(), user.clone(), admin.clone()],
+            Self::SetWhitelistStatusPastExpirationTpl { user, admin, .. } => {
+                vec![user.clone(), admin.clone()]
+            }
+            Self::TransferredMetaAdminStatus { meta_admin, .. } => vec![meta_admin.clone()],
+            _ => vec![],
         }
     }
 
