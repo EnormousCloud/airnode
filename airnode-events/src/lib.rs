@@ -441,6 +441,11 @@ impl AirnodeEvent {
         requests::get_endpoint_id(self)
     }
 
+    // airnode: only for beta-protocol
+    pub fn get_airnode(&self) -> Option<H160> {
+        requests::get_airnode(self)
+    }
+
     // provider_id: only for pre-alpha
     pub fn get_provider_id(&self) -> Option<U256> {
         requests::get_provider_id(self)
