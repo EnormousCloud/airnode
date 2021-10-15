@@ -22,6 +22,22 @@ pub fn get_template_id(evt: &AirnodeEvent) -> Option<U256> {
     }
 }
 
+pub fn get_endpoint_id(evt: &AirnodeEvent) -> Option<U256> {
+    match evt {
+        AirnodeEvent::ClientFullRequestCreatedA { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::EndpointUpdatedA { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::TemplateCreatedA { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::CreatedTemplate { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::ExtendedWhitelistExpiration { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::MadeFullRequest { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::SetWhitelistExpiration { endpoint_id, .. } => Some(endpoint_id.clone()),
+        AirnodeEvent::SetWhitelistStatusPastExpiration { endpoint_id, .. } => {
+            Some(endpoint_id.clone())
+        }
+        _ => None,
+    }
+}
+
 pub fn get_fulfill_function_id(evt: &AirnodeEvent) -> Option<u64> {
     match evt {
         AirnodeEvent::ClientFullRequestCreatedA {
