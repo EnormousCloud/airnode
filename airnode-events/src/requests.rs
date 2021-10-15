@@ -1,6 +1,27 @@
 use crate::AirnodeEvent;
 use web3::types::U256;
 
+pub fn get_template_id(evt: &AirnodeEvent) -> Option<U256> {
+    match evt {
+        AirnodeEvent::ClientRequestCreatedA { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::ClientShortRequestCreatedA { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::TemplateCreatedA { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::CreatedTemplate { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::ErroredBeaconUpdate { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::ExtendedWhitelistExpirationTpl { template_id, .. } => {
+            Some(template_id.clone())
+        }
+        AirnodeEvent::MadeTemplateRequest { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::RequestedBeaconUpdate { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::SetWhitelistExpirationTpl { template_id, .. } => Some(template_id.clone()),
+        AirnodeEvent::SetWhitelistStatusPastExpirationTpl { template_id, .. } => {
+            Some(template_id.clone())
+        }
+        AirnodeEvent::UpdatedBeacon { template_id, .. } => Some(template_id.clone()),
+        _ => None,
+    }
+}
+
 pub fn get_provider_id(evt: &AirnodeEvent) -> Option<U256> {
     match evt {
         AirnodeEvent::ClientFullRequestCreatedA { provider_id, .. } => Some(provider_id.clone()),

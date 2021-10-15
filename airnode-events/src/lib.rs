@@ -442,6 +442,10 @@ impl AirnodeEvent {
         requests::get_provider_id(self)
     }
 
+    pub fn get_template_id(&self) -> Option<U256> {
+        requests::get_template_id(self)
+    }
+
     pub fn from_log(log: &web3::types::Log) -> Result<Self, EventParseError> {
         let t0 = log.topics[0];
 
