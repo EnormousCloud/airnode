@@ -22,6 +22,32 @@ pub fn get_template_id(evt: &AirnodeEvent) -> Option<U256> {
     }
 }
 
+pub fn get_fulfill_function_id(evt: &AirnodeEvent) -> Option<u64> {
+    match evt {
+        AirnodeEvent::ClientFullRequestCreatedA {
+            fulfill_function_id,
+            ..
+        } => Some(fulfill_function_id.clone()),
+        AirnodeEvent::ClientRequestCreatedA {
+            fulfill_function_id,
+            ..
+        } => Some(fulfill_function_id.clone()),
+        AirnodeEvent::TemplateCreatedA {
+            fulfill_function_id,
+            ..
+        } => Some(fulfill_function_id.clone()),
+        AirnodeEvent::MadeFullRequest {
+            fulfill_function_id,
+            ..
+        } => Some(fulfill_function_id.clone()),
+        AirnodeEvent::MadeTemplateRequest {
+            fulfill_function_id,
+            ..
+        } => Some(fulfill_function_id.clone()),
+        _ => None,
+    }
+}
+
 pub fn get_provider_id(evt: &AirnodeEvent) -> Option<U256> {
     match evt {
         AirnodeEvent::ClientFullRequestCreatedA { provider_id, .. } => Some(provider_id.clone()),
