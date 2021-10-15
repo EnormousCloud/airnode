@@ -62,6 +62,13 @@ pub enum Msg {
     UpdateMinBlock(String),
     UpdateMaxBlock(String),
     UpdateBatchSize(String),
+    UpdateByProviderId(String),
+    UpdateByEndpointId(String),
+    UpdateByTemplateId(String),
+    UpdateByRequestId(String),
+    UpdateByRequesterIndex(String),
+    UpdateByAddress(String),
+    UpdateByAirnode(String),
 }
 
 // state is Entry + whether each field is valid
@@ -231,6 +238,28 @@ impl Component for EntryForm {
                 true
             }
             Msg::UpdateBatchSize(s) => self.batch_size.parse_u64(&s),
+            Msg::UpdateByProviderId(s) => {
+                self.by_provider_id = Input::str(&s);
+                true
+            }
+            Msg::UpdateByTemplateId(s) => {
+                self.by_template_id = Input::str(&s);
+                true
+            }
+            Msg::UpdateByEndpointId(s) => {
+                self.by_endpoint_id = Input::str(&s);
+                true
+            }
+            Msg::UpdateByRequestId(s) => {
+                self.by_request_id = Input::str(&s);
+                true
+            }
+            Msg::UpdateByRequesterIndex(s) => {
+                self.by_requester_index = Input::str(&s);
+                true
+            }
+            Msg::UpdateByAddress(s) => self.by_address.parse_address(&s),
+            Msg::UpdateByAirnode(s) => self.by_airnode.parse_address(&s),
         }
     }
 
