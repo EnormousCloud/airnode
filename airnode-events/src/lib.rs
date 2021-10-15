@@ -445,6 +445,9 @@ impl AirnodeEvent {
     pub fn get_template_id(&self) -> Option<U256> {
         requests::get_template_id(self)
     }
+    pub fn get_fulfill_function_id(&self) -> Option<u64> {
+        requests::get_fulfill_function_id(self)
+    }
 
     pub fn from_log(log: &web3::types::Log) -> Result<Self, EventParseError> {
         let t0 = log.topics[0];
