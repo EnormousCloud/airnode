@@ -1,5 +1,5 @@
 mod addresses;
-pub mod logreader;
+pub(crate) mod logreader;
 mod requests;
 
 use crate::logreader::{EventParseError, LogReader};
