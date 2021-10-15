@@ -1,5 +1,5 @@
 use crate::AirnodeEvent;
-use web3::types::U256;
+use web3::types::{H160, U256};
 
 pub fn get_template_id(evt: &AirnodeEvent) -> Option<U256> {
     match evt {
@@ -151,6 +151,23 @@ pub fn get_request_id(evt: &AirnodeEvent) -> Option<U256> {
             ..
         } => Some(withdrawal_request_id.clone()),
         AirnodeEvent::UpdatedBeacon { request_id, .. } => Some(request_id.clone()),
+        _ => None,
+    }
+}
+
+pub fn get_airnode(evt: &AirnodeEvent) -> Option<H160> {
+    match evt {
+        AirnodeEvent::CreatedTemplate { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::ExtendedWhitelistExpiration { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::FailedRequest { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::FulfilledRequest { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::FulfilledWithdrawal { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::MadeFullRequest { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::MadeTemplateRequest { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::RequestedWithdrawal { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::SetAirnodeXpub { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::SetWhitelistExpiration { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::SetWhitelistStatusPastExpiration { airnode, .. } => Some(airnode.clone()),
         _ => None,
     }
 }
