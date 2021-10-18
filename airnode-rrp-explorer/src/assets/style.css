@@ -589,3 +589,28 @@ input.primary[type="submit"]
   padding-top: 5px;
   padding-bottom: 5px;
 }
+
+.button-link {
+  text-decoration: underline;
+  padding: 0px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--color-link);
+  display: block;
+  line-height: 2rem;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.mandatory {
+  color: var(--color-link);
+}
+
+.extended-filtration {
+  position: relative;
+}
+.at-right {
+  position: absolute; 
+  top: 0px;
+  right: 0px;
+}

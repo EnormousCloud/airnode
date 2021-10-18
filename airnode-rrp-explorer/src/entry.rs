@@ -18,6 +18,7 @@ pub struct Entry {
     pub max_block: Option<u64>,
     pub batch_size: u64,
 
+    pub extended: bool,
     // provider ID was only in pre-alpha version of the protocol
     pub by_provider_id: String,
     pub by_endpoint_id: String,
@@ -38,6 +39,7 @@ impl Default for Entry {
             min_block: 0,
             max_block: None,
             batch_size: 10000,
+            extended: false,
             by_provider_id: String::from(""),
             by_endpoint_id: String::from(""),
             by_template_id: String::from(""),
@@ -69,6 +71,7 @@ pub enum Msg {
     UpdateByRequesterIndex(String),
     UpdateByAddress(String),
     UpdateByAirnode(String),
+    ToggleExtended,
 }
 
 // state is Entry + whether each field is valid
@@ -79,6 +82,7 @@ pub struct EntryForm {
     pub min_block: Input<u64>,
     pub max_block: Input<Option<u64>>,
     pub batch_size: Input<u64>,
+    pub extended: bool,
     pub by_provider_id: Input<String>,
     pub by_endpoint_id: Input<String>,
     pub by_template_id: Input<String>,
@@ -89,7 +93,7 @@ pub struct EntryForm {
 }
 
 impl EntryForm {
-    const KEY: &'static str = "airnode.rrp.v20211012";
+    const KEY: &'static str = "airnode.rrp.v20211018";
 
     pub fn load() -> Self {
         SessionStorage::get(Self::KEY).unwrap_or_default()
@@ -112,6 +116,7 @@ impl Default for EntryForm {
             min_block: Input::u64(7812260),
             max_block: Input::opt_u64(),
             batch_size: Input::u64(50000),
+            extended: false,
             by_provider_id: Input::str(""),
             by_endpoint_id: Input::str(""),
             by_template_id: Input::str(""),
@@ -184,6 +189,7 @@ impl EntryForm {
             min_block,
             max_block,
             batch_size,
+            extended: self.extended,
             by_endpoint_id,
             by_template_id,
             by_provider_id,
@@ -211,6 +217,14 @@ impl EntryForm {
         let link = ctx.link();
         html! {
             <div class="extended-filtration">
+                <div class="at-right">
+                    <button
+                        class="button primary"
+                        onclick={link.callback(|_| Msg::ToggleExtended)}
+                    >
+                        {"x"}
+                    </button>
+                </div>
                 <h3 class="cell-title" style="color: var(--color-grey)">{ "Advanced filtration" }</h3>
                 <div class="dash-row" style="margin-bottom: 20px;">
                     <div class="dash-col-100">
@@ -353,6 +367,10 @@ impl Component for EntryForm {
                 }
                 true
             }
+            Msg::ToggleExtended => {
+                self.extended = !self.extended;
+                true
+            }
             Msg::UpdateNetwork(s) => self.network.parse_url(&s),
             Msg::UpdateAddress(s) => self.address.parse_address(&s),
             Msg::UpdateMinBlock(s) => {
@@ -486,7 +504,19 @@ impl Component for EntryForm {
                             {for self.batch_size.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
                         </div>
                     </div>
-                    {self.extended_filtration(ctx)}
+                    { if self.extended {
+                        self.extended_filtration(ctx)
+                      } else {
+                        html!{
+                            <button
+                                class="button-link"
+                                onclick={link.callback(|_| Msg::ToggleExtended)}
+                            >
+                                {"Advanced Filtration"}
+                            </button>
+                        }
+                      }
+                    }
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="dash-col-3">
                             <div
