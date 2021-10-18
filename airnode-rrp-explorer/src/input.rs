@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use web3::types::H160;
+use web3::types::{H160, U256};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Input<T> {
@@ -62,6 +62,34 @@ impl Input<Option<u64>> {
     }
 }
 
+impl Input<Option<U256>> {
+    pub fn opt_u256() -> Self {
+        Self {
+            s: "".to_owned(),
+            value: None,
+            msg: None,
+        }
+    }
+    pub fn parse_opt_u256(&mut self, s: &str) -> bool {
+        self.s = s.to_owned();
+        if s == "" || s == "0" {
+            self.value = None;
+            self.msg = None;
+        } else {
+            // parsing decimals could be separated here too
+            match s.parse::<U256>() {
+                Ok(x) => {
+                    self.value = Some(x);
+                    self.msg = None;
+                }
+                Err(e) => {
+                    self.msg = Some(format!("{}", e));
+                }
+            }
+        }
+        true
+    }
+}
 
 impl Input<Option<H160>> {
     pub fn address(value: Option<H160>) -> Self {
@@ -101,7 +129,6 @@ impl Input<Option<H160>> {
         true
     }
 }
-
 
 impl Input<H160> {
     pub fn address(value: H160) -> Self {
