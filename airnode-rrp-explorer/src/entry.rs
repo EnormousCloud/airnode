@@ -206,6 +206,134 @@ impl EntryForm {
             }
         }
     }
+
+    fn extended_filtration(&self, ctx: &Context<Self>) -> Html {
+        let link = ctx.link();
+        html! {
+            <div class="extended-filtration">
+                <h3 class="cell-title" style="color: var(--color-grey)">{ "Advanced filtration" }</h3>
+                <div class="dash-row" style="margin-bottom: 20px;">
+                    <div class="dash-col-100">
+                        <label>
+                            <h3 class="cell-title">{ "By Address of Participant: " }</h3>
+                            <input
+                                name="by_address"
+                                style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_address.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByAddress(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByAddress(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_address.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                </div>
+                <div class="dash-row" style="margin-bottom: 20px;">
+                    <div class="dash-col-100">
+                        <label>
+                            <h3 class="cell-title">{ "By Request ID: " }</h3>
+                            <input
+                                name="by_request_id"
+                                style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_request_id.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByRequestId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByRequestId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_request_id.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                </div>
+                <div class="dash-row" style="margin-bottom: 20px;">
+                    <div class="dash-col-100">
+                        <label>
+                            <h3 class="cell-title">{ "By Endpoint ID: " }</h3>
+                            <input
+                                name="by_endpoint_id"
+                                style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_endpoint_id.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByEndpointId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByEndpointId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_endpoint_id.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                </div>
+                <div class="dash-row" style="margin-bottom: 20px;">
+                    <div class="dash-col-100">
+                        <label>
+                            <h3 class="cell-title">{ "By Template ID: " }</h3>
+                            <input
+                                name="by_template_id"
+                                style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_template_id.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByTemplateId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByTemplateId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_template_id.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                </div>
+                <h3 class="cell-title" style="color: var(--color-grey)">{ "Pre-Alpha Protocol Version" }</h3>
+                <div class="dash-row" style="margin-bottom: 20px;">
+                    <div class="dash-col-100">
+                        <label>
+                            <h3 class="cell-title">{ "By Provider ID: " }</h3>
+                            <input
+                                name="by_provider_id"
+                                style="width:100%; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_provider_id.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByProviderId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByProviderId(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_provider_id.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                    <div style="width: 150px; ">
+                        <label>
+                            <h3 class="cell-title">{ "Requester Index: " }</h3>
+                            <input
+                                name="by_requester_index"
+                                style="max-width: 80px; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                placeholder=""
+                                value={self.by_requester_index.s.clone()}
+                                oninput={link.callback(move |e: InputEvent| {
+                                    Msg::UpdateByRequesterIndex(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                                onchange={link.callback(move |e: Event| {
+                                    Msg::UpdateByRequesterIndex(e.target_unchecked_into::<HtmlInputElement>().value())
+                                })}
+                            />
+                            {for self.by_requester_index.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        }
+    }
 }
 
 impl Component for EntryForm {
@@ -358,6 +486,7 @@ impl Component for EntryForm {
                             {for self.batch_size.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
                         </div>
                     </div>
+                    {self.extended_filtration(ctx)}
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="dash-col-3">
                             <div

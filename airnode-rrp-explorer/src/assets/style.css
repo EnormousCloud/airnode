@@ -230,6 +230,7 @@ h3.cell-title  {
   color: var(--color-cell-title);
   font-weight: 500;
   text-transform: uppercase;
+  margin-bottom: 0px;
 }
 
 label.cell-title {
