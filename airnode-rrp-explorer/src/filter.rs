@@ -26,7 +26,7 @@ impl LogFiltration {
             match lee.get_provider_id() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
@@ -36,7 +36,7 @@ impl LogFiltration {
             match lee.get_endpoint_id() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
@@ -46,7 +46,7 @@ impl LogFiltration {
             match lee.get_template_id() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
@@ -56,7 +56,7 @@ impl LogFiltration {
             match lee.get_request_id() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
@@ -66,7 +66,7 @@ impl LogFiltration {
             match lee.get_requester_index() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
@@ -76,7 +76,7 @@ impl LogFiltration {
             match lee.get_airnode() {
                 Some(actual) => {
                     if expected != actual {
-                        return true;
+                        return false;
                     }
                 }
                 None => return false,
