@@ -344,6 +344,27 @@ impl EntryForm {
                             {for self.by_requester_index.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
                         </label>
                     </div>
+                    <h3 class="cell-title" style="color: var(--color-grey)">{ "Beta Protocol Version" }</h3>
+                    <div class="dash-row" style="margin-bottom: 20px;">
+                        <div class="dash-col-100">
+                            <label>
+                                <h3 class="cell-title">{ "By Airnode: " }</h3>
+                                <input
+                                    name="by_airnode"
+                                    style="width:100%; text-align: center; font-family: monospace; font-size: 0.9rem;"
+                                    placeholder=""
+                                    value={self.by_airnode.s.clone()}
+                                    oninput={link.callback(move |e: InputEvent| {
+                                        Msg::UpdateByAirnode(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                    onchange={link.callback(move |e: Event| {
+                                        Msg::UpdateByAirnode(e.target_unchecked_into::<HtmlInputElement>().value())
+                                    })}
+                                />
+                                {for self.by_airnode.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         }
