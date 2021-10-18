@@ -18,7 +18,7 @@ impl LogFiltration {
         if !self.extended {
             return true;
         }
-        let lee = match le.event {
+        let lee = match &le.event {
             Some(x) => x,
             None => return false,
         };

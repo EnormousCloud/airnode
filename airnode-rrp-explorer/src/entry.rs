@@ -4,7 +4,7 @@ use crate::input::Input;
 use gloo::storage::{SessionStorage, Storage};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use web3::types::H160;
+use web3::types::{H160, U256};
 use yew::web_sys::{Event, HtmlInputElement, InputEvent};
 use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
 
@@ -20,11 +20,11 @@ pub struct Entry {
 
     pub extended: bool,
     // provider ID was only in pre-alpha version of the protocol
-    pub by_provider_id: String,
-    pub by_endpoint_id: String,
-    pub by_template_id: String,
-    pub by_request_id: String,
-    pub by_requester_index: String,
+    pub by_provider_id: Option<U256>,
+    pub by_endpoint_id: Option<U256>,
+    pub by_template_id: Option<U256>,
+    pub by_request_id: Option<U256>,
+    pub by_requester_index: Option<U256>,
     // by any address of RRP participants (airnode, sponsor, requester, designatedWallet, clientAddress)
     pub by_address: Option<H160>,
     // by airnode address (beta-version)
@@ -40,11 +40,11 @@ impl Default for Entry {
             max_block: None,
             batch_size: 10000,
             extended: false,
-            by_provider_id: String::from(""),
-            by_endpoint_id: String::from(""),
-            by_template_id: String::from(""),
-            by_request_id: String::from(""),
-            by_requester_index: String::from(""),
+            by_provider_id: None,
+            by_endpoint_id: None,
+            by_template_id: None,
+            by_request_id: None,
+            by_requester_index: None,
             by_address: None,
             by_airnode: None,
         }
@@ -83,11 +83,11 @@ pub struct EntryForm {
     pub max_block: Input<Option<u64>>,
     pub batch_size: Input<u64>,
     pub extended: bool,
-    pub by_provider_id: Input<String>,
-    pub by_endpoint_id: Input<String>,
-    pub by_template_id: Input<String>,
-    pub by_request_id: Input<String>,
-    pub by_requester_index: Input<String>,
+    pub by_provider_id: Input<Option<U256>>,
+    pub by_endpoint_id: Input<Option<U256>>,
+    pub by_template_id: Input<Option<U256>>,
+    pub by_request_id: Input<Option<U256>>,
+    pub by_requester_index: Input<Option<U256>>,
     pub by_address: Input<Option<H160>>,
     pub by_airnode: Input<Option<H160>>,
 }
@@ -117,11 +117,11 @@ impl Default for EntryForm {
             max_block: Input::opt_u64(),
             batch_size: Input::u64(50000),
             extended: false,
-            by_provider_id: Input::str(""),
-            by_endpoint_id: Input::str(""),
-            by_template_id: Input::str(""),
-            by_request_id: Input::str(""),
-            by_requester_index: Input::str(""),
+            by_provider_id: Input::opt_u256(),
+            by_endpoint_id: Input::opt_u256(),
+            by_template_id: Input::opt_u256(),
+            by_request_id: Input::opt_u256(),
+            by_requester_index: Input::opt_u256(),
             by_address: Input::none_address(),
             by_airnode: Input::none_address(),
         }
@@ -392,11 +392,11 @@ impl Component for EntryForm {
                 self.extended = !self.extended;
                 // eventually there is no effect on existing input forms
                 if !self.extended {
-                    self.by_provider_id = Input::str("");
-                    self.by_endpoint_id = Input::str("");
-                    self.by_template_id = Input::str("");
-                    self.by_request_id = Input::str("");
-                    self.by_requester_index = Input::str("");
+                    self.by_provider_id = Input::opt_u256();
+                    self.by_endpoint_id = Input::opt_u256();
+                    self.by_template_id = Input::opt_u256();
+                    self.by_request_id = Input::opt_u256();
+                    self.by_requester_index = Input::opt_u256();
                     self.by_address = Input::none_address();
                     self.by_airnode = Input::none_address();
                 }
@@ -417,23 +417,23 @@ impl Component for EntryForm {
             }
             Msg::UpdateBatchSize(s) => self.batch_size.parse_u64(&s),
             Msg::UpdateByProviderId(s) => {
-                self.by_provider_id = Input::str(&s);
+                self.by_provider_id.parse_opt_u256(&s);
                 true
             }
             Msg::UpdateByTemplateId(s) => {
-                self.by_template_id = Input::str(&s);
+                self.by_template_id.parse_opt_u256(&s);
                 true
             }
             Msg::UpdateByEndpointId(s) => {
-                self.by_endpoint_id = Input::str(&s);
+                self.by_endpoint_id.parse_opt_u256(&s);
                 true
             }
             Msg::UpdateByRequestId(s) => {
-                self.by_request_id = Input::str(&s);
+                self.by_request_id.parse_opt_u256(&s);
                 true
             }
             Msg::UpdateByRequesterIndex(s) => {
-                self.by_requester_index = Input::str(&s);
+                self.by_requester_index.parse_opt_u256(&s);
                 true
             }
             Msg::UpdateByAddress(s) => self.by_address.parse_address(&s),
