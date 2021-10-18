@@ -399,10 +399,10 @@ impl Component for EntryForm {
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="dash-col-100">
                             <label>
-                                <h3 class="cell-title">{ "Network RPC URL:" }</h3>
+                                <h3 class="cell-title">{ "Network RPC URL*:" }</h3>
                                 <input
                                     name="jsonrpc"
-                                    style="width: 480px; text-align: center;"
+                                    style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
                                     placeholder="Network RPC URL"
                                     value={self.network.s.clone()}
                                     oninput={link.callback(move |e: InputEvent| {
@@ -419,7 +419,7 @@ impl Component for EntryForm {
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="dash-col-100">
                             <label>
-                                <h3 class="cell-title">{ "Contract Address: " }</h3>
+                                <h3 class="cell-title">{ "Contract Address*: " }</h3>
                                 <input
                                     name="contract"
                                     style="width: 480px; text-align: center; font-family: monospace; font-size: 0.9rem;"
@@ -438,10 +438,10 @@ impl Component for EntryForm {
                     </div>
                     <div class="dash-row" style="margin-bottom: 20px;">
                         <div class="cell dash-col-3" style="width: 120px;">
-                            <h3 class="cell-title">{ "Min Block:" }</h3>
+                            <h3 class="cell-title">{ "Min Block*:" }</h3>
                             <input
                                 name="min_block"
-                                style="width: 120px; text-align: center"
+                                style="width: 120px; text-align: center; font-family: monospace; font-size: 0.9rem;"
                                 placeholder="0"
                                 value={self.min_block.s.clone()}
                                 oninput={link.callback(move |e: InputEvent| {
@@ -470,10 +470,10 @@ impl Component for EntryForm {
                             {for self.max_block.clone().msg.map(|m| html!{ <div class="input-warn">{m}</div> })}
                         </div>
                         <div class="cell dash-col-3" style="width: 120px;">
-                            <h3 class="cell-title">{ "Batch Size:" }</h3>
+                            <h3 class="cell-title">{ "Batch Size*:" }</h3>
                             <input
                                 name="batch_size"
-                                style="width: 120px; text-align: center"
+                                style="width: 120px; text-align: center; font-family: monospace; font-size: 0.9rem;"
                                 placeholder=""
                                 value={self.batch_size.s.clone()}
                                 oninput={link.callback(move |e: InputEvent| {
