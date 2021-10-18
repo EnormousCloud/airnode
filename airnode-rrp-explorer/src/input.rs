@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
-use web3::types::H160;
+use web3::types::{H160, U256};
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Input<T> {
@@ -52,6 +52,74 @@ impl Input<Option<u64>> {
                 Ok(x) => {
                     self.value = Some(x);
                     self.msg = None;
+                }
+                Err(e) => {
+                    self.msg = Some(format!("{}", e));
+                }
+            }
+        }
+        true
+    }
+}
+
+impl Input<Option<U256>> {
+    pub fn opt_u256() -> Self {
+        Self {
+            s: "".to_owned(),
+            value: None,
+            msg: None,
+        }
+    }
+    pub fn parse_opt_u256(&mut self, s: &str) -> bool {
+        self.s = s.to_owned();
+        if s == "" || s == "0" {
+            self.value = None;
+            self.msg = None;
+        } else {
+            // parsing decimals could be separated here too
+            match s.parse::<U256>() {
+                Ok(x) => {
+                    self.value = Some(x);
+                    self.msg = None;
+                }
+                Err(e) => {
+                    self.msg = Some(format!("{}", e));
+                }
+            }
+        }
+        true
+    }
+}
+
+impl Input<Option<H160>> {
+    pub fn address(value: Option<H160>) -> Self {
+        Self {
+            s: match value {
+                Some(v) => format!("{:x}", v),
+                None => "".to_owned(),
+            },
+            value,
+            msg: None,
+        }
+    }
+    pub fn none_address() -> Self {
+        Self {
+            s: "".to_owned(),
+            value: None,
+            msg: None,
+        }
+    }
+    pub fn parse_address(&mut self, s: &str) -> bool {
+        self.s = s.to_owned();
+        let no0x = s.clone().replace("0x", "");
+        if no0x == "" {
+            self.value = None;
+        } else {
+            match H160::from_str(&no0x) {
+                Ok(x) => {
+                    self.value = Some(x.clone());
+                    self.msg = None;
+                    return true;
                 }
                 Err(e) => {
                     self.msg = Some(format!("{}", e));

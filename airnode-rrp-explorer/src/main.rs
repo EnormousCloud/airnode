@@ -1,5 +1,6 @@
 pub mod components;
 pub mod entry;
+pub mod filter;
 pub mod footer;
 pub mod input;
 pub mod logevent;
@@ -7,6 +8,7 @@ pub mod reader;
 pub mod results;
 
 use crate::entry::Entry;
+use crate::filter::LogFiltration;
 use crate::logevent::LogEvent;
 use crate::reader::{BlockBatch, Scanner};
 use std::rc::Rc;
@@ -35,6 +37,7 @@ enum Mode {
 
 struct App {
     mode: Mode,
+    filtration: LogFiltration,
     chain_id: u64,
     batch: Option<BlockBatch>,
     logs: Vec<LogEvent>,
@@ -50,6 +53,7 @@ impl Component for App {
             chain_id: 0,
             batch: None,
             logs: vec![],
+            filtration: LogFiltration::default(),
         }
     }
 
@@ -75,11 +79,25 @@ impl Component for App {
             }
             Msg::BatchDone(logs) => {
                 for l in logs {
-                    self.logs.push(LogEvent::new(l));
+                    let le = LogEvent::new(l);
+                    if self.filtration.allows(&le) {
+                        self.logs.push(le);
+                    }
                 }
             }
             Msg::Submit(input) => {
                 self.mode = Mode::Connecting;
+                self.filtration = LogFiltration {
+                    extended: input.extended,
+                    by_provider_id: input.by_provider_id.clone(),
+                    by_endpoint_id: input.by_endpoint_id.clone(),
+                    by_template_id: input.by_template_id.clone(),
+                    by_request_id: input.by_request_id.clone(),
+                    by_requester_index: input.by_requester_index.clone(),
+                    by_address: input.by_address.clone(),
+                    by_airnode: input.by_airnode.clone(),
+                };
+
                 let link = ctx.link().clone();
                 ctx.link().send_future(async move {
                     match web3::transports::Http::new(&input.network) {
