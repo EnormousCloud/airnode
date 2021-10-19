@@ -1,4 +1,6 @@
 pub mod args;
+pub mod filter;
+pub mod logevent;
 pub mod reader;
 
 use airnode_events::AirnodeEvent;
