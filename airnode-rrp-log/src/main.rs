@@ -3,8 +3,8 @@ pub mod filter;
 pub mod logevent;
 pub mod reader;
 
-use crate::logevent::LogEvent;
 use crate::filter::LogFiltration;
+use crate::logevent::LogEvent;
 use std::collections::BTreeMap;
 use std::str::FromStr;
 use web3::types::{H160, H256};

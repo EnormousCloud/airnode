@@ -22,6 +22,21 @@ pub struct Args {
     /// API3 secondary voting agent address
     #[structopt(long, env = "ADDR_CONTRACT")]
     pub address_contract: String,
+
+    #[structopt(long, env = "BY_PROVIDER_ID")]
+    pub by_provider_id: Option<String>,
+    #[structopt(long, env = "BY_ENDPOINT_ID")]
+    pub by_endpoint_id: Option<String>,
+    #[structopt(long, env = "BY_TEMPLATE_ID")]
+    pub by_template_id: Option<String>,
+    #[structopt(long, env = "BY_REQUEST_ID")]
+    pub by_request_id: Option<String>,
+    #[structopt(long, env = "BY_ENDPOINTER_INDEX")]
+    pub by_requester_index: Option<u64>,
+    #[structopt(long, env = "BY_ADDRESS")]
+    pub by_address: Option<String>,
+    #[structopt(long, env = "BY_AIRNODE")]
+    pub by_airnode: Option<String>,
 }
 
 pub fn parse() -> anyhow::Result<Args> {

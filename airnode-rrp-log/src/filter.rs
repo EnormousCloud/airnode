@@ -1,4 +1,6 @@
+use crate::args::Args;
 use crate::logevent::LogEvent;
+use std::str::FromStr;
 use web3::types::{H160, U256};
 
 #[derive(Debug, Clone, Default)]
@@ -13,6 +15,38 @@ pub struct LogFiltration {
 }
 
 impl LogFiltration {
+    pub fn new(args: Args) -> anyhow::Result<Self> {
+        let by_provider_id = args
+            .by_provider_id
+            .map(|x| U256::from_str(&x).expect("invalid BY_PROVIDER_ID"));
+        let by_endpoint_id = args
+            .by_endpoint_id
+            .map(|x| U256::from_str(&x).expect("invalid BY_ENDPOINT_ID"));
+        let by_template_id = args
+            .by_template_id
+            .map(|x| U256::from_str(&x).expect("invalid BY_TEMPLATE_ID"));
+        let by_request_id = args
+            .by_request_id
+            .map(|x| U256::from_str(&x).expect("invalid BY_REQUEST_ID"));
+        let by_requester_index = args.by_requester_index.map(|x| U256::from(x));
+        let by_address = args
+            .by_address
+            .map(|x| H160::from_str(&x).expect("invalid BY_ADDRESS"));
+        let by_airnode = args
+            .by_airnode
+            .map(|x| H160::from_str(&x).expect("invalid BY_AIRNODE"));
+
+        Ok(Self {
+            by_provider_id,
+            by_endpoint_id,
+            by_template_id,
+            by_request_id,
+            by_requester_index,
+            by_address,
+            by_airnode,
+        })
+    }
+
     pub fn allows(&self, le: &LogEvent) -> bool {
         let lee = match &le.event {
             Some(x) => x,
