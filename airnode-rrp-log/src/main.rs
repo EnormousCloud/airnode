@@ -4,6 +4,7 @@ pub mod logevent;
 pub mod reader;
 
 use airnode_events::AirnodeEvent;
+use crate::logevent::LogEvent;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -33,27 +34,13 @@ struct Out {
 
 impl reader::EventHandler for State {
     fn on(&mut self, l: web3::types::Log) -> () {
-        let evt = AirnodeEvent::from_log(&l).unwrap();
-        match evt {
-            AirnodeEvent::Unknown => {
-                // info!("{:?}", serde_json::to_string(&l).unwrap());
-                // info!("{:?} {:?} {:?}", l.block_number.unwrap(), l.transaction_hash.unwrap(), evt);
-                self.unknown
-                    .insert(l.topics[0], l.transaction_hash.unwrap());
-            }
-            AirnodeEvent::Unclassified => {
-                // Unclassified: this is what is ok to skip silently
-                // info!("{:?} {:?} {:?}", l.block_number.unwrap(), l.transaction_hash.unwrap(), evt);
-            }
-            _ => {
-                let out = Out {
-                    block: l.block_number.unwrap().as_u64(),
-                    tx: l.transaction_hash.unwrap(),
-                    event: evt,
-                };
-                info!("{}", serde_json::to_string(&out).unwrap());
-            }
+        let hash = l.transaction_hash.unwrap();
+        let topic = l.topics[0];
+        let le = LogEvent::new(l);
+        if le.is_unknown() {
+            self.unknown.insert(topic, hash);
         }
+        info!("{}", serde_json::to_string(&le).unwrap());
     }
 }
 

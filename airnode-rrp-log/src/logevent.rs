@@ -3,7 +3,7 @@ use airnode_events::AirnodeEvent;
 use serde::{Deserialize, Serialize};
 use web3::types::{Log, H256};
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct LogEvent {
     pub block_number: u64,
     pub transaction_hash: H256,
@@ -26,6 +26,17 @@ impl LogEvent {
             transaction_hash,
             event,
             error,
+        }
+    }
+
+    pub fn is_unknown(&self) -> bool {
+        let e = match &self.event {
+            Some(x) => x,
+            _ => return false,
+        };
+        match e {
+            AirnodeEvent::Unknown => true,
+            _ => false,
         }
     }
 }
