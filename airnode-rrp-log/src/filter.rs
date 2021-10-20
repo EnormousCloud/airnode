@@ -3,7 +3,6 @@ use web3::types::{H160, U256};
 
 #[derive(Debug, Clone, Default)]
 pub struct LogFiltration {
-    pub extended: bool,
     pub by_provider_id: Option<U256>,
     pub by_endpoint_id: Option<U256>,
     pub by_template_id: Option<U256>,
@@ -15,9 +14,6 @@ pub struct LogFiltration {
 
 impl LogFiltration {
     pub fn allows(&self, le: &LogEvent) -> bool {
-        if !self.extended {
-            return true;
-        }
         let lee = match &le.event {
             Some(x) => x,
             None => return false,
