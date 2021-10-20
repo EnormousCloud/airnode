@@ -1,6 +1,3 @@
-import React from 'react';
-
-import './header.css';
 import App from '../App';
 
 interface HeaderProps {
