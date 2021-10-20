@@ -3,33 +3,26 @@ pub mod filter;
 pub mod logevent;
 pub mod reader;
 
-use airnode_events::AirnodeEvent;
 use crate::logevent::LogEvent;
-use serde::Serialize;
+use crate::filter::LogFiltration;
 use std::collections::BTreeMap;
 use std::str::FromStr;
-use tracing::info;
 use web3::types::{H160, H256};
 
 #[derive(Debug, Clone)]
 pub struct State {
     // a map of unknown topics
     pub unknown: BTreeMap<H256, H256>,
+    pub filtration: LogFiltration,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
             unknown: BTreeMap::new(),
+            filtration: LogFiltration::default(),
         }
     }
-}
-
-#[derive(Debug, Serialize)]
-struct Out {
-    block: u64,
-    tx: H256,
-    event: AirnodeEvent,
 }
 
 impl reader::EventHandler for State {
@@ -40,7 +33,9 @@ impl reader::EventHandler for State {
         if le.is_unknown() {
             self.unknown.insert(topic, hash);
         }
-        info!("{}", serde_json::to_string(&le).unwrap());
+        if self.filtration.allows(&le) {
+            tracing::info!("{}", serde_json::to_string(&le).unwrap());
+        }
     }
 }
 
