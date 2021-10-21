@@ -13,6 +13,7 @@ const Template: ComponentStory<typeof AirnodeHeader> = (args) => <AirnodeHeader 
 
 export const Default = Template.bind({});
 Default.args = {
+  filter: "",
   onClickSelect: () => {},
 };
 
