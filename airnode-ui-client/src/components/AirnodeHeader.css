@@ -1,0 +1,28 @@
+
+header {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+    background: var(--color-body);
+    box-shadow: 0px 2px 4px #888;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.hd-column {
+    flex: 0;
+    min-width: 200px;
+}
+.hd-column-wide {
+    flex: 1;
+    color: var(--color-text);
+}
+.hd-column-wide strong {
+    color: var(--color-panel-title);
+}
+.chain-row {
+    line-height: 1.33rem;
+    font-size: 0.9rem;
+}
