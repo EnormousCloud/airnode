@@ -3,6 +3,26 @@ use structopt::StructOpt;
 use web3::types::H160;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AirnodeRef {
+    pub chain_id: u64,
+    pub contract_address: H160,
+}
+impl AirnodeRef {
+    pub fn new(chain_id: u64, contract_address: H160) -> Self {
+        Self {
+            chain_id,
+            contract_address,
+        }
+    }
+    pub fn to_string(&self) -> String {
+        format!("{}.{}", self.contract_address, self.chain_id)
+    }
+    pub fn as_bytes(&self) -> Vec<u8> {
+        Vec::from(self.to_string().as_bytes())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AirnodeConfig {
     pub chain_id: u64,
     pub contract_address: H160,
