@@ -1,0 +1,36 @@
+footer {
+  box-shadow: 0px -2px 4px #888;
+  background: var(--color-body);
+  color: var(--color-text);
+}
+
+@media (min-width: 640px) {
+  footer {
+    width: 100vw;
+    position: fixed;
+    bottom: 0;
+  }
+  footer .inner {
+    max-width: 1024px;
+    margin: 10px auto;
+    display: flex;
+    flex-direction: row;
+  }
+}
+
+footer .copyright {
+  text-align: center;
+  width: 100%;
+  font-size: 0.75rem;
+}
+
+footer .source {
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+footer .tool {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  color: var(--color-cell-title);
+}
