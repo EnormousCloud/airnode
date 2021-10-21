@@ -1,6 +1,8 @@
+import { Link } from 'react-router-dom';
+
 interface HeaderProps {
     onClickSelect?: Function
-    filter?: String
+    filter?: string
 }
 
 export const AirnodeHeader = (props: HeaderProps) => (
@@ -25,10 +27,12 @@ export const AirnodeHeader = (props: HeaderProps) => (
                 xPub: &nbsp; 
                 <strong>0x2378832929a2392e3929fc9329292323232acccaa2332320123aa</strong>
             </div>
-            <div className="chain-row">
-                <span className="desktop-only">Filter: &nbsp; </span>
-                <a href="#">All Endpoints, All Templates, All Functions</a>
-            </div>
+            {(typeof props.filter !== 'undefined') ? (
+                <div className="chain-row">
+                    <span className="desktop-only">Filter: &nbsp; </span>
+                    <Link to={props.filter + ''}>All Endpoints, All Templates, All Functions</Link>
+                </div>
+            ): null}
         </div>
     </div>
   </header>
