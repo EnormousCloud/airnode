@@ -52,3 +52,44 @@ impl AirnodeConfig {
     }
 }
 
+#[derive(StructOpt, Debug, Clone, Deserialize)]
+#[serde(tag = "type")]
+pub enum AirnodeConfigCmd {
+    Add {
+        #[structopt(long)]
+        contract_address: H160,
+        #[structopt(long, env = "RPC_ENDPOINT")]
+        rpc_address: String,
+        #[structopt(long)]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[structopt(long, env = "RPC_MIN_BLOCK")]
+        min_block: Option<u64>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[structopt(long, env = "RPC_BATCH_SIZE")]
+        batch_size: Option<u64>,
+    },
+    Get {
+        #[structopt(long)]
+        contract_address: H160,
+        #[structopt(long)]
+        chain_id: u64,
+    },
+    List {},
+    Update {
+        #[structopt(long)]
+        contract_address: H160,
+        #[structopt(long)]
+        chain_id: u64,
+        #[structopt(long, env = "RPC_ENDPOINT")]
+        rpc_address: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        #[structopt(long, env = "RPC_BATCH_SIZE")]
+        batch_size: Option<u64>,
+    },
+    Delete {
+        #[structopt(long)]
+        contract_address: H160,
+        #[structopt(long)]
+        chain_id: u64,
+    },
+}
