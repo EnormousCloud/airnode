@@ -1,18 +1,19 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
 import '../index.css';
+import './AirnodeHeader.css';
 
-import { Header } from './Header';
+import { AirnodeHeader } from './AirnodeHeader';
 
 export default {
   title: 'Example/Header',
-  component: Header,
-} as ComponentMeta<typeof Header>;
+  component: AirnodeHeader,
+} as ComponentMeta<typeof AirnodeHeader>;
 
-const Template: ComponentStory<typeof Header> = (args) => <Header {...args} />;
+const Template: ComponentStory<typeof AirnodeHeader> = (args) => <AirnodeHeader {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {
-  user: {},
+  onClickSelect: () => {},
 };
 
 // export const LoggedOut = Template.bind({});
