@@ -1,0 +1,42 @@
+.desktop-menu {
+  display: none;
+}
+@media (min-width: 699px) {
+  .desktop-menu {
+    display: flex;
+    align-items: flex-end;
+  }
+  .desktop-menu ul {
+    margin: 0;
+    padding: 0;
+    padding-inline-start: 0;
+    width: 100%;
+    padding: 0;
+    display: block;
+  }
+  .desktop-menu ul li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: block;
+  }
+  .desktop-menu a {
+    text-decoration: none;
+    color: var(--color-grey);
+    background: transparent;
+    padding: 0px 14px;
+    display: block;
+    line-height: 42px;
+    font-weight: bold;
+    border-left: 2px transparent solid;
+  }
+  .desktop-menu a.active {
+    color: var(--color-accent);
+    background: var(--color-bk-darken);
+    border-left: 2px var(--color-accent) solid;
+  }
+  .desktop-menu a:hover {
+    color: var(--color-text);
+    border-left: 2px var(--color-accent) solid;
+  }
+}
