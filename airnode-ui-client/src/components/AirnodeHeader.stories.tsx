@@ -1,6 +1,4 @@
 import { ComponentStory, ComponentMeta } from '@storybook/react';
-import '../index.css';
-import './AirnodeHeader.css';
 
 import { AirnodeHeader } from './AirnodeHeader';
 

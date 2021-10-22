@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 
+import './AirnodeHeader.css';
+
 interface HeaderProps {
     onClickSelect?: Function
     filter?: string
