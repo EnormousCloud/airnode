@@ -35,3 +35,18 @@ export const Operations = Template.bind({});
 Operations.args = {
   items: items.map(item => ((item.name === 'Operations') ? { ...item,  active: true } : item)),
 };
+
+export const Endpoints = Template.bind({});
+Endpoints.args = {
+  items: items.map(item => ((item.name === 'Endpoints') ? { ...item,  active: true } : item)),
+};
+
+export const Whitelists = Template.bind({});
+Whitelists.args = {
+  items: items.map(item => ((item.name === 'Whitelists') ? { ...item,  active: true } : item)),
+};
+
+export const Withdrawals = Template.bind({});
+Withdrawals.args = {
+  items: items.map(item => ((item.name === 'Withdrawals') ? { ...item,  active: true } : item)),
+};
