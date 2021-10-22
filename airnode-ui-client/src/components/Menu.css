@@ -40,3 +40,24 @@
     border-left: 2px var(--color-accent) solid;
   }
 }
+
+.menu-panel {
+  flex: 0;
+  width: 180px;
+  min-width: 180px;
+}
+.menu-panel h3 {
+  text-align: left;
+  color: var(--color-panel-title);
+  margin-bottom: 0;
+  padding-bottom: 0;
+  padding-left: 18px;
+}
+.menu-address {
+  text-align: left;
+  font-size: 0.75em;
+  padding-left: 18px;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+  border-bottom: 1px var(--color-panel-border) solid;
+}

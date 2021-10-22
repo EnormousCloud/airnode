@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
 import { Menu, MenuItem } from "./Menu";
+import { MenuPanel } from "./MenuPanel";
 
 export default {
   title: "Example/Menu",
@@ -29,7 +30,9 @@ const items: Array<MenuItem> = [
   },
 ];
 
-const Template: ComponentStory<typeof Menu> = (args) => <Menu {...args} />;
+const Template: ComponentStory<typeof Menu> = (args) => (
+  <MenuPanel><Menu {...args} /></MenuPanel>
+);
 
 export const Operations = Template.bind({});
 Operations.args = {
