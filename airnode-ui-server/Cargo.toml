@@ -10,7 +10,14 @@ anyhow = "1"
 airnode-events = { version = "0.1" }
 chrono = { version = "0.4", features = ["serde"] }
 jsonrpc-core = "18.0"
+rocksdb = { version = "0.17.0", default-features = false }
+rweb = { version = "0.15", features = ["openapi"] }
 serde_json = { version = "1.0" }
 serde = { version = "1.0", default-features = false, features = ["std", "derive"]  }
+structopt = { version = "0.3", default-features = false }
+tracing = { version = "0.1" }
+tracing-futures =  { version = "0.2" }
+tracing-subscriber = { version = "0.2" }
 tokio = { version = "1.0" }
+ureq = { version = "2.3" }
 web3 = { version = "0.17.0" }
