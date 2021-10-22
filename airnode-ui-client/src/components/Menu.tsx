@@ -2,17 +2,36 @@ import { Link } from 'react-router-dom';
 
 import './Menu.css';
 
+// Individual Menu item
+export interface MenuItem {
+    // name of the menu
+    name: string
+    // location reference
+    href: string
+    // count of items
+    counter?: number
+    // whether the item is active
+    active?: boolean
+}
+
 interface MenuProps {
+    // list of items
+    items: Array<MenuItem>
 }
 
 export const Menu = (props: MenuProps) => (
     <div className="desktop-menu">
         <ul>
-            <li><Link to="/">Operations <span className="badge badge-counter">100</span></Link></li>
-            <li><Link to="/" className="active">Endpoints <span className="badge badge-counter">3</span></Link></li>
-            <li><Link to="/">Templates</Link></li>
-            <li><Link to="/">Whitelists</Link></li>
-            <li><Link to="/">Withdrawals</Link></li>
+            {props.items.map((item: MenuItem) => (
+                <li key={item.name}>
+                    <Link to={item.href} className={(item.active) ? 'active': ''}>
+                        {item.name}
+                        {(item.counter && item.counter > 0) ? (
+                            <span className="badge badge-counter">{item.counter}</span>
+                        ) : null}
+                    </Link>
+                </li>
+            ))}
         </ul>
     </div>
 );
