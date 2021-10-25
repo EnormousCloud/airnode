@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { AirnodeHeader } from './AirnodeHeader';
 
 export default {
-  title: 'Example/Header',
+  title: 'Components/Header',
   component: AirnodeHeader,
 } as ComponentMeta<typeof AirnodeHeader>;
 
