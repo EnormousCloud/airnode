@@ -4,7 +4,7 @@ import { Menu, MenuItem } from "./Menu";
 import { MenuPanel } from "./MenuPanel";
 
 export default {
-  title: "Example/Menu",
+  title: "Components/Menu",
   component: Menu,
 } as ComponentMeta<typeof Menu>;
 
