@@ -1,6 +1,8 @@
 use airnode_events::AirnodeEvent;
+use hex_literal::hex;
 use serde::{Deserialize, Serialize};
-use web3::types::{Block, Log, Transaction, TransactionReceipt as Receipt, H160, H256, U256};
+use web3::types::Log;
+use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256, U256};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TxFee {
@@ -14,6 +16,31 @@ pub struct TxFee {
     pub gas_used: Option<U256>,
     /// USD equivalent of the price paid for gas
     pub usd: Option<f64>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OperationRef {
+    /// Block height
+    #[serde(rename = "h")]
+    pub height: u64,
+    /// Transaction Block Index
+    #[serde(rename = "ti")]
+    pub tx_index: u64,
+    /// Transaction Log Index
+    #[serde(rename = "li")]
+    pub log_index: u64,
+}
+
+impl OperationRef {
+    pub fn to_string(&self) -> String {
+        format!(
+            "{:08x}.{:02x}.{:02x}",
+            self.height, self.tx_index, self.log_index
+        )
+    }
+    pub fn as_bytes(&self) -> Vec<u8> {
+        Vec::from(self.to_string().as_bytes())
+    }
 }
 
 /// Operation encapsulates business-level details of the event
@@ -37,8 +64,11 @@ pub struct Operation {
     /// Transaction hash
     #[serde(rename = "tx")]
     pub transaction_hash: H256,
+    /// Transaction Block Index
+    #[serde(rename = "ti")]
+    pub tx_index: u64,
     /// Transaction Log Index
-    #[serde(rename = "i")]
+    #[serde(rename = "li")]
     pub log_index: u64,
     /// Fees that were applied
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -48,5 +78,6 @@ pub struct Operation {
 impl Operation {
     /// create operation record from the log file
     /// by pulling all, related to transaction
-    pub fn new(log: &Log, rpc_address: &str) -> anyhow::Result<Self> {}
+    pub fn new(log: &Log, rpc_address: &str) -> anyhow::Result<Self> {
+    }
 }
