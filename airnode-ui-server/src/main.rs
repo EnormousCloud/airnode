@@ -6,6 +6,7 @@ pub mod nice;
 pub mod storage_config;
 pub mod storage_ops;
 pub mod storage_state;
+pub mod usdprice;
 pub mod web3sync;
 
 fn main() {
