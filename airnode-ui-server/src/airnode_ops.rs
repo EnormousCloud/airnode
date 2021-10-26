@@ -1,5 +1,6 @@
+use crate::web3sync::{batch_fragment, RpcBatchRequest, RpcBatchResponse, RpcSingleRequest};
 use airnode_events::AirnodeEvent;
-use hex_literal::hex;
+use jsonrpc_core::types::params::Params;
 use serde::{Deserialize, Serialize};
 use web3::types::Log;
 use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256, U256};
@@ -57,7 +58,8 @@ pub struct Operation {
     #[serde(rename = "h")]
     pub height: u64,
     /// Who called this transaction
-    pub from: H160,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub from: Option<H160>,
     /// Block hash
     #[serde(rename = "b")]
     pub block: H256,
@@ -79,5 +81,57 @@ impl Operation {
     /// create operation record from the log file
     /// by pulling all, related to transaction
     pub fn new(log: &Log, rpc_address: &str) -> anyhow::Result<Self> {
+        let event = AirnodeEvent::from_log(log)?;
+        let block = log.block_hash.unwrap();
+        let height = log.block_number.unwrap().as_u64();
+        let transaction_hash = log.transaction_hash.unwrap();
+        let log_index = log.transaction_log_index.unwrap().as_u64();
+        let tx_index = log.transaction_index.unwrap().as_u64();
+        let fees = None;
+        let rpc_client = crate::web3sync::EthClient::new(rpc_address);
+        // from getBlockByHash: timestamp
+        // from getTransactionByHash: from
+        // from getReceiptByHash: fees
+        let txh = serde_json::Value::from(format!("{:?}", transaction_hash));
+        let blockh = serde_json::Value::from(format!("{:?}", block));
+        let rq1 = RpcSingleRequest {
+            jsonrpc: "2.0".to_owned(),
+            id: "block".to_owned(),
+            method: "eth_getBlockByHash".to_owned(),
+            params: Params::Array(vec![blockh]),
+        };
+        let rq2 = RpcSingleRequest {
+            jsonrpc: "2.0".to_owned(),
+            id: "hash".to_owned(),
+            method: "eth_getTransactionByHash".to_owned(),
+            params: Params::Array(vec![txh.clone()]),
+        };
+        let rq3 = RpcSingleRequest {
+            jsonrpc: "2.0".to_owned(),
+            id: "receipt".to_owned(),
+            method: "eth_getTransactionReceipt".to_owned(),
+            params: Params::Array(vec![txh.clone()]),
+        };
+        let batch: RpcBatchRequest = vec![rq1, rq2, rq3];
+        let payload = serde_json::to_string(&batch).unwrap();
+        let response: RpcBatchResponse = rpc_client.execute_str(&payload)?;
+
+        let b: Block<H256> = batch_fragment(&response, "block").unwrap();
+        let timestamp = b.timestamp.as_u64();
+        let tx: Transaction = batch_fragment(&response, "hash").unwrap();
+        let from = tx.from.clone();
+        let _receipt: Receipt = batch_fragment(&response, "receipt").unwrap();
+
+        Ok(Self {
+            block,
+            event,
+            height,
+            log_index,
+            timestamp,
+            transaction_hash,
+            tx_index,
+            from,
+            fees,
+        })
     }
 }

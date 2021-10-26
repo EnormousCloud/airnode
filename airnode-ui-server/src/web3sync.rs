@@ -39,15 +39,15 @@ struct RpcErrorResponse {
 }
 
 #[derive(Debug, Clone, Serialize)]
-struct RpcSingleRequest {
+pub struct RpcSingleRequest {
     pub jsonrpc: String,
     pub id: String,
     pub method: String,
     pub params: Params,
 }
 
-type RpcBatchRequest = Vec<RpcSingleRequest>;
-type RpcBatchResponse = Vec<Value>;
+pub type RpcBatchRequest = Vec<RpcSingleRequest>;
+pub type RpcBatchResponse = Vec<Value>;
 
 pub fn batch_fragment<T>(response: &RpcBatchResponse, id_match: &str) -> anyhow::Result<T>
 where
