@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import api3 from './../assets/api3.svg';
 
 import './AirnodeHeader.css';
 
@@ -13,8 +14,18 @@ export const AirnodeHeader = (props: HeaderProps) => (
         <div className="hd-column">
             <button className="select" onClick={() => { 
                 props.onClickSelect && props.onClickSelect() 
+            }} style={{
+                background: '#000',
+                color: 'white',
+                display: 'flex',
+                cursor: 'pointer',
+                paddingTop: 10,
+                paddingBottom: 10,
+                alignItems: 'center',
+                width: 175,
             }}>
-                Select Airnode
+                <img src={api3} alt='API3' style={{ width: '30%', height: '30%'}} />
+                <div style={{ whiteSpace: "nowrap" }}>Choose Airnode</div>
             </button>
         </div>
         <div className="hd-column-wide">
