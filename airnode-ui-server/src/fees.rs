@@ -1,11 +1,8 @@
-use std::collections::HashSet;
-
 use crate::nice;
-use crate::state::OnChainEvent;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use web3::types::TransactionReceipt as Receipt;
-use web3::types::{Transaction, H256, U256};
+use web3::types::{Transaction, U256};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct TxFee {
@@ -49,4 +46,3 @@ impl TxFee {
         pieces.join(", ")
     }
 }
-
