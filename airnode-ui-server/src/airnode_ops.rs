@@ -1,10 +1,11 @@
-use crate::web3sync::{batch_fragment, RpcBatchRequest, RpcBatchResponse, RpcSingleRequest};
 use crate::fees::TxFee;
+use crate::web3sync::{batch_fragment, RpcBatchRequest, RpcBatchResponse, RpcSingleRequest};
 use airnode_events::AirnodeEvent;
+use chrono::NaiveDateTime;
 use jsonrpc_core::types::params::Params;
 use serde::{Deserialize, Serialize};
 use web3::types::Log;
-use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256, U256};
+use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OperationRef {
@@ -108,7 +109,8 @@ impl Operation {
         let tx: Transaction = batch_fragment(&response, "hash").unwrap();
         let from = tx.from.clone();
         let receipt: Receipt = batch_fragment(&response, "receipt").unwrap();
-        let fees = None;
+        let dt = NaiveDateTime::from_timestamp(timestamp as i64, 0);
+        let fees = Some(TxFee::new(&tx, &receipt, dt));
 
         Ok(Self {
             block,
