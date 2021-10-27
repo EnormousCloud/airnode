@@ -37,3 +37,26 @@ export interface Cursor {
     // limit
     from?: string
 }
+
+// Airnode context selection
+export interface AirnodeRef {
+    // EVM chain ID
+    chainId: number
+    // Address of the RRP contract
+    address: string
+    // Provider ID (for pre-alpha airnode). None might be selected
+    providerID?: string
+    // Address of the Airnode (v0.2 and later). None might be selected
+    airnode?: string
+    // Restrict view by the only endpoint
+    by_endpoint?: string
+    // Restrict view by the only endpoint
+    by_template?: string
+    // Restrict view by the only endpoint
+    by_func?: string
+}
+
+// State that is persistent in session storage
+export interface PeristentState {
+    filters: Array<AirnodeRef>
+}
