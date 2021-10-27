@@ -1,9 +1,9 @@
 import { Debounced } from './Debounced';
-import { PeristentState } from './types';
+import { PersistentState } from './types';
 
 const key = "airnodes";
-export const MdmStorage = {
-    get: (state: PeristentState): PeristentState => {
+export const Storage = {
+    get: (state: PersistentState): PersistentState => {
         try {
             const stateStr = sessionStorage.getItem(key);
             return stateStr ? JSON.parse(stateStr) : state;
@@ -11,7 +11,7 @@ export const MdmStorage = {
         }
         return state;
     },
-    set: (val: PeristentState) => {
+    set: (val: PersistentState) => {
         Debounced.start('key', () => {
             sessionStorage.setItem(key, JSON.stringify(val))
         }, 50);

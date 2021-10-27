@@ -57,6 +57,6 @@ export interface AirnodeRef {
 }
 
 // State that is persistent in session storage
-export interface PeristentState {
+export interface PersistentState {
     filters: Array<AirnodeRef>
 }

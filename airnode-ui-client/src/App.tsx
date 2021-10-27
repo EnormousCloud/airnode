@@ -1,41 +1,51 @@
-import { useState } from 'react'
+import { useReducer } from 'react';
+import { Link, HashRouter, Routes, Route, useParams } from 'react-router-dom';
+import { Storage } from './service/Storage';
+import { PersistentState } from './service/types';
+import { Select } from './screens/Select';
+import { MenuItem } from './components/Menu';
 
-function App() {
-  const [count, setCount] = useState(0)
+// import mockState from './fixtures/state';
 
+interface AppState {
+  /// persistent part of the state
+  nodes: PersistentState,
+  /// current menu of the airnode (do not show the menu if absent)
+  airnodeMenu: Array<MenuItem>,
+  /// current menu of the selected rrp contract
+  rrpMenu: Array<MenuItem>,
+}
+
+const defaultState: AppState  = {
+  nodes: {
+    filters: [],
+  },
+  airnodeMenu: [],
+  rrpMenu: [],
+};
+
+function reducer(state: any, action: any) {
+  switch (action.type) {
+    case 'CHANGE_FILTER_FIELD':
+      // return Storage.set({});
+      return state;
+    default:
+      throw new Error();
+  }
+}
+
+
+const App = () => {
+  const [state, dispatch] = useReducer(reducer, defaultState, (s: any) => {
+    return { ...defaultState, selected: Storage.get(s.selected) }
+  });
   return (
-    <div className="App">
-      <header className="App-header">
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<Select />}>
+        </Route>
+      </Routes>
+    </HashRouter>
   )
 }
 
