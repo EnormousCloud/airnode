@@ -2,6 +2,7 @@ pub mod airnode_config;
 pub mod airnode_ops;
 pub mod airnode_state;
 pub mod args;
+pub mod fees;
 pub mod nice;
 pub mod storage_config;
 pub mod storage_ops;

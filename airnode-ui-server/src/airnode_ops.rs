@@ -1,23 +1,10 @@
 use crate::web3sync::{batch_fragment, RpcBatchRequest, RpcBatchResponse, RpcSingleRequest};
+use crate::fees::TxFee;
 use airnode_events::AirnodeEvent;
 use jsonrpc_core::types::params::Params;
 use serde::{Deserialize, Serialize};
 use web3::types::Log;
 use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256, U256};
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct TxFee {
-    /// Gas Price
-    #[serde(rename = "gasPrice")]
-    pub gas_price: U256,
-    /// Gas amount (limit on transaction creation)
-    pub gas: U256,
-    /// Gas that was actually used from receipt
-    #[serde(rename = "gasUsed")]
-    pub gas_used: Option<U256>,
-    /// USD equivalent of the price paid for gas
-    pub usd: Option<f64>,
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OperationRef {
@@ -87,7 +74,7 @@ impl Operation {
         let transaction_hash = log.transaction_hash.unwrap();
         let log_index = log.transaction_log_index.unwrap().as_u64();
         let tx_index = log.transaction_index.unwrap().as_u64();
-        let fees = None;
+
         let rpc_client = crate::web3sync::EthClient::new(rpc_address);
         // from getBlockByHash: timestamp
         // from getTransactionByHash: from
@@ -120,7 +107,8 @@ impl Operation {
         let timestamp = b.timestamp.as_u64();
         let tx: Transaction = batch_fragment(&response, "hash").unwrap();
         let from = tx.from.clone();
-        let _receipt: Receipt = batch_fragment(&response, "receipt").unwrap();
+        let receipt: Receipt = batch_fragment(&response, "receipt").unwrap();
+        let fees = None;
 
         Ok(Self {
             block,
