@@ -1,5 +1,5 @@
 use crate::airnode_config::{AirnodeConfig, AirnodeRef};
-use rocksdb::{Options, DB};
+use rocksdb::{ColumnFamilyDescriptor, Options, DB};
 use std::sync::Arc;
 
 pub trait KVStore {
@@ -19,11 +19,17 @@ impl KVStore for Storage {
     fn init(data_dir: &str) -> Self {
         let mut opts = Options::default();
         opts.create_if_missing(true);
+        opts.create_missing_column_families(true);
         opts.set_use_fsync(false);
         opts.set_keep_log_file_num(1);
+
+        let mut cf_opts = Options::default();
+        cf_opts.create_if_missing(true);
+
         let file_path = format!("{}/nodes", data_dir);
+        let cf = ColumnFamilyDescriptor::new("nodes", cf_opts);
         Self {
-            db: Arc::new(DB::open(&opts, file_path).unwrap()),
+            db: Arc::new(DB::open_cf_descriptors(&opts, file_path, vec![cf]).unwrap()),
         }
     }
 
@@ -73,3 +79,4 @@ impl KVStore for Storage {
         self.db.delete(k.as_bytes()).is_ok()
     }
 }
+
