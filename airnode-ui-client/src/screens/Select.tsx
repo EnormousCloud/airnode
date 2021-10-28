@@ -9,7 +9,7 @@ export const Select = (props: ScreenSelectProps) => {
             <main>
                 <div className="inner" style={{ minHeight: 'auto' }}>
                     <div className="content">
-                        <div className="screen-empty">SELECT AIRNODE</div>
+                        <h1>SELECT AIRNODE</h1>
                     </div>
                 </div>
             </main>
