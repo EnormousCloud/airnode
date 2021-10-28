@@ -2,13 +2,13 @@ import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader } from "./../components/AirnodeHeader";
 
-interface ChangeContractProps {
+interface ChangeFilterProps {
     chainId: number
     contractAddress: string
     menu: MenuPanelProps
 }
 
-export const ChangeContract = (props: ChangeContractProps) => {
+export const ChangeFilter = (props: ChangeFilterProps) => {
     return (
         <div>
             <AirnodeHeader filter="" />
@@ -16,7 +16,7 @@ export const ChangeContract = (props: ChangeContractProps) => {
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
-                        <h1>Change Contract</h1>
+                        <h1>Change Filter</h1>
                     </div>
                 </div>
             </main>
