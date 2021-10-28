@@ -2,10 +2,9 @@ import { useReducer } from 'react';
 import { Link, HashRouter, Routes, Route, useParams } from 'react-router-dom';
 import { Storage } from './service/Storage';
 import { PersistentState } from './service/types';
-import { Select } from './screens/Select';
 import { MenuItem } from './components/Menu';
-
-// import mockState from './fixtures/state';
+import { Select } from './screens/Select';
+import { AddContract } from './screens/AddContract';
 
 interface AppState {
   /// persistent part of the state
@@ -42,8 +41,8 @@ const App = () => {
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Select />}>
-        </Route>
+        <Route path="/" element={<Select />} />
+        <Route path="/add" element={<AddContract />} />
       </Routes>
     </HashRouter>
   )
