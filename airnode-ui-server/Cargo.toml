@@ -7,13 +7,15 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-airnode-events = { version = "0.2" }
+airnode-events = { version = "0.3" }
 cached = { version = "0.26" }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = { version = "0.15" }
+fake = { version = "2.4", features = ["derive", "chrono"] }
 hex-literal = "0.3"
 jsonrpc-core = "18.0"
 rocksdb = { version = "0.17.0", default-features = false }
+rand = "0.8"
 rweb = { version = "0.15", features = ["openapi"] }
 serde_json = { version = "1.0" }
 serde = { version = "1.0", default-features = false, features = ["std", "derive"]  }
