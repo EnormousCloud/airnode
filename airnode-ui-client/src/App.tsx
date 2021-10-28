@@ -1,12 +1,12 @@
 import { useReducer } from 'react';
-import { Link, HashRouter, Routes, Route, useParams } from 'react-router-dom';
+import { HashRouter, Routes, Route, useParams } from 'react-router-dom';
 import { Storage } from './service/Storage';
 import { PersistentState } from './service/types';
-import { MenuPanelProps } from './components/MenuPanel';
 import { mockMenu } from "./fixtures/menu";
 import { Select } from './screens/Select';
 import { AddContract } from './screens/AddContract';
 import { ChangeFilter } from './screens/ChangeFilter';
+import { RrpAirnodes } from './screens/RrpAirnodes';
 
 interface AppState {
   /// persistent part of the state
@@ -45,6 +45,12 @@ const App = () => {
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           return <ChangeFilter {...{ menu, chainId, contractAddress }} />
+        }} />
+        <Route path="/:chainId/:contractAddress/airnodes" element={() => {
+          const params = useParams();
+          const chainId = parseInt(params.chainId as string);
+          const contractAddress = params.contractAddress as string;
+          return <RrpAirnodes {...{ menu, chainId, contractAddress }} />
         }} />
       </Routes>
     </HashRouter>
