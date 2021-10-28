@@ -66,6 +66,29 @@ pub struct Operation {
 }
 
 impl Operation {
+    pub fn as_ref(&self) -> OperationRef {
+        OperationRef {
+            height: self.height,
+            tx_index: self.tx_index,
+            log_index: self.log_index,
+        }
+    }
+
+    pub fn as_bytes(&self) -> Vec<u8> {
+        Vec::from(serde_json::to_string(&self).unwrap().as_bytes())
+    }
+
+    pub fn from_bytes(src: &[u8]) -> anyhow::Result<Self> {
+        let s = match String::from_utf8(src.to_vec()) {
+            Ok(x) => x,
+            Err(e) => return Err(anyhow::Error::new(e)),
+        };
+        Ok(match serde_json::from_str(&s) {
+            Ok(x) => x,
+            Err(e) => return Err(anyhow::Error::msg(e.to_string())),
+        })
+    }
+
     /// create operation record from the log file
     /// by pulling all, related to transaction
     pub fn new(log: &Log, rpc_address: &str) -> anyhow::Result<Self> {
