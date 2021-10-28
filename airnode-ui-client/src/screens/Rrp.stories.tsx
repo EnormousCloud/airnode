@@ -2,6 +2,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { mockMenu } from "../fixtures/menu";
 import { RrpAirnodes } from "./RrpAirnodes";
 import { RrpOperations } from "./RrpOperations";
+import { RrpAdmins } from "./RrpAdmins";
 
 export default {
   title: "Screens/RRP",
@@ -13,7 +14,7 @@ const TemplateAirnodes: ComponentStory<typeof RrpAirnodes> = (args) => (
 );
 
 const rrp = { ...mockMenu.rrp };
-rrp.items = rrp.items.map(item => ({ ...item, active: false }));
+rrp.items = rrp.items.map((item) => ({ ...item, active: false }));
 
 export const Airnodes = TemplateAirnodes.bind({});
 Airnodes.args = {
@@ -21,13 +22,37 @@ Airnodes.args = {
 };
 
 const TemplateOperations: ComponentStory<typeof RrpOperations> = (args) => (
-    <RrpOperations {...args} />
+  <RrpOperations {...args} />
 );
-
-const menuOps = { ...mockMenu };
-menuOps.rrp.items = menuOps.rrp.items.map(item => ((item.name === 'Operations') ? { ...item,  active: true } : item));
 
 export const Operations = TemplateOperations.bind({});
 Operations.args = {
-  menu: { ...menuOps, airnode: null },
+  menu: {
+    airnode: null,
+    rrp: {
+      ...mockMenu.rrp,
+      items: rrp.items.map((item) => ({
+        ...item,
+        active: item.name === "Operations",
+      })),
+    },
+  },
+};
+
+const TemplateAdmins: ComponentStory<typeof RrpAdmins> = (args) => (
+  <RrpAdmins {...args} />
+);
+
+export const Admins = TemplateAdmins.bind({});
+Admins.args = {
+  menu: {
+    airnode: null,
+    rrp: {
+      ...mockMenu.rrp,
+      items: rrp.items.map((item) => ({
+        ...item,
+        active: item.name === "Admins",
+      })),
+    },
+  },
 };

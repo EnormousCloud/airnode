@@ -8,6 +8,7 @@ import { AddContract } from './screens/AddContract';
 import { ChangeFilter } from './screens/ChangeFilter';
 import { RrpAirnodes } from './screens/RrpAirnodes';
 import { RrpOperations } from './screens/RrpOperations';
+import { RrpAdmins } from './screens/RrpAdmins';
 
 interface AppState {
   /// persistent part of the state
@@ -53,11 +54,17 @@ const App = () => {
           const contractAddress = params.contractAddress as string;
           return <RrpAirnodes {...{ menu, chainId, contractAddress }} />
         }} />
-         <Route path="/:chainId/:contractAddress/operations" element={() => {
+        <Route path="/:chainId/:contractAddress/operations" element={() => {
           const params = useParams();
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           return <RrpOperations {...{ menu, chainId, contractAddress }} />
+        }} />
+        <Route path="/:chainId/:contractAddress/admins" element={() => {
+          const params = useParams();
+          const chainId = parseInt(params.chainId as string);
+          const contractAddress = params.contractAddress as string;
+          return <RrpAdmins {...{ menu, chainId, contractAddress }} />
         }} />
       </Routes>
     </HashRouter>
