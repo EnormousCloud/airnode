@@ -7,6 +7,7 @@ import { Select } from './screens/Select';
 import { AddContract } from './screens/AddContract';
 import { ChangeFilter } from './screens/ChangeFilter';
 import { RrpAirnodes } from './screens/RrpAirnodes';
+import { RrpOperations } from './screens/RrpOperations';
 
 interface AppState {
   /// persistent part of the state
@@ -51,6 +52,12 @@ const App = () => {
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           return <RrpAirnodes {...{ menu, chainId, contractAddress }} />
+        }} />
+         <Route path="/:chainId/:contractAddress/operations" element={() => {
+          const params = useParams();
+          const chainId = parseInt(params.chainId as string);
+          const contractAddress = params.contractAddress as string;
+          return <RrpOperations {...{ menu, chainId, contractAddress }} />
         }} />
       </Routes>
     </HashRouter>
