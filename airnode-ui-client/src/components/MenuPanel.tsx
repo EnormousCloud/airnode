@@ -12,8 +12,8 @@ export interface NodeMenuProps {
 }
 
 export interface MenuPanelProps {
-    airnode: NodeMenuProps,
-    rrp: NodeMenuProps,
+    airnode: NodeMenuProps|null
+    rrp: NodeMenuProps|null
 }
 
 const NodeMenu = (props: NodeMenuProps) => {
@@ -31,7 +31,7 @@ const NodeMenu = (props: NodeMenuProps) => {
 
 export const MenuPanel = (props: MenuPanelProps) => (
     <div className="menu-panel">
-        <NodeMenu {...props.airnode} />
-        <NodeMenu {...props.rrp} />
+        {props.airnode ? <NodeMenu {...props.airnode} /> : null }
+        {props.rrp ? <NodeMenu {...props.rrp} /> : null }
     </div>
 );

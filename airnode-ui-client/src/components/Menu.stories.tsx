@@ -1,8 +1,9 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 
 import { Menu } from "./Menu";
+import { NodeMenuProps } from "./MenuPanel";
 import { mockMenu } from "./../fixtures/menu";
-const items = mockMenu.airnode.items;
+const items = (mockMenu.airnode as NodeMenuProps).items;
 
 export default {
   title: "Components/Menu",
