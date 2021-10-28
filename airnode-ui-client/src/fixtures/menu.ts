@@ -47,7 +47,7 @@ const itemsAirnode: Array<MenuItem> = [
       link: "/",
       address: "0x4444...0000",
       items: itemsAirnode,
-      balance: "",
+      balance: "0.002231",
       symbol: "ETH",
     },
     rrp: {
@@ -55,7 +55,7 @@ const itemsAirnode: Array<MenuItem> = [
       link: "/",
       address: "0xeeee...0000",
       items: itemsRRP,
-      balance: "",
+      balance: "0.000000",
       symbol: "ETH",
     },
   };

@@ -3,7 +3,7 @@ import { Select } from "./Select";
 import { mockMenu } from "./../fixtures/menu";
 
 export default {
-  title: "Screens/Select",
+  title: "Screens/Select Airnode",
   component: Select,
 } as ComponentMeta<typeof Select>;
 
