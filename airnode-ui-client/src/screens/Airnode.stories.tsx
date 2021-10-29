@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { mockMenu } from "../fixtures/menu";
 import { AirnodeRequests } from "./AirnodeRequests";
+import { AirnodeOperations } from "./AirnodeOperations";
 
 export default {
   title: "Screens/Airnode",
@@ -29,4 +30,29 @@ Requests.args = {
       })),
     },
   },
+};
+
+
+const TemplateOperations: ComponentStory<typeof AirnodeOperations> = (args) => (
+    <AirnodeOperations {...args} />
+);
+
+export const Operations = TemplateOperations.bind({});
+Operations.args = {
+    menu: {
+        airnode: {
+            ...mockMenu.airnode,
+            items: mockMenu.airnode.items.map((item) => ({
+                ...item,
+                active: item.name === "Operations",
+            })),
+        },
+        rrp: {
+            ...mockMenu.rrp,
+            items: mockMenu.rrp.items.map((item) => ({
+                ...item,
+                active: false,
+            })),
+        },
+    },
 };
