@@ -80,3 +80,49 @@ impl KVStore for Storage {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fake::Fake;
+    use std::env;
+    use web3::types::H160;
+
+    /// converts array of bytes into fixed array of 16 or panic
+    pub fn into20(src: &[u8]) -> [u8; 20] {
+        src.try_into()
+            .expect(format!("slice with incorrect length of {}", src.len()).as_str())
+    }
+
+    fn random_config() -> AirnodeConfig {
+        let contract_address = H160::from(into20(&fake::vec![u8; 20]));
+        AirnodeConfig {
+            chain_id: (8..20).fake::<u64>(),
+            contract_address,
+            rpc_address: "http://localhost:8545/".to_owned(),
+            min_block: None,
+            batch_size: None,
+        }
+    }
+
+    #[test]
+    pub fn it_saves_1_reads_1() {
+        let current_dir = env::current_dir().unwrap();
+        let rnd_name = (8..20).fake::<String>();
+        let data_dir = format!(
+            "{}/_data/{}",
+            current_dir.as_os_str().to_str().unwrap(),
+            rnd_name
+        );
+        let db = Storage::init(&data_dir);
+        let config = random_config();
+        db.save(&config);
+        let nodes = db.list();
+        assert_eq!(nodes.len(), 1);
+        assert_eq!(
+            serde_json::to_string(&nodes[0]).unwrap(),
+            serde_json::to_string(&config).unwrap()
+        );
+        // println!("{}", serde_json::to_string(&nodes[0]).unwrap());
+        rocksdb::DB::destroy(&rocksdb::Options::default(), &data_dir).unwrap();
+    }
+}
