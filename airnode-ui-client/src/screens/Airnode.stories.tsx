@@ -4,6 +4,7 @@ import { AirnodeRequests } from "./AirnodeRequests";
 import { AirnodeOperations } from "./AirnodeOperations";
 import { AirnodeEndpoints } from "./AirnodeEndpoints";
 import { AirnodeWhitelist } from "./AirnodeWhitelist";
+import { AirnodeWithdrawals } from "./AirnodeWithdrawals";
 
 export default {
   title: "Screens/Airnode",
@@ -97,6 +98,31 @@ Whitelist.args = {
             items: mockMenu.airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Whitelist",
+            })),
+        },
+        rrp: {
+            ...mockMenu.rrp,
+            items: mockMenu.rrp.items.map((item) => ({
+                ...item,
+                active: false,
+            })),
+        },
+    },
+};
+
+
+const TemplateWithdrawals: ComponentStory<typeof AirnodeWithdrawals> = (args) => (
+    <AirnodeWithdrawals {...args} />
+);
+
+export const Withdrawals = TemplateWithdrawals.bind({});
+Withdrawals.args = {
+    menu: {
+        airnode: {
+            ...mockMenu.airnode,
+            items: mockMenu.airnode.items.map((item) => ({
+                ...item,
+                active: item.name === "Withdrawals",
             })),
         },
         rrp: {

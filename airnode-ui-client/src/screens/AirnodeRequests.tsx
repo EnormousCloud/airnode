@@ -17,7 +17,7 @@ export const AirnodeRequests = (props: AirnodeRequestsProps) => {
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
-                        <h1>Airnode Requests</h1>
+                        <h1>Requests</h1>
                     </div>
                 </div>
             </main>
