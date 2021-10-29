@@ -2,14 +2,14 @@ import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader } from "./../components/AirnodeHeader";
 
-interface AirnodeWhitelistProps {
+interface AirnodeWithdrawalsProps {
     chainId: number
     contractAddress: string
     provider: string
     menu: MenuPanelProps
 }
 
-export const AirnodeWhitelist = (props: AirnodeWhitelistProps) => {
+export const AirnodeWithdrawals = (props: AirnodeWithdrawalsProps) => {
     return (
         <div>
             <AirnodeHeader filter="" />
@@ -17,7 +17,7 @@ export const AirnodeWhitelist = (props: AirnodeWhitelistProps) => {
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
-                        <h1>Whitelist</h1>
+                        <h1>Withdrawals</h1>
                     </div>
                 </div>
             </main>
