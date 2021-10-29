@@ -4,7 +4,9 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug, Clone)]
 
 pub enum Command {
+    /// Nodes configuration: commands manage Airnode RRP contracts
     Config(AirnodeConfigCmd),
+    /// Start HTTP server
     Server,
 }
 
@@ -12,10 +14,15 @@ pub enum Command {
 #[structopt(name = "", about = "RPC Apps management CLI utility")]
 
 pub struct Args {
-    #[structopt(short, long, env = "DATA_DIR")]
+    /// Directory for persistent data storage
+    #[structopt(short, long, default_value = "./_data", env = "DATA_DIR")]
     pub data_dir: String,
+    /// Command to exectue
     #[structopt(subcommand)]
     pub cmd: Command,
+    /// Net listening address of HTTP server in case of "server" command
+    #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
+    pub listen: String,
 }
 
 pub fn parse() -> anyhow::Result<Args> {
@@ -28,4 +35,3 @@ pub fn parse() -> anyhow::Result<Args> {
     tracing::debug!("{:?}", res);
     Ok(res)
 }
-
