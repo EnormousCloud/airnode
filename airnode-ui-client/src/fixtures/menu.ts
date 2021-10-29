@@ -18,7 +18,7 @@ const itemsAirnode: Array<MenuItem> = [
     href: "/",
   },
   {
-    name: "Whitelists",
+    name: "Whitelist",
     counter: 0,
     href: "/",
   },

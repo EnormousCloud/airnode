@@ -3,6 +3,7 @@ import { mockMenu } from "../fixtures/menu";
 import { AirnodeRequests } from "./AirnodeRequests";
 import { AirnodeOperations } from "./AirnodeOperations";
 import { AirnodeEndpoints } from "./AirnodeEndpoints";
+import { AirnodeWhitelist } from "./AirnodeWhitelist";
 
 export default {
   title: "Screens/Airnode",
@@ -71,6 +72,31 @@ Endpoints.args = {
             items: mockMenu.airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Endpoints",
+            })),
+        },
+        rrp: {
+            ...mockMenu.rrp,
+            items: mockMenu.rrp.items.map((item) => ({
+                ...item,
+                active: false,
+            })),
+        },
+    },
+};
+
+
+const TemplateWhitelist: ComponentStory<typeof AirnodeWhitelist> = (args) => (
+    <AirnodeWhitelist {...args} />
+);
+
+export const Whitelist = TemplateWhitelist.bind({});
+Whitelist.args = {
+    menu: {
+        airnode: {
+            ...mockMenu.airnode,
+            items: mockMenu.airnode.items.map((item) => ({
+                ...item,
+                active: item.name === "Whitelist",
             })),
         },
         rrp: {
