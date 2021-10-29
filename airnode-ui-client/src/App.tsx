@@ -12,6 +12,7 @@ import { RrpAdmins } from './screens/RrpAdmins';
 import { AirnodeRequests } from './screens/AirnodeRequests';
 import { AirnodeOperations } from './screens/AirnodeOperations';
 import { AirnodeEndpoints } from './screens/AirnodeEndpoints';
+import { AirnodeWhitelist } from './screens/AirnodeWhitelist';
 
 interface AppState {
   /// persistent part of the state
@@ -89,6 +90,13 @@ const App = () => {
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
           return <AirnodeEndpoints {...{ menu, chainId, contractAddress, provider }} />
+        }} />
+        <Route path="/:chainId/:contractAddress/nodes/:provider/whitelist" element={() => {
+          const params = useParams();
+          const chainId = parseInt(params.chainId as string);
+          const contractAddress = params.contractAddress as string;
+          const provider = params.provider as string;
+          return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider }} />
         }} />
       </Routes>
     </HashRouter>

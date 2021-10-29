@@ -29,9 +29,9 @@ Endpoints.args = {
   items: items.map(item => ((item.name === 'Endpoints') ? { ...item,  active: true } : item)),
 };
 
-export const Whitelists = Template.bind({});
-Whitelists.args = {
-  items: items.map(item => ((item.name === 'Whitelists') ? { ...item,  active: true } : item)),
+export const Whitelist = Template.bind({});
+Whitelist.args = {
+  items: items.map(item => ((item.name === 'Whitelist') ? { ...item,  active: true } : item)),
 };
 
 export const Withdrawals = Template.bind({});
