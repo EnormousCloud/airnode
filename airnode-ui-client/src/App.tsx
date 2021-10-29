@@ -10,6 +10,7 @@ import { RrpAirnodes } from './screens/RrpAirnodes';
 import { RrpOperations } from './screens/RrpOperations';
 import { RrpAdmins } from './screens/RrpAdmins';
 import { AirnodeRequests } from './screens/AirnodeRequests';
+import { AirnodeOperations } from './screens/AirnodeOperations';
 
 interface AppState {
   /// persistent part of the state
@@ -73,6 +74,13 @@ const App = () => {
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
           return <AirnodeRequests {...{ menu, chainId, contractAddress, provider }} />
+        }} />
+        <Route path="/:chainId/:contractAddress/nodes/:provider/operations" element={() => {
+          const params = useParams();
+          const chainId = parseInt(params.chainId as string);
+          const contractAddress = params.contractAddress as string;
+          const provider = params.provider as string;
+          return <AirnodeOperations {...{ menu, chainId, contractAddress, provider }} />
         }} />
       </Routes>
     </HashRouter>
