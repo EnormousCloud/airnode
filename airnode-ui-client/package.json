@@ -3,10 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "upload-storybook": "cd storybook-static/ && zip storybook-static.zip -r static/ images/ *.txt *.json *.map *.ico *.html *.js && ls -All *.zip && scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no storybook-static.zip root@enormous.cloud:/opt/api3-airnodes-ui-storybook/storybook-static/storybook-static.zip && ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@enormous.cloud 'cd /opt/api3-airnodes-ui-storybook/storybook-static && unzip -qo storybook-static.zip'"
   },
   "dependencies": {
     "react": "^17.0.2",
