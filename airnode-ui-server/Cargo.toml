@@ -16,7 +16,7 @@ hex-literal = "0.3"
 jsonrpc-core = "18.0"
 rocksdb = { version = "0.17.0", default-features = false }
 rand = "0.8"
-rweb = { version = "0.15", features = ["openapi"] }
+warp = { version = "0.3" }
 serde_json = { version = "1.0" }
 serde = { version = "1.0", default-features = false, features = ["std", "derive"]  }
 structopt = { version = "0.3", default-features = false }
