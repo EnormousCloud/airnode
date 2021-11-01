@@ -73,6 +73,12 @@ body > div.inner {
 }
 
 @media (min-width: 799px) {
+  .centered {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 799px) {
   .inner {
     max-width: 1024px;
     display: flex;
@@ -269,4 +275,70 @@ a.icon {
 
 .link-icon {
   fill: var(--color-link);
+}
+
+input {
+  min-width: 50px;
+  background-color: transparent;
+  font-weight: 500;
+  border-width: 0;
+  outline: none;
+  color: var(--color-white);
+  font-size: 1.2rem;
+  line-height: 2rem;
+  border-bottom: 1px var(--color-cell-title) solid;
+}
+
+input:focus {
+  box-shadow: none;
+  color: var(--color-white);
+}
+
+.input-warn {
+  color: var(--color-error);
+  font-size: 0.8rem;
+}
+
+.text-input .full {
+  display: flex;
+  align-items: center;
+}
+
+
+.results-error {
+  max-width: 480px; 
+  margin: 0px auto;
+  text-align: center;
+  color: var(--color-error);
+  font-size: 0.8rem;
+}
+
+.results-status-details,
+.results-status {
+  max-width: 480px;
+  margin: 0px auto; 
+  text-align: center;
+  color: var(--color-accent);
+}
+.results-status-details {
+  font-size: 0.8rem;
+}
+.results-status {
+  padding-top: 30px;
+}
+
+.panel-results {
+  margin: 0px auto;
+  margin-top: 40px;
+  max-width: 960px;
+  padding: 0px 15px;
+}
+.panel-results ol li {
+  font-family: monospace;
+  word-break: break-word;
+  white-space: pre;
+}
+
+.panel-results li.err {
+  color: var(--color-error);
 }

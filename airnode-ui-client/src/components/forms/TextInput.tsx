@@ -43,7 +43,6 @@ const stylePostfix: CSSProperties = {
   fontSize: '1.1rem'
 };
 const styleCheck = {
-  lineHeight: 2,
   marginLeft: 10,
 };
 
