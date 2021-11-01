@@ -13,15 +13,16 @@ const ALink = styled(IE11Component)`
 `;
 
 export const ExternalLink = (props: any) => {
-  const title = props.title || props.children || props.href;
+  const inner = props.children || props.href;
+  const title = props.title;
   const { href, className, style } = props;
   return (
     <ALink
-      {...{ href, className, style }}
+      {...{ title, href, className, style }}
       rel="noopener noreferrer nofollow"
       target="_blank"
     >
-      {title}
+      {inner}
     </ALink>
   );
 };
