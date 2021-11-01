@@ -1,0 +1,72 @@
+.button.link {
+  text-decoration: underline;
+  padding: 0px;
+  text-align: center;
+  color: var(--color-link);
+  display: block;
+  border: none;
+  font-size: 0.9rem;
+}
+.button:disabled {
+  color: var(--color-cell-border);
+  cursor: not-allowed !important;
+}
+
+button,
+input[type="submit"] {
+  background-color: transparent;
+  margin: 0px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-white);
+  border-width: 1px;
+  border-style: solid;
+  outline: none;
+  cursor: pointer;
+  padding: 17px;
+  font-size: 1rem;
+}
+
+button:disabled,
+input[type="submit"]:disabled {
+  color: var(--color-cell-border);
+  cursor: not-allowed !important;
+}
+
+button.primary,
+input.primary[type="submit"] {
+  border-image-source: linear-gradient(270deg, #7ce3cb, #7963b2);
+  border-image-slice: 1;
+}
+
+
+button.primary:disabled,
+input.primary[type="submit"]:disabled {
+  border-image-source: none;
+}
+
+
+.button-wrapper:hover {
+  transform: scale(1.02);
+}
+.button-wrapper .underline.default {
+  margin-top: 4px;
+  height: 1px;
+  width: 100%;
+  background: var(--color-cell-border);
+}
+.button-wrapper .underline.primary {
+  margin-top: 4px;
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(270deg, #7ce3cb, #7963b2);
+}
+
+.button-wrapper .underline.disabled {
+  background: var(--color-cell-border);
+}   
+
+.button-wrapper button {
+  width: 100%;
+}
