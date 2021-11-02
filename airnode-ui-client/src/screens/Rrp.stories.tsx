@@ -1,5 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { mockMenu } from "../fixtures/menu";
+import { mockMenu, airnode, rrp } from "../fixtures/menu";
+
 import { RrpAirnodes } from "./RrpAirnodes";
 import { RrpOperations } from "./RrpOperations";
 import { RrpAdmins } from "./RrpAdmins";
@@ -12,9 +13,6 @@ export default {
 const TemplateAirnodes: ComponentStory<typeof RrpAirnodes> = (args) => (
   <RrpAirnodes {...args} />
 );
-
-const rrp = { ...mockMenu.rrp };
-rrp.items = rrp.items.map((item) => ({ ...item, active: false }));
 
 export const Airnodes = TemplateAirnodes.bind({});
 Airnodes.args = {
@@ -30,7 +28,7 @@ Operations.args = {
   menu: {
     airnode: null,
     rrp: {
-      ...mockMenu.rrp,
+      ...rrp,
       items: rrp.items.map((item) => ({
         ...item,
         active: item.name === "Operations",
@@ -48,7 +46,7 @@ Admins.args = {
   menu: {
     airnode: null,
     rrp: {
-      ...mockMenu.rrp,
+      ...rrp,
       items: rrp.items.map((item) => ({
         ...item,
         active: item.name === "Admins",

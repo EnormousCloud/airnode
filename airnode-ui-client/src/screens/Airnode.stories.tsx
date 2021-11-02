@@ -1,5 +1,5 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { mockMenu } from "../fixtures/menu";
+import { airnode, rrp } from "../fixtures/menu";
 import { AirnodeRequests } from "./AirnodeRequests";
 import { AirnodeOperations } from "./AirnodeOperations";
 import { AirnodeEndpoints } from "./AirnodeEndpoints";
@@ -19,15 +19,15 @@ export const Requests = TemplateRequests.bind({});
 Requests.args = {
   menu: {
     airnode: {
-        ...mockMenu.airnode,
-        items: mockMenu.airnode.items.map((item) => ({
+        ...airnode,
+        items: airnode.items.map((item) => ({
           ...item,
           active: item.name === "Requests",
         })),
     },
     rrp: {
-      ...mockMenu.rrp,
-      items: mockMenu.rrp.items.map((item) => ({
+      ...rrp,
+      items: rrp.items.map((item) => ({
         ...item,
         active: false,
       })),
@@ -44,15 +44,15 @@ export const Operations = TemplateOperations.bind({});
 Operations.args = {
     menu: {
         airnode: {
-            ...mockMenu.airnode,
-            items: mockMenu.airnode.items.map((item) => ({
+            ...airnode,
+            items: airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Operations",
             })),
         },
         rrp: {
-            ...mockMenu.rrp,
-            items: mockMenu.rrp.items.map((item) => ({
+            ...rrp,
+            items: rrp.items.map((item) => ({
                 ...item,
                 active: false,
             })),
@@ -69,15 +69,15 @@ export const Endpoints = TemplateEndpoints.bind({});
 Endpoints.args = {
     menu: {
         airnode: {
-            ...mockMenu.airnode,
-            items: mockMenu.airnode.items.map((item) => ({
+            ...airnode,
+            items: airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Endpoints",
             })),
         },
         rrp: {
-            ...mockMenu.rrp,
-            items: mockMenu.rrp.items.map((item) => ({
+            ...rrp,
+            items: rrp.items.map((item) => ({
                 ...item,
                 active: false,
             })),
@@ -94,15 +94,15 @@ export const Whitelist = TemplateWhitelist.bind({});
 Whitelist.args = {
     menu: {
         airnode: {
-            ...mockMenu.airnode,
-            items: mockMenu.airnode.items.map((item) => ({
+            ...airnode,
+            items: airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Whitelist",
             })),
         },
         rrp: {
-            ...mockMenu.rrp,
-            items: mockMenu.rrp.items.map((item) => ({
+            ...rrp,
+            items: rrp.items.map((item) => ({
                 ...item,
                 active: false,
             })),
@@ -119,15 +119,15 @@ export const Withdrawals = TemplateWithdrawals.bind({});
 Withdrawals.args = {
     menu: {
         airnode: {
-            ...mockMenu.airnode,
-            items: mockMenu.airnode.items.map((item) => ({
+            ...airnode,
+            items: airnode.items.map((item) => ({
                 ...item,
                 active: item.name === "Withdrawals",
             })),
         },
         rrp: {
-            ...mockMenu.rrp,
-            items: mockMenu.rrp.items.map((item) => ({
+            ...rrp,
+            items: rrp.items.map((item) => ({
                 ...item,
                 active: false,
             })),

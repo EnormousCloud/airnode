@@ -1,5 +1,5 @@
 import { MenuItem } from "./../components/Menu";
-import { MenuPanelProps } from "./../components/MenuPanel";
+import { NodeMenuProps, MenuPanelProps } from "./../components/MenuPanel";
 
 const itemsAirnode: Array<MenuItem> = [
   {
@@ -59,3 +59,9 @@ export const mockMenu: MenuPanelProps = {
     symbol: "ETH",
   },
 };
+
+export const airnode = mockMenu.airnode as NodeMenuProps;
+airnode.items = airnode.items?.map((item) => ({ ...item, active: false }));
+
+export const rrp = mockMenu.rrp as NodeMenuProps;
+rrp.items = rrp.items?.map((item) => ({ ...item, active: false }));
