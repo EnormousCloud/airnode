@@ -26,7 +26,7 @@ Add.args = {};
 const TemplateFilter: ComponentStory<typeof ChangeFilter> = (args) => (
   <ChangeFilter {...args} />
 );
-export const Filter = ChangeFilter.bind({});
+export const Filter = TemplateFilter.bind({});
 Filter.args = {
   menu: { ...mockMenu, airnode: null },
 };
