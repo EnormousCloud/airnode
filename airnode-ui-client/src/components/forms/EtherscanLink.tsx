@@ -46,7 +46,7 @@ export interface AddressLinkProps {
 }
 
 const shortened = (x: string) => {
-    if (!x.startsWith('0x')) return x;
+    if (!x.startsWith('0x') || x.length < 10) return x;
     return x.substring(0, 6) + '...' + x.substring(x.length-4);
 }
 
