@@ -1,18 +1,20 @@
 import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
-import { AirnodeHeader } from "./../components/AirnodeHeader";
+import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 
 interface AirnodeOperationsProps {
     chainId: number
     contractAddress: string
     provider: string
+    xPubKey: string
     menu: MenuPanelProps
 }
 
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
+    const { chainId, contractAddress, provider, xPubKey } = props;
     return (
         <div>
-            <AirnodeHeader filter="" />
+            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />

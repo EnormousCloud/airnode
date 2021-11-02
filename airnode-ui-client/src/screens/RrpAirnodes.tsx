@@ -1,6 +1,6 @@
 import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
-import { AirnodeHeader } from "./../components/AirnodeHeader";
+import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 
 interface RrpAirnodesProps {
     chainId: number
@@ -9,9 +9,12 @@ interface RrpAirnodesProps {
 }
 
 export const RrpAirnodes = (props: RrpAirnodesProps) => {
+    const { chainId, contractAddress } = props;
+    const provider = '';
+    const xPubKey = '';
     return (
-        <div>
-            <AirnodeHeader filter="" />
+        <div className="no-airnode">
+            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
