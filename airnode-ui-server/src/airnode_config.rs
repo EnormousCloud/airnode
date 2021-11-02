@@ -74,7 +74,7 @@ pub enum AirnodeConfigCmd {
         #[structopt(long)]
         chain_id: u64,
     },
-    List {},
+    List,
     Update {
         #[structopt(long)]
         contract_address: H160,
