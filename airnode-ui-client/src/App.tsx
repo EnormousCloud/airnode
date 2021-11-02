@@ -76,35 +76,45 @@ const App = () => {
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
-          return <AirnodeRequests {...{ menu, chainId, contractAddress, provider }} />
+          // TODO: pubkey - from the state of the airnode
+          const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+          return <AirnodeRequests {...{ menu, chainId, contractAddress, provider, xPubKey }} />
         }} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/operations" element={() => {
           const params = useParams();
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
-          return <AirnodeOperations {...{ menu, chainId, contractAddress, provider }} />
+          // TODO: pubkey - from the state of the airnode
+          const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+          return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, xPubKey }} />
         }} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/endpoints" element={() => {
           const params = useParams();
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
-          return <AirnodeEndpoints {...{ menu, chainId, contractAddress, provider }} />
+          // TODO: pubkey - from the state of the airnode
+          const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+          return <AirnodeEndpoints {...{ menu, chainId, contractAddress, provider, xPubKey }} />
         }} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/whitelist" element={() => {
           const params = useParams();
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
-          return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider }} />
+          // TODO: pubkey - from the state of the airnode
+          const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+          return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider, xPubKey }} />
         }} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/withdrawals" element={() => {
           const params = useParams();
           const chainId = parseInt(params.chainId as string);
           const contractAddress = params.contractAddress as string;
           const provider = params.provider as string;
-          return <AirnodeWithdrawals {...{ menu, chainId, contractAddress, provider }} />
+          // TODO: pubkey - from the state of the airnode
+          const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+          return <AirnodeWithdrawals {...{ menu, chainId, contractAddress, provider, xPubKey }} />
         }} />
       </Routes>
     </HashRouter>

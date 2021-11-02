@@ -1,23 +1,29 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { AirnodeHeader } from "./AirnodeHeader";
-import { MenuPanel, MenuPanelProps } from "./MenuPanel";
+import { AirnodeHeader, fromParams } from "./AirnodeHeader";
+import { MenuPanel } from "./MenuPanel";
 import { Footer } from "./Footer";
 import { mockMenu } from "./../fixtures/menu";
 
-const Screen = (props: any) => (
-  <div>
-    <AirnodeHeader filter="" />
-    <main>
-      <div className="inner">
-        <MenuPanel {...mockMenu} />
-        <div className="content">
-          <div className="screen-empty">NO ENDPOINTS</div>
+const Screen = (props: any) => {
+  const chainId = 4;
+  const contractAddress = "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec";
+  const provider = "0xac498088cd9396b3e8366d7fb267697e49235b4436971d2e3bea9955744cf3b8";
+  const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+  return (
+    <div>
+      <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey)} />
+      <main>
+        <div className="inner">
+          <MenuPanel {...mockMenu} />
+          <div className="content">
+            <div className="screen-empty">NO ENDPOINTS</div>
+          </div>
         </div>
-      </div>
-    </main>
-    <Footer />
-  </div>
-);
+      </main>
+      <Footer />
+    </div>
+  );
+}
 
 export default {
   title: "Screens/Empty",

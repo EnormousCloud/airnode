@@ -1,6 +1,6 @@
 import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
-import { AirnodeHeader } from "./../components/AirnodeHeader";
+import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 
 interface ChangeContractProps {
     chainId: number
@@ -9,9 +9,10 @@ interface ChangeContractProps {
 }
 
 export const ChangeContract = (props: ChangeContractProps) => {
+    const { chainId, contractAddress } = props;
     return (
-        <div>
-            <AirnodeHeader filter="" />
+        <div className="no-airnode">
+            <AirnodeHeader {...fromParams(chainId, contractAddress )}/>
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
