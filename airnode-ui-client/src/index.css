@@ -57,13 +57,19 @@ ul {
   margin: 0px auto;
 }
 
-main > div.inner,
-body > div.inner {
-  padding-top: 70px;
-  padding-bottom: 0px;
-}
-
 @media (min-width: 799px) {
+
+  main > div.inner,
+  body > div.inner {
+    padding-top: 70px;
+    padding-bottom: 0px;
+  }
+
+
+  .no-airnode main > div.inner {
+    padding-top: 55px;
+  }
+
   main > div.inner,
   body > div.inner {
     padding-top: 75px;
