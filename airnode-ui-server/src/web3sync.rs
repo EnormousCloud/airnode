@@ -134,4 +134,17 @@ impl EthClient {
         let res: RpcSingleResponse<Vec<Log>> = self.execute_str(&payload)?;
         Ok(res.result)
     }
+
+    pub fn get_chain_id(&self) -> anyhow::Result<u64> {
+        let payload = format!("{{\"jsonrpc\":\"2.0\",\"method\":\"net_version\",\"id\":\"1\"}}");
+        let out: RpcSingleResponse<serde_json::Value> = match self.execute_str(&payload) {
+            Ok(x) => x,
+            Err(x) => return Err(anyhow::Error::msg(x.to_string())),
+        };
+        match out.result {
+            serde_json::Value::Number(n) => return Ok(n.as_u64().unwrap()),
+            serde_json::Value::String(s) => return Ok(s.parse().unwrap()),
+            _ => return Err(anyhow::Error::msg("result convertion failure")),
+        }
+    }
 }

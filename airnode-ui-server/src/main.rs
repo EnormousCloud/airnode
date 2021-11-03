@@ -29,9 +29,8 @@ pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> 
             min_block,
             batch_size,
         } => {
-            let config: AirnodeConfig =
-                AirnodeConfig::connect(contract_address, rpc_address, min_block, batch_size)
-                    .unwrap(); // failure if there is no connection
+            let config =
+                AirnodeConfig::new(&rpc_address, contract_address, min_block, batch_size).unwrap(); // failure if there is no connection
             let _ = db_config.save(&config);
         }
         AirnodeConfigCmd::Get {

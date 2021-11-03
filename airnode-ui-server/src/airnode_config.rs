@@ -50,6 +50,26 @@ impl AirnodeConfig {
     pub fn as_bytes(&self) -> Vec<u8> {
         Vec::from(serde_json::to_string(&self).unwrap().as_bytes())
     }
+
+    pub fn new(
+        rpc_address: &str,
+        contract_address: H160,
+        min_block: Option<u64>,
+        batch_size: Option<u64>,
+    ) -> anyhow::Result<Self> {
+        let client = crate::web3sync::EthClient::new(&rpc_address);
+        let chain_id = match client.get_chain_id() {
+            Ok(x) => x,
+            Err(e) => return Err(e),
+        };
+        Ok(Self {
+            chain_id,
+            contract_address,
+            rpc_address: rpc_address.to_string(),
+            min_block,
+            batch_size,
+        })
+    }
 }
 
 #[derive(StructOpt, Debug, Clone, Deserialize)]
