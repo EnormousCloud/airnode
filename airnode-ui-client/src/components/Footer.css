@@ -4,7 +4,30 @@ footer {
   color: var(--color-text);
 }
 
-@media (min-width: 640px) {
+footer .tool {
+  display: block;
+  text-align: center;
+  line-height: 1.33rem;
+  font-size: 0.75rem;
+  color: var(--color-cell-title);
+  white-space: nowrap;
+}
+footer .copyright {
+  width: 40%;
+  text-align: left;
+  font-size: 0.75rem;
+  line-height: 1.33rem;
+}
+footer .source {
+  float: right;
+  width: 50%;
+  text-align: right;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  line-height: 1.33rem;
+}
+
+@media (min-width: 499px) {
   footer {
     width: 100vw;
     position: fixed;
@@ -16,21 +39,32 @@ footer {
     display: flex;
     flex-direction: row;
   }
+
+  footer .tool {
+    line-height: ineherit;
+    text-align: left;
+    line-height: 1rem;
+    padding-left: 10px;
+  }
+
+  footer .copyright {
+    text-align: center;
+    width: 100%;
+    line-height: 1rem;
+  }
+ 
+  footer .source {
+    line-height: 1rem;
+    padding-right: 10px;
+  }
 }
 
-footer .copyright {
-  text-align: center;
-  width: 100%;
-  font-size: 0.75rem;
-}
+@media (min-width: 1024px) {
+  footer .tool {
+    padding-left: 0px;
+  }
 
-footer .source {
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-footer .tool {
-  font-size: 0.75rem;
-  white-space: nowrap;
-  color: var(--color-cell-title);
+  footer .source {
+    padding-right: 0px;
+  }
 }
