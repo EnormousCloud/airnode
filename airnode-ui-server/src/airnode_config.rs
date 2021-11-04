@@ -75,6 +75,7 @@ impl AirnodeConfig {
 #[derive(StructOpt, Debug, Clone, Deserialize)]
 #[serde(tag = "type")]
 pub enum AirnodeConfigCmd {
+    /// Add airnode RRP contract to the configuration
     Add {
         #[structopt(long)]
         contract_address: H160,
@@ -88,13 +89,16 @@ pub enum AirnodeConfigCmd {
         #[structopt(long, env = "RPC_BATCH_SIZE")]
         batch_size: Option<u64>,
     },
+    /// Get airnode RRP contract configuration
     Get {
         #[structopt(long)]
         contract_address: H160,
         #[structopt(long)]
         chain_id: u64,
     },
+    /// Get the list of RRP contracts
     List,
+    /// Update airnode RRP contract configuration
     Update {
         #[structopt(long)]
         contract_address: H160,
@@ -106,6 +110,7 @@ pub enum AirnodeConfigCmd {
         #[structopt(long, env = "RPC_BATCH_SIZE")]
         batch_size: Option<u64>,
     },
+    /// Delete airnode RRP configuration and erase all its history
     Delete {
         #[structopt(long)]
         contract_address: H160,
