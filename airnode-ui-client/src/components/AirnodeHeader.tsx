@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import api3 from "./../assets/api3.svg";
-
+import { getChainName } from '../service/Chain';
 import "./AirnodeHeader.css";
 
 interface HeaderProps {
@@ -20,7 +20,7 @@ export const fromParams = (
   xPubKey: string = '',
 ): HeaderProps => {
   return {
-    chain: chainId + "", // TODO: from function
+    chain: getChainName(chainId),
     contract: contractAddress,
     airnode: provider,
     hrefSelect: "/",
