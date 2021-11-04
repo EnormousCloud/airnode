@@ -1,14 +1,5 @@
 import { ExternalLink } from "./ExternalLink";
-
-export const getChainEtherscan = (chainId: string) => {
-    if (chainId === "0") return "https://etherscan.io";
-    if (chainId === "4") return "https://rinkeby.etherscan.io";
-    if (chainId === "42") return "https://kovan.etherscan.io";
-    if (chainId === "30") return "https://explorer.rsk.co";
-    if (chainId === "31") return "https://explorer.testnet.rsk.co";
-    if (chainId === "100") return "https://blockscout.com/xdai/mainnet";
-    return "";
-};
+import { getChainEtherscan } from './../../service/Chain';
 
 const svg = (
   <svg
