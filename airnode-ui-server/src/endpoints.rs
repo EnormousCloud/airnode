@@ -1,6 +1,8 @@
 use crate::airnode_config::{AirnodeConfig, AirnodeConfigCmd, AirnodeRef};
 use crate::storage_config;
 use crate::storage_config::KVStore;
+use crate::storage_ops;
+use crate::storage_ops::LogIndex;
 use crate::State;
 use std::collections::BTreeMap as Map;
 use std::sync::{Arc, Mutex};
@@ -154,8 +156,30 @@ pub fn routes_nodes(
     h_get.or(h_list).or(h_add).or(h_update).or(h_delete)
 }
 
+pub fn api_operations(data: &storage_ops::Storage) -> Response {
+    let res = data.list();
+    with_status(json(&res), StatusCode::OK).into_response()
+}
+
+pub fn routes_ops(
+    state: Arc<Mutex<State>>,
+) -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    let h_list = warp::path!("api" / "node" / u64 / H160)
+        .and(with_state(state.clone()))
+        .map(
+            |chain_id: u64, contract: H160, state_rc: Arc<Mutex<State>>| {
+                let node = AirnodeRef::new(chain_id, contract);
+                match state_rc.lock().unwrap().db_ops.get(&node) {
+                    Some(db) => api_operations(db),
+                    None => return json_error(StatusCode::NOT_FOUND, "airnode not found"),
+                }
+            },
+        );
+    h_list
+}
+
 pub fn routes(
     state: Arc<Mutex<State>>,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    routes_nodes(state)
+    routes_nodes(state.clone()).or(routes_ops(state))
 }
