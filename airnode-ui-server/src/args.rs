@@ -1,4 +1,5 @@
 use crate::airnode_config::AirnodeConfigCmd;
+use crate::airnode_ops::AirnodeOpsCmd;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug, Clone)]
@@ -6,6 +7,8 @@ use structopt::StructOpt;
 pub enum Command {
     /// Nodes configuration: commands manage Airnode RRP contracts
     Config(AirnodeConfigCmd),
+    /// Nodes configuration: commands manage Airnode RRP contracts
+    Op(AirnodeOpsCmd),
     /// Start HTTP server
     Server,
 }
@@ -23,6 +26,12 @@ pub struct Args {
     /// Net listening address of HTTP server in case of "server" command
     #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
     pub listen: String,
+    /// Contract address of RRP contract in case of "op" command
+    #[structopt(long, default_value = "")]
+    pub contract: String,
+    /// Chain ID of RRP contract in case of "op" command
+    #[structopt(long, default_value = "1")]
+    pub chain_id: u64,
 }
 
 pub fn parse() -> anyhow::Result<Args> {

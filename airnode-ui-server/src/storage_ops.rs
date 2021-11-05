@@ -1,12 +1,13 @@
+use crate::airnode_config::AirnodeRef;
 use crate::airnode_ops::Operation;
 use rocksdb::{ColumnFamilyDescriptor, Options, DB};
 use std::sync::Arc;
-use web3::types::H160;
 
 pub trait LogIndex {
-    fn init(data_dir: &str, airnode: H160) -> Self;
+    fn init(data_dir: &str, airnode: AirnodeRef) -> Self;
     fn append(&self, v: &Operation) -> bool;
     fn list(&self) -> Vec<Operation>;
+    fn truncate(&self) -> bool;
 }
 
 #[derive(Clone)]
@@ -15,7 +16,7 @@ pub struct Storage {
 }
 
 impl LogIndex for Storage {
-    fn init(data_dir: &str, airnode: H160) -> Self {
+    fn init(data_dir: &str, airnode: AirnodeRef) -> Self {
         let mut opts = Options::default();
         opts.create_if_missing(true);
         opts.create_missing_column_families(true);
@@ -25,7 +26,7 @@ impl LogIndex for Storage {
         let mut cf_opts = Options::default();
         cf_opts.create_if_missing(true);
 
-        let file_path = format!("{}/{:?}", data_dir, airnode);
+        let file_path = format!("{}/{:?}", data_dir, airnode.to_string());
         let cf = ColumnFamilyDescriptor::new("log", cf_opts);
         Self {
             db: Arc::new(DB::open_cf_descriptors(&opts, file_path, vec![cf]).unwrap()),
@@ -47,6 +48,16 @@ impl LogIndex for Storage {
             iter.next();
         }
         out
+    }
+
+    fn truncate(&self) -> bool {
+        let mut iter = self.db.raw_iterator();
+        iter.seek_to_first();
+        while iter.valid() {
+            let _ = self.db.delete(iter.key().unwrap());
+            iter.next();
+        }
+        true
     }
 }
 
@@ -95,7 +106,8 @@ mod tests {
         let current_dir = env::current_dir().unwrap();
         let data_dir = format!("{}/_data", current_dir.as_os_str().to_str().unwrap());
         let address: H160 = H160::from(into20(&fake::vec![u8; 20]));
-        let db = Storage::init(&data_dir, address);
+        let airnode = AirnodeRef::new(1, address);
+        let db = Storage::init(&data_dir, airnode);
         let first = random_operation();
         db.append(&first);
         let second = random_operation();
