@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use std::cmp::{Ord, Ordering};
 use structopt::StructOpt;
 use web3::types::H160;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Eq, PartialEq, PartialOrd)]
 pub struct AirnodeRef {
     pub chain_id: u64,
     pub contract_address: H160,
@@ -19,6 +20,12 @@ impl AirnodeRef {
     }
     pub fn as_bytes(&self) -> Vec<u8> {
         Vec::from(self.to_string().as_bytes())
+    }
+}
+
+impl Ord for AirnodeRef {
+    fn cmp(&self, other: &Self) -> Ordering {
+        (self.chain_id, &self.contract_address).cmp(&(other.chain_id, &other.contract_address))
     }
 }
 
