@@ -4,6 +4,7 @@ use airnode_events::AirnodeEvent;
 use chrono::NaiveDateTime;
 use jsonrpc_core::types::params::Params;
 use serde::{Deserialize, Serialize};
+use structopt::StructOpt;
 use web3::types::Log;
 use web3::types::{Block, Transaction, TransactionReceipt as Receipt, H160, H256};
 
@@ -147,4 +148,13 @@ impl Operation {
             fees,
         })
     }
+}
+
+#[derive(StructOpt, Debug, Clone, Deserialize)]
+#[serde(tag = "type")]
+pub enum AirnodeOpsCmd {
+    /// Get the list of operations
+    List,
+    /// Reset operations log
+    Truncate,
 }
