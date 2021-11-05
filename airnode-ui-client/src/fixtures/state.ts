@@ -5,7 +5,7 @@ export default [
     "contract_address": "0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e",
     "balance": {
       "last_value": "0x0",
-      "last_updated": "2022-01-06T15:01:15.225391162Z",
+      "last_updated": "2022-01-09T07:59:03.344428979Z",
       "decimals": 18,
       "symbol": "RBTC"
     },
@@ -3916,127 +3916,11 @@ export default [
   },
   {
     "owned": false,
-    "chain_id": 100,
-    "contract_address": "0x32d228b5d44fd18fefbfd68bfe5a5f3f75c873ae",
-    "balance": {
-      "last_value": "0x0",
-      "last_updated": "2022-01-06T15:01:15.431776401Z",
-      "decimals": 18,
-      "symbol": "xDAI"
-    },
-    "providers": {
-      "0xf082eb9f63235922d4724f66b5da8f23e4a2c94f35b4ae0e0c62b9323a99d449": {
-        "xpubkey": "xpub661MyMwAqRbcGS6ZTHUVbzgEjCd3pYJ6wKD9mRzP1XT5k66amSFQsayAu8nzP58Z1oG71jaNUF7tU9evYEsbBtKzsKQZWwVxymmH1LKMJcH",
-        "requests": {
-          "0xcc0609c734aa96adadc8e8368e11909f44d4e0e87f099517d7a30f569873a9d": {
-            "id": "0xcc0609c734aa96adadc8e8368e11909f44d4e0e87f099517d7a30f569873a9d",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0xeb9b655e84758f4bd08f440b4dd3998df6a6c8332e41e3827aa0b29e3366c41": {
-            "id": "0xeb9b655e84758f4bd08f440b4dd3998df6a6c8332e41e3827aa0b29e3366c41",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x1dabd3417306c81d22bf42986bac700755278c0340e2b7ce5cada4cd2141a1fb": {
-            "id": "0x1dabd3417306c81d22bf42986bac700755278c0340e2b7ce5cada4cd2141a1fb",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x23f97adca1b9019a178de5190744c5e1adbfb727e263b29a9c8d96d5289414c7": {
-            "id": "0x23f97adca1b9019a178de5190744c5e1adbfb727e263b29a9c8d96d5289414c7",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x2c6f1e13659856ec4c66f62dbe3133bed8ac681941f095d283251b6bd729ff28": {
-            "id": "0x2c6f1e13659856ec4c66f62dbe3133bed8ac681941f095d283251b6bd729ff28",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x329b5d382031dcb23f9d656b409db84f57b5c4ee9b0ef306db4c2e770c3ad639": {
-            "id": "0x329b5d382031dcb23f9d656b409db84f57b5c4ee9b0ef306db4c2e770c3ad639",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x4ed7401ff201e989f8912bd1631c8ea75295a366bb7a829fc4b5807bd2b3db82": {
-            "id": "0x4ed7401ff201e989f8912bd1631c8ea75295a366bb7a829fc4b5807bd2b3db82",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x81fc22fa2620c3ad16f30f92d8268285c841bd76e5d5d566f82be76da5709c83": {
-            "id": "0x81fc22fa2620c3ad16f30f92d8268285c841bd76e5d5d566f82be76da5709c83",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x8be1a6c872e052b493c8443717cd0cd4304493c2fd29f7c006bd4dbb81aa1e80": {
-            "id": "0x8be1a6c872e052b493c8443717cd0cd4304493c2fd29f7c006bd4dbb81aa1e80",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0x92d5ce86e0617e466bd0995459db03404c8effb7a23bad7e084bededd413ae0a": {
-            "id": "0x92d5ce86e0617e466bd0995459db03404c8effb7a23bad7e084bededd413ae0a",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0xa2780c2a977f1a4f3301631fe34d0c0e318601bf61f7a6411e3862958ed522ab": {
-            "id": "0xa2780c2a977f1a4f3301631fe34d0c0e318601bf61f7a6411e3862958ed522ab",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0xaab0a06e6ed534224b64b1592b034c626783fc0cb2dd5c4a59b066bb68552b06": {
-            "id": "0xaab0a06e6ed534224b64b1592b034c626783fc0cb2dd5c4a59b066bb68552b06",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0xd53e076c6083df67dffbdc96f3941c5e027a17e88f645372d34f46c6937c2f17": {
-            "id": "0xd53e076c6083df67dffbdc96f3941c5e027a17e88f645372d34f46c6937c2f17",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          },
-          "0xe2435dbc996c7518ca4394e7f7142a2aa9bdd5b41e201732c2a9c419f446921f": {
-            "id": "0xe2435dbc996c7518ca4394e7f7142a2aa9bdd5b41e201732c2a9c419f446921f",
-            "fulfill": 1,
-            "fail": 0,
-            "withdraw": 0
-          }
-        },
-        "endpoints": {
-          "0xcfbb4287751a89c7132f36de279f07486f7270ac3abaa8be17413e27fc80a78d": 1
-        },
-        "templates": {},
-        "functions": {},
-        "whitelisted": [],
-        "operations_num": 15
-      }
-    },
-    "requesters": {
-      "1": "0x1da10cdec44538e1854791b8e71fa4ef05b4b238",
-      "2": "0x1da10cdec44538e1854791b8e71fa4ef05b4b238"
-    },
-    "airnodes": {},
-    "operations_num": 21,
-    "admins": {}
-  },
-  {
-    "owned": false,
     "chain_id": 4,
     "contract_address": "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec",
     "balance": {
       "last_value": "0x0",
-      "last_updated": "2022-01-06T15:01:15.865303004Z",
+      "last_updated": "2022-01-09T07:59:03.572953632Z",
       "decimals": 18,
       "symbol": "ETH"
     },
@@ -6942,6 +6826,165 @@ export default [
     },
     "airnodes": {},
     "operations_num": 585,
+    "admins": {}
+  },
+  {
+    "owned": false,
+    "chain_id": 4,
+    "contract_address": "0xb8e96200a1290907436d928bcc3c7ff18e7f4ae6",
+    "balance": {
+      "last_value": "0x0",
+      "last_updated": "2022-01-09T07:59:07.205734195Z",
+      "decimals": 18,
+      "symbol": "ETH"
+    },
+    "providers": {
+      "0xd96ade5a38df43cbff29da97bac3ca0657a80d36b57ae4122dbb2d7541549dc9": {
+        "xpubkey": "xpub661MyMwAqRbcG3oyo4FGEyg8LtmFGWbgUK5kteysQd3hxHYP4mbkXRkc7p4HtSNowJksBVob7uXyzT9qGX9cmu4KT8ZD3D9SK7HU5PsCVs6",
+        "requests": {
+          "0x2f1863a3eeef4133602b0c05dbade23e142dc34982b34473f4d015bbff817904": {
+            "id": "0x2f1863a3eeef4133602b0c05dbade23e142dc34982b34473f4d015bbff817904",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x3ef73747fb5250f13bd1958de849edeef2ae4af1b1c75e0a2f9e8b92bf0436da": {
+            "id": "0x3ef73747fb5250f13bd1958de849edeef2ae4af1b1c75e0a2f9e8b92bf0436da",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          }
+        },
+        "endpoints": {
+          "0xf466b8feec41e9e50815e0c9dca4db1ff959637e564bb13fefa99e9f9f90453c": 1
+        },
+        "templates": {},
+        "functions": {},
+        "whitelisted": [],
+        "operations_num": 3
+      }
+    },
+    "requesters": {
+      "1": "0x500860f25e113de416fd9dc0038b5d3b6524a85f"
+    },
+    "airnodes": {},
+    "operations_num": 6,
+    "admins": {}
+  },
+  {
+    "owned": false,
+    "chain_id": 100,
+    "contract_address": "0x32d228b5d44fd18fefbfd68bfe5a5f3f75c873ae",
+    "balance": {
+      "last_value": "0x0",
+      "last_updated": "2022-01-09T07:59:13.872298784Z",
+      "decimals": 18,
+      "symbol": "xDAI"
+    },
+    "providers": {
+      "0xf082eb9f63235922d4724f66b5da8f23e4a2c94f35b4ae0e0c62b9323a99d449": {
+        "xpubkey": "xpub661MyMwAqRbcGS6ZTHUVbzgEjCd3pYJ6wKD9mRzP1XT5k66amSFQsayAu8nzP58Z1oG71jaNUF7tU9evYEsbBtKzsKQZWwVxymmH1LKMJcH",
+        "requests": {
+          "0xcc0609c734aa96adadc8e8368e11909f44d4e0e87f099517d7a30f569873a9d": {
+            "id": "0xcc0609c734aa96adadc8e8368e11909f44d4e0e87f099517d7a30f569873a9d",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0xeb9b655e84758f4bd08f440b4dd3998df6a6c8332e41e3827aa0b29e3366c41": {
+            "id": "0xeb9b655e84758f4bd08f440b4dd3998df6a6c8332e41e3827aa0b29e3366c41",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x1dabd3417306c81d22bf42986bac700755278c0340e2b7ce5cada4cd2141a1fb": {
+            "id": "0x1dabd3417306c81d22bf42986bac700755278c0340e2b7ce5cada4cd2141a1fb",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x23f97adca1b9019a178de5190744c5e1adbfb727e263b29a9c8d96d5289414c7": {
+            "id": "0x23f97adca1b9019a178de5190744c5e1adbfb727e263b29a9c8d96d5289414c7",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x2c6f1e13659856ec4c66f62dbe3133bed8ac681941f095d283251b6bd729ff28": {
+            "id": "0x2c6f1e13659856ec4c66f62dbe3133bed8ac681941f095d283251b6bd729ff28",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x329b5d382031dcb23f9d656b409db84f57b5c4ee9b0ef306db4c2e770c3ad639": {
+            "id": "0x329b5d382031dcb23f9d656b409db84f57b5c4ee9b0ef306db4c2e770c3ad639",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x4ed7401ff201e989f8912bd1631c8ea75295a366bb7a829fc4b5807bd2b3db82": {
+            "id": "0x4ed7401ff201e989f8912bd1631c8ea75295a366bb7a829fc4b5807bd2b3db82",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x81fc22fa2620c3ad16f30f92d8268285c841bd76e5d5d566f82be76da5709c83": {
+            "id": "0x81fc22fa2620c3ad16f30f92d8268285c841bd76e5d5d566f82be76da5709c83",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x8be1a6c872e052b493c8443717cd0cd4304493c2fd29f7c006bd4dbb81aa1e80": {
+            "id": "0x8be1a6c872e052b493c8443717cd0cd4304493c2fd29f7c006bd4dbb81aa1e80",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0x92d5ce86e0617e466bd0995459db03404c8effb7a23bad7e084bededd413ae0a": {
+            "id": "0x92d5ce86e0617e466bd0995459db03404c8effb7a23bad7e084bededd413ae0a",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0xa2780c2a977f1a4f3301631fe34d0c0e318601bf61f7a6411e3862958ed522ab": {
+            "id": "0xa2780c2a977f1a4f3301631fe34d0c0e318601bf61f7a6411e3862958ed522ab",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0xaab0a06e6ed534224b64b1592b034c626783fc0cb2dd5c4a59b066bb68552b06": {
+            "id": "0xaab0a06e6ed534224b64b1592b034c626783fc0cb2dd5c4a59b066bb68552b06",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0xd53e076c6083df67dffbdc96f3941c5e027a17e88f645372d34f46c6937c2f17": {
+            "id": "0xd53e076c6083df67dffbdc96f3941c5e027a17e88f645372d34f46c6937c2f17",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          },
+          "0xe2435dbc996c7518ca4394e7f7142a2aa9bdd5b41e201732c2a9c419f446921f": {
+            "id": "0xe2435dbc996c7518ca4394e7f7142a2aa9bdd5b41e201732c2a9c419f446921f",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 0
+          }
+        },
+        "endpoints": {
+          "0xcfbb4287751a89c7132f36de279f07486f7270ac3abaa8be17413e27fc80a78d": 1
+        },
+        "templates": {},
+        "functions": {},
+        "whitelisted": [],
+        "operations_num": 15
+      }
+    },
+    "requesters": {
+      "1": "0x1da10cdec44538e1854791b8e71fa4ef05b4b238",
+      "2": "0x1da10cdec44538e1854791b8e71fa4ef05b4b238"
+    },
+    "airnodes": {},
+    "operations_num": 21,
     "admins": {}
   }
 ]
