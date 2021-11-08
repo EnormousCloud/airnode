@@ -41,6 +41,8 @@ const itemsRRP: Array<MenuItem> = [
   },
 ];
 
+export const noMenu: MenuPanelProps = { airnode: null, rrp: null };
+
 export const mockMenu: MenuPanelProps = {
   airnode: {
     title: "Airnode",
