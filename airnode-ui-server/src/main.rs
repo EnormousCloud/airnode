@@ -142,16 +142,25 @@ pub fn cli_state(
         }
         AirnodeStateCmd::List => {
             let rc_list: Arc<Mutex<Vec<AirnodeState>>> = Arc::new(Mutex::new(vec![]));
+            let dir: Arc<String> = Arc::new(data_dir.to_string());
+            let mut threads = vec![];
             for config in db_config.list() {
-                let node = AirnodeRef::new(config.chain_id, config.contract_address);
-                let mut state: AirnodeState = AirnodeState::new(&node);
-                let db_ops = storage_ops::Storage::init(&data_dir, node);
-                for op in db_ops.list() {
-                    // state.handle_op(&op);
-                }
                 let rcc = rc_list.clone();
-                let mut rc = rcc.lock().unwrap();
-                rc.push(state.clone());
+                let data_path = dir.clone();
+                threads.push(std::thread::spawn(move || {
+                    let node = AirnodeRef::new(config.chain_id, config.contract_address);
+                    let mut state: AirnodeState = AirnodeState::new(&node);
+                    let db_ops = storage_ops::Storage::init(&data_path, node);
+                    for op in db_ops.list() {
+                        // state.handle_op(&op);
+                    }
+                    let mut rc = rcc.lock().unwrap();
+                    rc.push(state.clone());
+                }));
+            }
+            // wait for result
+            for t in threads {
+                let _ = t.join();
             }
             let rcc = rc_list.clone();
             let rc = rcc.lock().unwrap();
