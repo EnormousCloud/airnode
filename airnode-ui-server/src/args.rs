@@ -14,7 +14,10 @@ pub enum Command {
 }
 
 #[derive(StructOpt, Debug, Clone)]
-#[structopt(name = "", about = "RPC Apps management CLI utility")]
+#[structopt(
+    name = "airnode-ui-server",
+    about = "Airnode UI server and management utility"
+)]
 
 pub struct Args {
     /// Directory for persistent data storage
