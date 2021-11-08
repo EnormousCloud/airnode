@@ -13,6 +13,7 @@ pub mod web3sync;
 
 use crate::airnode_config::{AirnodeConfig, AirnodeConfigCmd, AirnodeRef};
 use crate::airnode_ops::AirnodeOpsCmd;
+use crate::airnode_state::{AirnodeState, AirnodeStateCmd};
 use crate::args::Command;
 use crate::storage_config::KVStore;
 use crate::storage_ops::LogIndex;
@@ -25,6 +26,7 @@ use web3::types::H160;
 pub struct State {
     pub db_config: storage_config::Storage,
     pub db_ops: Map<AirnodeRef, storage_ops::Storage>,
+    pub db_state: Map<AirnodeRef, AirnodeState>,
 }
 
 pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> anyhow::Result<()> {
@@ -120,6 +122,45 @@ pub fn cli_op(db_ops: storage_ops::Storage, cmd: AirnodeOpsCmd) -> anyhow::Resul
     Ok(())
 }
 
+pub fn cli_state(
+    db_config: storage_config::Storage,
+    chain_id: u64,
+    contract_str: &str,
+    data_dir: &str,
+    cmd: AirnodeStateCmd,
+) -> anyhow::Result<()> {
+    match cmd {
+        AirnodeStateCmd::Get => {
+            let contract = H160::from_str(&contract_str).expect("Contract address is required");
+            let node = AirnodeRef::new(chain_id, contract);
+            let mut state: AirnodeState = AirnodeState::new(&node);
+            let db_ops = storage_ops::Storage::init(&data_dir, node);
+            for op in db_ops.list() {
+                // state.handle_op(&op);
+            }
+            println!("{}", serde_json::to_string(&state).unwrap());
+        }
+        AirnodeStateCmd::List => {
+            let rc_list: Arc<Mutex<Vec<AirnodeState>>> = Arc::new(Mutex::new(vec![]));
+            for config in db_config.list() {
+                let node = AirnodeRef::new(config.chain_id, config.contract_address);
+                let mut state: AirnodeState = AirnodeState::new(&node);
+                let db_ops = storage_ops::Storage::init(&data_dir, node);
+                for op in db_ops.list() {
+                    // state.handle_op(&op);
+                }
+                let rcc = rc_list.clone();
+                let mut rc = rcc.lock().unwrap();
+                rc.push(state.clone());
+            }
+            let rcc = rc_list.clone();
+            let rc = rcc.lock().unwrap();
+            println!("{}", serde_json::to_string(rc.as_slice()).unwrap());
+        }
+    }
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = match args::parse() {
@@ -140,10 +181,26 @@ async fn main() -> anyhow::Result<()> {
             let db_ops = storage_ops::Storage::init(&args.data_dir, node);
             return cli_op(db_ops, cmd);
         }
+        Command::State(cmd) => {
+            return cli_state(
+                db_config,
+                args.chain_id,
+                &args.contract,
+                &args.data_dir,
+                cmd,
+            );
+        }
         Command::Server => {
+            let mut db_ops = Map::new();
+            let mut db_state = Map::new();
+            for node in db_config.list() {
+                let key = AirnodeRef::new(node.chain_id, node.contract_address);
+                db_ops.insert(key.clone(), storage_ops::Storage::init(&args.data_dir, key));
+            }
             let state = Arc::new(Mutex::new(State {
                 db_config,
-                db_ops: Map::new(),
+                db_ops,
+                db_state,
             }));
             let socket_addr: std::net::SocketAddr =
                 args.listen.parse().expect("invalid bind to listen");

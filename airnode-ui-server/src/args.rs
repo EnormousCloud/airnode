@@ -1,15 +1,18 @@
 use crate::airnode_config::AirnodeConfigCmd;
 use crate::airnode_ops::AirnodeOpsCmd;
+use crate::airnode_state::AirnodeStateCmd;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug, Clone)]
 
 pub enum Command {
-    /// Nodes configuration: commands manage Airnode RRP contracts
+    /// commands to manage Airnode RRP contracts
     Config(AirnodeConfigCmd),
-    /// Nodes configuration: commands manage Airnode RRP contracts
+    /// commands to manage operations
     Op(AirnodeOpsCmd),
-    /// Start HTTP server
+    /// commands to read and return state of the airnode
+    State(AirnodeStateCmd),
+    /// start HTTP server
     Server,
 }
 
@@ -29,10 +32,10 @@ pub struct Args {
     /// Net listening address of HTTP server in case of "server" command
     #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
     pub listen: String,
-    /// Contract address of RRP contract in case of "op" command
+    /// Contract address of RRP contract in case of "op" or "state" command
     #[structopt(long, default_value = "")]
     pub contract: String,
-    /// Chain ID of RRP contract in case of "op" command
+    /// Chain ID of RRP contract in case of "op" or "state" command
     #[structopt(long, default_value = "1")]
     pub chain_id: u64,
 }

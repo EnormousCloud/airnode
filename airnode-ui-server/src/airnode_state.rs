@@ -1,7 +1,9 @@
+use crate::airnode_config::AirnodeRef;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap as Map;
+use structopt::StructOpt;
 use web3::types::{H160, H256, U256};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -40,7 +42,7 @@ pub struct SyncState {
     pub last_updated: Option<DateTime<Utc>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AirnodeState {
     /// whether this airnode is owned
     /// by the private key/seed in the contaner environment
@@ -73,4 +75,48 @@ pub struct AirnodeState {
     pub admins: Vec<H160>,
     /// number of operations that happened
     pub operations_num: u32,
+}
+
+impl AirnodeState {
+    pub fn new(node: &AirnodeRef) -> Self {
+        Self::default()
+        //     ... Self::default()
+        // /// address of the airnode
+        // pub address: H160,
+        // /// details about chain syncing
+        // #[serde(skip_serializing_if = "Option::is_none")]
+        // pub sync: Option<SyncState>,
+        // /// extended public key of the Airnode
+        // #[serde(skip_serializing_if = "Option::is_none")]
+        // pub xpubkey: Option<String>,
+        // /// current balance details
+        // #[serde(skip_serializing_if = "Option::is_none")]
+        // pub balance: Option<Balance>,
+        // /// sponsor of this airnode
+        // #[serde(skip_serializing_if = "Option::is_none")]
+        // pub sponsor: Option<H160>,
+        // /// map of requests that were actually took place
+        // pub requests: Map<H256, u32>,
+        // /// map of endpoints that were actually used
+        // pub endpoints: Map<H256, u32>,
+        // /// map of templates that were actually used
+        // pub templates: Map<H256, u32>,
+        // /// map of functions that were actually used
+        // pub functions: Map<H256, u32>,
+        // /// list of whitelist addresses
+        // pub whitelisted: Vec<H160>,
+        // /// list of admins of this airnode
+        // pub admins: Vec<H160>,
+        // /// number of operations that happened
+        // pub operations_num: u32,
+    }
+}
+
+#[derive(StructOpt, Debug, Clone, Deserialize)]
+#[serde(tag = "type")]
+pub enum AirnodeStateCmd {
+    /// List states for all nodes
+    List,
+    /// Get the state of the single node
+    Get,
 }
