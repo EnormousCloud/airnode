@@ -6,6 +6,16 @@ export interface DataStatus {
     errorMessage: string
 }
 
+export const DataIsLoading: DataStatus = {
+    isLoading: true,
+    errorMessage: '',
+};
+
+export const DataIsReady: DataStatus = {
+    isLoading: false,
+    errorMessage: '',
+};
+
 // additional information about paging
 export interface More {
     // token from which the request should start
