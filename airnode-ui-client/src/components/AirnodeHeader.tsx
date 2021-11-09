@@ -29,6 +29,17 @@ export const fromParams = (
   };
 };
 
+export const noParams = (): HeaderProps => {
+  return {
+    chain: '',
+    contract: '',
+    airnode: '',
+    hrefSelect: "/",
+    xPubKey: '',
+    filter: "*",  // TODO: from the session storage
+  };
+}
+
 const shortened = (x: string) => {
   if (!x || !x.startsWith("0x") || x.length < 10) return x;
   return x.substring(0, 4 + 2) + "..." + x.substring(x.length - 4);
@@ -74,47 +85,49 @@ export const AirnodeHeader = (props: HeaderProps) => {
             </span>
           </Link>
         </div>
-        <div className="hd-column-wide">
-          <div className="chain-row">
-            <strong title="EVM Chain" className="chain-name">
-              {props.chain}
-            </strong>
-            <span className="sep">&nbsp; / &nbsp;</span>
-            <strong title="RRP Contract" className="chain-rrp-contract">
-              {shortened(props.contract)}
-            </strong>
-            {props.airnode
-              ? [
-                  <span className="sep">&nbsp; / &nbsp; </span>,
-                  <strong title="Airnode Address" className="chain-airnode">
-                    {shortened(props.airnode)}
-                  </strong>,
-                ]
-              : null}
+        {props.chain ? (
+          <div className="hd-column-wide">
+            <div className="chain-row">
+              <strong title="EVM Chain" className="chain-name">
+                {props.chain}
+              </strong>
+              <span className="sep">&nbsp; / &nbsp;</span>
+              <strong title="RRP Contract" className="chain-rrp-contract">
+                {shortened(props.contract)}
+              </strong>
+              {props.airnode
+                ? [
+                    <span className="sep">&nbsp; / &nbsp; </span>,
+                    <strong title="Airnode Address" className="chain-airnode">
+                      {shortened(props.airnode)}
+                    </strong>,
+                  ]
+                : null}
+            </div>
+            {xPubKey ? (
+              <div className="chain-row">
+                <span className="desktop-only xpub">
+                  {shortXpub(xPubKey, 20)}
+                </span>
+                <span className="mobile-only xpub">{shortXpub(xPubKey, 12)}</span>
+              </div>
+            ) : null}
+            {typeof props.filter !== "undefined" ? (
+              <div className="chain-row">
+                {props.filterName ? (
+                  [
+                    <span className="desktop-only">Filter: &nbsp; </span>,
+                    <Link to={props.filter + ""}>{props.filterName}</Link>,
+                  ]
+                ) : (
+                  <Link to={props.filter + ""}>
+                    All Endpoints, All Templates, All Functions
+                  </Link>
+                )}
+              </div>
+            ) : null}
           </div>
-          {xPubKey ? (
-            <div className="chain-row">
-              <span className="desktop-only xpub">
-                {shortXpub(xPubKey, 20)}
-              </span>
-              <span className="mobile-only xpub">{shortXpub(xPubKey, 12)}</span>
-            </div>
-          ) : null}
-          {typeof props.filter !== "undefined" ? (
-            <div className="chain-row">
-              {props.filterName ? (
-                [
-                  <span className="desktop-only">Filter: &nbsp; </span>,
-                  <Link to={props.filter + ""}>{props.filterName}</Link>,
-                ]
-              ) : (
-                <Link to={props.filter + ""}>
-                  All Endpoints, All Templates, All Functions
-                </Link>
-              )}
-            </div>
-          ) : null}
-        </div>
+        ): null}
       </div>
     </header>
   );
