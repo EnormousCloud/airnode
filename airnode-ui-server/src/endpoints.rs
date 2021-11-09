@@ -3,7 +3,7 @@ use crate::storage_config;
 use crate::storage_config::KVStore;
 use crate::storage_ops;
 use crate::storage_ops::LogIndex;
-use crate::State;
+use crate::AppState;
 use std::collections::BTreeMap as Map;
 use std::sync::{Arc, Mutex};
 use warp::http::StatusCode;
@@ -85,8 +85,8 @@ pub fn api_node_delete(
 }
 
 fn with_state(
-    state: Arc<Mutex<State>>,
-) -> impl Filter<Extract = (Arc<Mutex<State>>,), Error = std::convert::Infallible> + Clone {
+    state: Arc<Mutex<AppState>>,
+) -> impl Filter<Extract = (Arc<Mutex<AppState>>,), Error = std::convert::Infallible> + Clone {
     warp::any().map(move || state.clone())
 }
 
@@ -98,17 +98,19 @@ fn with_json_config() -> impl Filter<Extract = (AirnodeConfigCmd,), Error = warp
 }
 
 pub fn routes_nodes(
-    state: Arc<Mutex<State>>,
+    state: Arc<Mutex<AppState>>,
 ) -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    let h_get = warp::path!("api" / "node" / u64 / H160)
+    let h_get = warp::path!("api" / "nodes" / u64 / H160)
         .and(with_state(state.clone()))
-        .map(|chain_id: u64, addr: H160, state_rc: Arc<Mutex<State>>| {
-            let db = &state_rc.lock().unwrap().db_config;
-            api_node(db, chain_id, addr)
-        });
+        .map(
+            |chain_id: u64, addr: H160, state_rc: Arc<Mutex<AppState>>| {
+                let db = &state_rc.lock().unwrap().db_config;
+                api_node(db, chain_id, addr)
+            },
+        );
     let h_list = warp::path!("api" / "nodes")
         .and(with_state(state.clone()))
-        .map(|state_rc: Arc<Mutex<State>>| {
+        .map(|state_rc: Arc<Mutex<AppState>>| {
             let db = &state_rc.lock().unwrap().db_config;
             api_nodes(&db)
         });
@@ -116,7 +118,7 @@ pub fn routes_nodes(
         .and(warp::post())
         .and(with_json_config())
         .and(with_state(state.clone()))
-        .map(|cmd: AirnodeConfigCmd, state_rc: Arc<Mutex<State>>| {
+        .map(|cmd: AirnodeConfigCmd, state_rc: Arc<Mutex<AppState>>| {
             let db = &state_rc.lock().unwrap().db_config;
             match cmd {
                 AirnodeConfigCmd::Add {
@@ -132,7 +134,7 @@ pub fn routes_nodes(
         .and(warp::put())
         .and(with_json_config())
         .and(with_state(state.clone()))
-        .map(|cmd: AirnodeConfigCmd, state_rc: Arc<Mutex<State>>| {
+        .map(|cmd: AirnodeConfigCmd, state_rc: Arc<Mutex<AppState>>| {
             let db = &state_rc.lock().unwrap().db_config;
             match cmd {
                 AirnodeConfigCmd::Update {
@@ -148,7 +150,7 @@ pub fn routes_nodes(
         .and(warp::delete())
         .and(with_state(state.clone()))
         .map(
-            |chain_id: u64, contract_address: H160, state_rc: Arc<Mutex<State>>| {
+            |chain_id: u64, contract_address: H160, state_rc: Arc<Mutex<AppState>>| {
                 let db = &state_rc.lock().unwrap().db_config;
                 return api_node_delete(&db, contract_address, chain_id);
             },
@@ -162,12 +164,12 @@ pub fn api_operations(data: &storage_ops::Storage) -> Response {
 }
 
 pub fn routes_ops(
-    state: Arc<Mutex<State>>,
+    state: Arc<Mutex<AppState>>,
 ) -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
     let h_list = warp::path!("api" / "node" / u64 / H160)
         .and(with_state(state.clone()))
         .map(
-            |chain_id: u64, contract: H160, state_rc: Arc<Mutex<State>>| {
+            |chain_id: u64, contract: H160, state_rc: Arc<Mutex<AppState>>| {
                 let node = AirnodeRef::new(chain_id, contract);
                 match state_rc.lock().unwrap().db_ops.get(&node) {
                     Some(db) => api_operations(db),
@@ -179,7 +181,7 @@ pub fn routes_ops(
 }
 
 pub fn routes(
-    state: Arc<Mutex<State>>,
+    state: Arc<Mutex<AppState>>,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
     routes_nodes(state.clone()).or(routes_ops(state))
 }

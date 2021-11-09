@@ -23,10 +23,10 @@ use std::sync::{Arc, Mutex};
 use web3::types::H160;
 
 #[derive(Clone)]
-pub struct State {
+pub struct AppState {
     pub db_config: storage_config::Storage,
     pub db_ops: Map<AirnodeRef, storage_ops::Storage>,
-    pub db_state: Map<AirnodeRef, AirnodeState>,
+    pub states: Map<AirnodeRef, AirnodeState>,
 }
 
 pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> anyhow::Result<()> {
@@ -200,20 +200,44 @@ async fn main() -> anyhow::Result<()> {
             );
         }
         Command::Server => {
+            // connecting to databases of operations:
             let mut db_ops = Map::new();
-            let mut db_state = Map::new();
             for node in db_config.list() {
                 let key = AirnodeRef::new(node.chain_id, node.contract_address);
                 db_ops.insert(key.clone(), storage_ops::Storage::init(&args.data_dir, key));
             }
-            let state = Arc::new(Mutex::new(State {
-                db_config,
-                db_ops,
-                db_state,
+            // starting threads to
+            let app_state = Arc::new(Mutex::new(AppState {
+                db_config: db_config.clone(),
+                db_ops: db_ops.clone(),
+                states: Map::new(),
             }));
+            let mut threads = vec![];
+            for config in db_config.list() {
+                let rcc = app_state.clone();
+                threads.push(std::thread::spawn(move || {
+                    let node = AirnodeRef::new(config.chain_id, config.contract_address);
+                    let mut state: AirnodeState = {
+                        let rc = rcc.lock().unwrap();
+                        rc.states.get(&node).unwrap().clone()
+                    };
+                    let ops = {
+                        let rc = rcc.lock().unwrap();
+                        rc.db_ops.get(&node).unwrap().list()
+                    };
+                    for op in ops {
+                        // state.handle_op(&op);
+                    }
+                    let mut rc = rcc.lock().unwrap();
+                    rc.states.insert(node.clone(), state.clone());
+                }));
+            }
+
             let socket_addr: std::net::SocketAddr =
                 args.listen.parse().expect("invalid bind to listen");
-            warp::serve(endpoints::routes(state)).run(socket_addr).await;
+            warp::serve(endpoints::routes(app_state))
+                .run(socket_addr)
+                .await;
         }
     }
 
