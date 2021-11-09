@@ -53,9 +53,19 @@ export interface AirnodeRef {
     // EVM chain ID
     chainId: number
     // Address of the RRP contract
-    address: string
+    contractAddress: string
     // Provider ID (for pre-alpha airnode). None might be selected
-    providerID?: string
+    provider?: string
+}
+
+// Airnode context selection
+export interface AirnodeFullRef {
+    // EVM chain ID
+    chainId: number
+    // Address of the RRP contract
+    contractAddress: string
+    // Provider ID (for pre-alpha airnode). None might be selected
+    provider?: string
     // Address of the Airnode (v0.2 and later). None might be selected
     airnode?: string
     // Restrict view by the only endpoint

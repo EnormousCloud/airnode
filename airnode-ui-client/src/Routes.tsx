@@ -39,6 +39,7 @@ RRP.Select = () => {
   const { nodeStatus } = state;
   if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  return <pre>{JSON.stringify(state, null, 2)}</pre>
   return <Select />
 }
 
