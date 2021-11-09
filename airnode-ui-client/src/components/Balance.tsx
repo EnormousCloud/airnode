@@ -17,11 +17,13 @@ const Div = styled.div`
 `;
 
 export const Balance = (props: BalanceProps) => (
-    <Div className="balance cell-t">
-        <div className="cell-title">Balance:</div>
-        <span className="value">{props.value}</span>
-        {(props.symbol) ? (
-            <span className="symbol">&nbsp; {props.symbol}</span>
-        ): null}        
-    </Div>
-);
+    (props.symbol && props.value !== '') ? (
+        <Div className="balance cell-t">
+            <div className="cell-title">Balance:</div>
+            <span className="value">{props.value}</span>
+            {(props.symbol) ? (
+                <span className="symbol">&nbsp; {props.symbol}</span>
+            ): null}        
+        </Div>
+    ) : null
+)
