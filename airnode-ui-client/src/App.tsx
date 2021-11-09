@@ -1,12 +1,13 @@
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { Airnode, RRP } from './Routes';
+import { ErrorScreen } from './components/ErrorScreen';
 
 const App = () => {
   return (
     <HashRouter>
       <Routes>
         <Route path="/" element={<RRP.Select />} />
-        <Route path="/add/:chainId" element={<RRP.Add />} />
+        <Route path="/add" element={<RRP.Add />} />
         <Route path="/:chainId/:contractAddress/filter" element={<RRP.ChangeFilter />} />
         <Route path="/:chainId/:contractAddress/airnodes" element={<RRP.GetProviders />} />
         <Route path="/:chainId/:contractAddress/operations" element={<RRP.GetOperations />} />
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/:chainId/:contractAddress/nodes/:provider/endpoints" element={<Airnode.GetEndpoints />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/whitelist" element={<Airnode.GetWhitelist />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/withdrawals" element={<Airnode.GetWithdrawals />} />
+        <Route path="/*" element={<ErrorScreen error="Page Not Found" />} />
       </Routes>
     </HashRouter>
   )
