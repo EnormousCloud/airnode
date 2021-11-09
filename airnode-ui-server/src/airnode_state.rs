@@ -47,6 +47,8 @@ pub struct AirnodeState {
     /// whether this airnode is owned
     /// by the private key/seed in the contaner environment
     pub owned: bool,
+    /// chain ID
+    pub chain_id: u64,
     /// address of the airnode
     pub address: H160,
     /// details about chain syncing
