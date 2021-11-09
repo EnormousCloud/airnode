@@ -33,6 +33,29 @@ export const niceError = (e: any) => {
 
 export const reducer = (state: AppState, action: any): AppState => {
     switch (action.type) {
+        case 'SELECT_NONE': {
+            const menu = { rrp: null, airnode: null };
+            return { ...state, menu };
+        }
+        case 'SELECT_RRP': {
+            const { chainId, contractAddress} = action.payload;
+            // TODO:
+            const menu = { ...state.menu, airnode: null };
+            return { ...state, menu };
+        }
+        case 'SELECT_AIRNODE': {
+            const { chainId, contractAddress, provider } = action.payload;
+            const airnode = { 
+                title: 'Airnode',
+                link: '',
+                address: '',
+                items: [], // <MenuItem>
+                balance: '',
+                symbol: '',
+            };
+            const menu = { ...state.menu, rrp: null, airnode };
+            return { ...state, menu };
+        }
         case 'STATE_ERROR':
             return { ...state, nodeStatus: { isLoading: false, errorMessage: niceError(action.payload) } };
         case 'STATE_READY':
