@@ -6,20 +6,22 @@ interface AirnodeRequestsProps {
     chainId: number
     contractAddress: string
     provider: string
-    xPubKey: string
+    airnodeState: any
     menu: MenuPanelProps
 }
 
 export const AirnodeRequests = (props: AirnodeRequestsProps) => {
-    const { chainId, contractAddress, provider, xPubKey } = props;
+    const { chainId, contractAddress, provider, airnodeState } = props;
+    const { xpubkey } = airnodeState;
     return (
         <div>
-            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
+            <AirnodeHeader {...fromParams(chainId, contractAddress, provider)} xpubkey={xpubkey} />
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Requests</h1>
+                        <pre>{JSON.stringify(airnodeState, null, 2)}</pre>
                     </div>
                 </div>
             </main>

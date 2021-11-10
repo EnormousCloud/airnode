@@ -45,22 +45,26 @@ export const niceError = (e: any) => {
     return e + '';
 }
 
-const airnodeMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelProps => {
+export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelProps => {
     const rrpState = state.fullState.find((x:any) => (
         x.chain_id == selected.chainId && x.contract_address == selected.contractAddress
     ));
+    const airnodeState = rrpState.providers 
+                ? rrpState.providers[selected.provider as string]
+                : rrpState.airnodes[selected.provider as string];
     const baseRRP = '/' + selected.chainId + '/' + selected.contractAddress;
     const baseURL = '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider;
     const itemsAirnode: Array<MenuItem> = [
         { name: "Requests", href: baseURL + '/requests'},
-        { name: "Operations", href: baseURL + '/operations' },
-        { name: "Endpoints", href: baseURL + '/endpoints' },
-        { name: "Whitelist", href: baseURL + '/whitelist' },
+        { name: "Operations", href: baseURL + '/operations', counter: airnodeState.operations_num },
+        { name: "Endpoints", href: baseURL + '/endpoints', counter: Object.keys(airnodeState.endpoints).length },
+        { name: "Whitelist", href: baseURL + '/whitelist', counter: airnodeState.whitelisted.length },
         { name: "Withdrawals", href: baseURL + '/withdrawals' },
     ];
     const airnode = { 
         title: 'Airnode',
         link: '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider + '/requests',
+        chainId: selected.chainId,
         address: selected.provider as string,
         items: itemsAirnode,
         balance: '',
@@ -75,6 +79,7 @@ const airnodeMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelP
     const rrp = { 
         title: 'RRP Contract',
         link: '/' + selected.chainId + '/' + selected.contractAddress + '/requests',
+        chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,
         balance,
@@ -83,7 +88,7 @@ const airnodeMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelP
     return { airnode, rrp };
 }
 
-const rrpMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelProps => {
+export const rrpMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelProps => {
     const baseRRP = '/' + selected.chainId + '/' + selected.contractAddress;
     const rrpState = state.fullState.find((x:any) => (
         x.chain_id == selected.chainId && x.contract_address == selected.contractAddress
@@ -96,6 +101,7 @@ const rrpMenuFromState = (state: AppState, selected: AirnodeRef): MenuPanelProps
     const rrp = { 
         title: 'RRP Contract',
         link: baseRRP + '/requests',
+        chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,
         balance,
@@ -131,10 +137,6 @@ export const reducer = (state: AppState, action: any): AppState => {
             const rrpState = state.fullState.find((x:any) => (
                 parseInt(x.chain_id) == selected.chainId && x.contract_address == selected.contractAddress
             ));
-            state.fullState.forEach(x => {
-                console.log(x.chain_id, selected.chainId, parseInt(x.chainId) == selected.chainId, x.contract_address == selected.contractAddress);
-            });
-
             if (!rrpState) {
                 const errorMessage = 'RRP contract ' + selected.contractAddress + ' not found in network ' + selected.chainId;
                 return { ...state, nodeStatus: { isLoading: false, errorMessage } };
@@ -146,6 +148,10 @@ export const reducer = (state: AppState, action: any): AppState => {
             const airnodeState = rrpState.providers 
                 ? rrpState.providers[selected.provider as string]
                 : rrpState.airnodes[selected.provider as string];
+            if (!airnodeState) {
+                const errorMessage = 'Provider ' + selected.provider + ' is not found in RRP contract ' + selected.contractAddress + ' in network ' + selected.chainId;
+                return { ...state, nodeStatus: { isLoading: false, errorMessage } };
+            }
             const menu = airnodeMenuFromState(state, selected);
             return { ...state, selected, airnodeState, menu };
         }
