@@ -114,15 +114,19 @@ export const AirnodeHeader = (props: HeaderProps) => {
             ) : null}
             {typeof props.filter !== "undefined" ? (
               <div className="chain-row">
-                {props.filterName ? (
-                  [
-                    <span className="desktop-only">Filter: &nbsp; </span>,
-                    <Link to={props.filter + ""}>{props.filterName}</Link>,
-                  ]
+                {(props.airnode) ? (
+                  (props.filterName) ? (
+                    [
+                      <span className="desktop-only">Filter: &nbsp; </span>,
+                      <Link to={props.filter + ""}>{props.filterName}</Link>,
+                    ]
+                  ) : (
+                    <Link to={props.filter + ""}>
+                      All Endpoints, All Templates, All Functions
+                    </Link>
+                  )
                 ) : (
-                  <Link to={props.filter + ""}>
-                    All Endpoints, All Templates, All Functions
-                  </Link>
+                  <span>Airnode is not selected</span>
                 )}
               </div>
             ) : null}
