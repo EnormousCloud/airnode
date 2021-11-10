@@ -97,8 +97,8 @@ export const AirnodeHeader = (props: HeaderProps) => {
               </strong>
               {props.airnode
                 ? [
-                    <span className="sep">&nbsp; / &nbsp; </span>,
-                    <strong title="Airnode Address" className="chain-airnode">
+                    <span key='sep' className="sep">&nbsp; / &nbsp; </span>,
+                    <strong key='address' title="Airnode Address" className="chain-airnode">
                       {shortened(props.airnode)}
                     </strong>,
                   ]
