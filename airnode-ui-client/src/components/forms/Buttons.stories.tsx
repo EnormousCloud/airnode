@@ -17,14 +17,14 @@ export const Default = Template.bind({});
 Default.args = {
     label: 'lorem ipsum',
     type: '',
-    width: 240
+    width: '240'
 }
 
 export const Primary = Template.bind({});
 Primary.args = {
     label: 'lorem ipsum',
     type: 'primary',
-    width: 240
+    width: '240'
 }
 
 export const Link = Template.bind({});

@@ -37,8 +37,8 @@ const init = (type: string, payload: any): any => {
 RRP.Select = () => {
   const [state, dispatch] = init('SELECT_NONE', {});
   const { nodeStatus } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   return <pre>{JSON.stringify(state, null, 2)}</pre>
   return <Select />
 }
@@ -46,8 +46,8 @@ RRP.Select = () => {
 RRP.Add = () => {
   const [state, dispatch] = init('SELECT_NONE', {});
   const { nodeStatus } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   return <AddContract />
 }
 
@@ -57,8 +57,8 @@ RRP.ChangeFilter = () => {
   const contractAddress = params.contractAddress as string;
   const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
   const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   return <ChangeFilter {...{ menu, chainId, contractAddress }} />
 };
 
@@ -68,8 +68,8 @@ RRP.GetProviders = () => {
   const contractAddress = params.contractAddress as string;
   const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
   const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   return <RrpAirnodes {...{ menu, chainId, contractAddress }} />
 }
 
@@ -79,8 +79,8 @@ RRP.GetOperations = () => {
   const contractAddress = params.contractAddress as string;
   const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
   const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   const operations = new Array(); // TODO: load operations
   const dataStatus = DataIsLoading;
   return <RrpOperations {...{ menu, chainId, contractAddress, dataStatus, operations }} />
@@ -92,8 +92,8 @@ RRP.GetAdmins = () => {
   const contractAddress = params.contractAddress as string;
   const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
   const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading) return <LoadingScreen />;
   return <RrpAdmins {...{ menu, chainId, contractAddress }} />
 }
 
@@ -104,15 +104,11 @@ Airnode.GetRequests = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-
   const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
-  const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
+  const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
-
-  // TODO: pubkey - from the state of the airnode
-  const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
-  return <AirnodeRequests {...{ menu, chainId, contractAddress, provider, xPubKey }} />
+  if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
+  return <AirnodeRequests {...{ menu, chainId, contractAddress, provider, airnodeState }} />
 }
 
 Airnode.GetOperations = () => {
@@ -121,12 +117,12 @@ Airnode.GetOperations = () => {
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
   const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
-  const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
+  const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
+  if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
   const operations = new Array(); // TODO: load operations
   const dataStatus = DataIsLoading;
-  return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, dataStatus, operations }} />
+  return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, dataStatus, airnodeState, operations }} />
 }
 
 Airnode.GetEndpoints = () => {
@@ -135,12 +131,10 @@ Airnode.GetEndpoints = () => {
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
   const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
-  const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
+  const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
-  // TODO: pubkey - from the state of the airnode
-  const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
-  return <AirnodeEndpoints {...{ menu, chainId, contractAddress, provider, xPubKey }} />
+  if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
+  return <AirnodeEndpoints {...{ menu, chainId, contractAddress, provider, airnodeState }} />
 }
 
 Airnode.GetWhitelist = () => {
@@ -149,12 +143,10 @@ Airnode.GetWhitelist = () => {
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
   const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
-  const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
+  const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
-  // TODO: pubkey - from the state of the airnode
-  const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
-  return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider, xPubKey }} />
+  if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
+  return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider, airnodeState }} />
 }
 
 Airnode.GetWithdrawals = () => {
@@ -163,11 +155,8 @@ Airnode.GetWithdrawals = () => {
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
   const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
-  const { nodeStatus, menu } = state;
-  if (nodeStatus.isLoading) return <LoadingScreen />;
+  const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
-
-  // TODO: pubkey - from the state of the airnode
-  const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
-  return <AirnodeWithdrawals {...{ menu, chainId, contractAddress, provider, xPubKey }} />
+  if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
+  return <AirnodeWithdrawals {...{ menu, chainId, contractAddress, provider, airnodeState }} />
 }

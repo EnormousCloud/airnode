@@ -1,5 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { airnode, rrp } from "../fixtures/menu";
+import mockStates from "../fixtures/state";
 import { AirnodeRequests } from "./AirnodeRequests";
 import { AirnodeOperations } from "./AirnodeOperations";
 import { AirnodeEndpoints } from "./AirnodeEndpoints";
@@ -18,11 +19,15 @@ const TemplateRequests: ComponentStory<typeof AirnodeRequests> = (args) => (
 const chainId = 4;
 const contractAddress = "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec";
 const provider = "0xac498088cd9396b3e8366d7fb267697e49235b4436971d2e3bea9955744cf3b8";
-const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+
+const rrpState = mockStates.find(x => (
+    x.chain_id == chainId && x.contract_address == contractAddress
+));
+const airnodeState = rrpState?.providers[provider];
 
 export const Requests = TemplateRequests.bind({});
 Requests.args = {
-  chainId, contractAddress, provider, xPubKey,
+  chainId, contractAddress, provider, airnodeState,
   menu: {
     airnode: {
         ...airnode,
@@ -48,7 +53,7 @@ const TemplateOperations: ComponentStory<typeof AirnodeOperations> = (args) => (
 
 export const Operations = TemplateOperations.bind({});
 Operations.args = {
-    chainId, contractAddress, provider, xPubKey,
+    chainId, contractAddress, provider, airnodeState,
     menu: {
         airnode: {
             ...airnode,
@@ -74,7 +79,7 @@ const TemplateEndpoints: ComponentStory<typeof AirnodeEndpoints> = (args) => (
 
 export const Endpoints = TemplateEndpoints.bind({});
 Endpoints.args = {
-    chainId, contractAddress, provider, xPubKey,
+    chainId, contractAddress, provider, airnodeState,
     menu: {
         airnode: {
             ...airnode,
@@ -100,7 +105,7 @@ const TemplateWhitelist: ComponentStory<typeof AirnodeWhitelist> = (args) => (
 
 export const Whitelist = TemplateWhitelist.bind({});
 Whitelist.args = {
-    chainId, contractAddress, provider, xPubKey,
+    chainId, contractAddress, provider, airnodeState,
     menu: {
         airnode: {
             ...airnode,
@@ -126,7 +131,7 @@ const TemplateWithdrawals: ComponentStory<typeof AirnodeWithdrawals> = (args) =>
 
 export const Withdrawals = TemplateWithdrawals.bind({});
 Withdrawals.args = {
-    chainId, contractAddress, provider, xPubKey,
+    chainId, contractAddress, provider, airnodeState,
     menu: {
         airnode: {
             ...airnode,

@@ -9,21 +9,22 @@ interface AirnodeOperationsProps {
     provider: string
     menu: MenuPanelProps
     dataStatus: DataStatus
+    airnodeState: any
     operations: Array<any>
 }
 
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
-    const { chainId, contractAddress, provider } = props;
-    // todo: 
-    const xPubKey = "xpub661MyMwAqRbcFwK5WBQpYHeJSMehLHgHga1JEepQpYzq8t4DgFuCCbUvFLQHwtHJZHWGCL69B4XEJzctzZ8YBCorp66Q7m1UdU6YDLjfWGM";
+    const { chainId, contractAddress, provider, airnodeState } = props;
+    const { xpubkey } = airnodeState;
     return (
         <div>
-            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
+            <AirnodeHeader {...fromParams(chainId, contractAddress, provider)} xpubkey={xpubkey} />
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
+                        <pre>{JSON.stringify(airnodeState, null, 2)}</pre>
                     </div>
                 </div>
             </main>
