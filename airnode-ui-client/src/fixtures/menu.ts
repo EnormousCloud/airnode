@@ -45,6 +45,7 @@ export const noMenu: MenuPanelProps = { airnode: null, rrp: null };
 
 export const mockMenu: MenuPanelProps = {
   airnode: {
+    chainId: 4,
     title: "Airnode",
     link: "/",
     address: "0x4444...0000",
@@ -53,6 +54,7 @@ export const mockMenu: MenuPanelProps = {
     symbol: "ETH",
   },
   rrp: {
+    chainId: 4,
     title: "RRP Contract",
     link: "/",
     address: "0xeeee...0000",

@@ -1,12 +1,12 @@
 import { ExternalLink } from "./ExternalLink";
 import { getChainEtherscan } from './../../service/Chain';
 
-const svg = (
+export const svgExternal = (size: number) => (
   <svg
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
     className="link-icon"
-    style={{ width: 16, height: 16 }}
+    style={{ width: size, height: size }}
     viewBox="0 0 511.626 511.627"
   >
     <g>
@@ -47,7 +47,18 @@ export const AddressLink = (props: AddressLinkProps) => {
   const href = baseUrl + "/address/" + props.address;
   return (
     <ExternalLink href={href} className="icon" title="View on Etherscan">
-      {shortened(props.address)} &nbsp; {svg}
+      {shortened(props.address)} &nbsp; {svgExternal(16)}
+    </ExternalLink>
+  );
+};
+
+export const AddressIcon = (props: AddressLinkProps) => {
+  const baseUrl = getChainEtherscan(props.chainId);
+  if (!baseUrl) return null;
+  const href = baseUrl + "/address/" + props.address;
+  return (
+    <ExternalLink href={href} className="icon" title="View on Etherscan" style={{ paddingLeft: 5, paddingRight: 5 }}>
+      {svgExternal(12)}
     </ExternalLink>
   );
 };

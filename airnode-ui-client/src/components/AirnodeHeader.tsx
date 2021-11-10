@@ -10,21 +10,21 @@ interface HeaderProps {
   contract: string;
   airnode?: string;
   hrefSelect: string;
-  xPubKey: string;
+  xpubkey: string;
 }
 
 export const fromParams = (
   chainId: number,
   contractAddress: string,
   provider: string = '',
-  xPubKey: string = '',
+  xpubkey: string = '',
 ): HeaderProps => {
   return {
     chain: getChainName(chainId),
     contract: contractAddress,
     airnode: provider,
     hrefSelect: "/",
-    xPubKey,
+    xpubkey,
     filter: "*",  // TODO: from the session storage
   };
 };
@@ -35,7 +35,7 @@ export const noParams = (): HeaderProps => {
     contract: '',
     airnode: '',
     hrefSelect: "/",
-    xPubKey: '',
+    xpubkey: '',
     filter: "*",  // TODO: from the session storage
   };
 }
@@ -54,7 +54,7 @@ const shortXpub = (x: string, ln: number) => {
 };
 
 export const AirnodeHeader = (props: HeaderProps) => {
-  const { xPubKey } = props;
+  const { xpubkey } = props;
   return (
     <header>
       <div className="inner">
@@ -104,12 +104,12 @@ export const AirnodeHeader = (props: HeaderProps) => {
                   ]
                 : null}
             </div>
-            {xPubKey ? (
+            {xpubkey ? (
               <div className="chain-row">
                 <span className="desktop-only xpub">
-                  {shortXpub(xPubKey, 20)}
+                  {shortXpub(xpubkey, 20)}
                 </span>
-                <span className="mobile-only xpub">{shortXpub(xPubKey, 12)}</span>
+                <span className="mobile-only xpub">{shortXpub(xpubkey, 12)}</span>
               </div>
             ) : null}
             {typeof props.filter !== "undefined" ? (
