@@ -2,6 +2,7 @@ import React from "react";
 import { Menu, MenuItem } from '../components/Menu';
 import { Balance } from '../components/Balance';
 import { Link } from 'react-router-dom';
+import { AddressIcon } from "./forms/EtherscanLink";
 
 const svgOpen = (
     <svg
@@ -37,6 +38,7 @@ const svgClose = (
 export interface NodeMenuProps {
     title: string
     link: string
+    chainId: number
     address: string
     items: Array<MenuItem>
     balance: string
@@ -48,13 +50,21 @@ export interface MenuPanelProps {
     rrp: NodeMenuProps|null
 }
 
+const shortened = (x: string) => {
+    if (!x.startsWith('0x') || x.length <= 10) return x;
+    return x.substring(0, 6) + '...' + x.substring(x.length-4);
+}
+
 const NodeMenu = (props: NodeMenuProps) => {
     return (
         <div className="menu-node">
             <h3>{props.title}</h3>
-            <div className="menu-address">
-                <Link to={props.link}>{props.address}</Link>
-            </div>
+            {props.address ? (
+                <div className="menu-address">
+                    <Link to={props.link}>{shortened(props.address)}</Link>
+                    <AddressIcon chainId={''+props.chainId} address={props.address} />
+                </div>
+            ) : null}
             <Menu items={props.items} />
             <Balance value={props.balance} symbol={props.symbol} />
         </div>
