@@ -166,7 +166,7 @@ pub fn api_operations(data: &storage_ops::Storage) -> Response {
 pub fn routes_ops(
     state: Arc<Mutex<AppState>>,
 ) -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    let h_list = warp::path!("api" / "node" / u64 / H160)
+    let h_list = warp::path!("api" / "operations" / u64 / H160)
         .and(with_state(state.clone()))
         .map(
             |chain_id: u64, contract: H160, state_rc: Arc<Mutex<AppState>>| {
@@ -180,8 +180,36 @@ pub fn routes_ops(
     h_list
 }
 
+pub fn routes_states(
+    state: Arc<Mutex<AppState>>,
+) -> impl warp::Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    let h_get = warp::path!("api" / "states" / u64 / H160)
+        .and(with_state(state.clone()))
+        .map(
+            |chain_id: u64, contract: H160, state_rc: Arc<Mutex<AppState>>| {
+                let node = AirnodeRef::new(chain_id, contract);
+                match state_rc.lock().unwrap().states.get(&node) {
+                    Some(state) => with_status(json(state), StatusCode::OK).into_response(),
+                    None => return json_error(StatusCode::NOT_FOUND, "airnode not found"),
+                }
+            },
+        );
+    let h_list = warp::path!("api" / "states")
+        .and(with_state(state.clone()))
+        .map(|state_rc: Arc<Mutex<AppState>>| {
+            let mut out = vec![];
+            for (_, nodestate) in &state_rc.lock().unwrap().states {
+                out.push(nodestate.clone());
+            }
+            with_status(json(&out), StatusCode::OK).into_response()
+        });
+    h_get.or(h_list)
+}
+
 pub fn routes(
     state: Arc<Mutex<AppState>>,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
-    routes_nodes(state.clone()).or(routes_ops(state))
+    routes_nodes(state.clone())
+        .or(routes_ops(state.clone()))
+        .or(routes_states(state))
 }
