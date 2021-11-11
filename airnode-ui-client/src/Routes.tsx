@@ -36,11 +36,10 @@ const init = (type: string, payload: any): any => {
 
 RRP.Select = () => {
   const [state, dispatch] = init('SELECT_NONE', {});
-  const { nodeStatus } = state;
+  const { fullState, nodeStatus } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
-  if (nodeStatus.isLoading) return <LoadingScreen />;
-  return <pre>{JSON.stringify(state, null, 2)}</pre>
-  return <Select />
+  if (nodeStatus.isLoading || !fullState) return <LoadingScreen />;
+  return <Select fullState={fullState}/>
 }
 
 RRP.Add = () => {
