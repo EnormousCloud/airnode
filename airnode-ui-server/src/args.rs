@@ -13,7 +13,11 @@ pub enum Command {
     /// commands to read and return state of the airnode
     State(AirnodeStateCmd),
     /// start HTTP server
-    Server,
+    Server {
+        /// Net listening address of HTTP server in case of "server" command
+        #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
+        listen: String,
+    },
 }
 
 #[derive(StructOpt, Debug, Clone)]
@@ -29,15 +33,6 @@ pub struct Args {
     /// Command to exectue
     #[structopt(subcommand)]
     pub cmd: Command,
-    /// Net listening address of HTTP server in case of "server" command
-    #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
-    pub listen: String,
-    /// Contract address of RRP contract in case of "op" or "state" command
-    #[structopt(long, default_value = "")]
-    pub contract: String,
-    /// Chain ID of RRP contract in case of "op" or "state" command
-    #[structopt(long, default_value = "1")]
-    pub chain_id: u64,
 }
 
 pub fn parse() -> anyhow::Result<Args> {

@@ -7,7 +7,6 @@ pub mod fees;
 pub mod nice;
 pub mod storage_config;
 pub mod storage_ops;
-pub mod storage_state;
 pub mod usdprice;
 pub mod web3sync;
 
@@ -18,9 +17,7 @@ use crate::args::Command;
 use crate::storage_config::KVStore;
 use crate::storage_ops::LogIndex;
 use std::collections::BTreeMap as Map;
-use std::str::FromStr;
 use std::sync::{Arc, Mutex};
-use web3::types::H160;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -110,11 +107,11 @@ pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> 
 
 pub fn cli_op(db_ops: storage_ops::Storage, cmd: AirnodeOpsCmd) -> anyhow::Result<()> {
     match cmd {
-        AirnodeOpsCmd::Truncate => {
+        AirnodeOpsCmd::Truncate { .. } => {
             let _ = db_ops.truncate();
             println!("OK");
         }
-        AirnodeOpsCmd::List => {
+        AirnodeOpsCmd::List { .. } => {
             let list = db_ops.list();
             println!("{}", serde_json::to_string(&list).unwrap());
         }
@@ -124,19 +121,19 @@ pub fn cli_op(db_ops: storage_ops::Storage, cmd: AirnodeOpsCmd) -> anyhow::Resul
 
 pub fn cli_state(
     db_config: storage_config::Storage,
-    chain_id: u64,
-    contract_str: &str,
     data_dir: &str,
     cmd: AirnodeStateCmd,
 ) -> anyhow::Result<()> {
     match cmd {
-        AirnodeStateCmd::Get => {
-            let contract = H160::from_str(&contract_str).expect("Contract address is required");
-            let node = AirnodeRef::new(chain_id, contract);
+        AirnodeStateCmd::Get {
+            chain_id,
+            contract_address,
+        } => {
+            let node = AirnodeRef::new(chain_id, contract_address);
             let mut state: AirnodeState = AirnodeState::new(&node);
             let db_ops = storage_ops::Storage::init(&data_dir, node);
             for op in db_ops.list() {
-                // state.handle_op(&op);
+                state.handle_op(&op);
             }
             println!("{}", serde_json::to_string(&state).unwrap());
         }
@@ -152,7 +149,7 @@ pub fn cli_state(
                     let mut state: AirnodeState = AirnodeState::new(&node);
                     let db_ops = storage_ops::Storage::init(&data_path, node);
                     for op in db_ops.list() {
-                        // state.handle_op(&op);
+                        state.handle_op(&op);
                     }
                     let mut rc = rcc.lock().unwrap();
                     rc.push(state.clone());
@@ -184,22 +181,24 @@ async fn main() -> anyhow::Result<()> {
             return cli_config(db_config, cmd);
         }
         Command::Op(cmd) => {
-            let chain_id = args.chain_id;
-            let contract = H160::from_str(&args.contract).expect("Contract address is required");
-            let node = AirnodeRef::new(chain_id, contract);
+            let (chain_id, contract_address) = match cmd {
+                AirnodeOpsCmd::List {
+                    chain_id,
+                    contract_address,
+                } => (chain_id, contract_address),
+                AirnodeOpsCmd::Truncate {
+                    chain_id,
+                    contract_address,
+                } => (chain_id, contract_address),
+            };
+            let node = AirnodeRef::new(chain_id, contract_address);
             let db_ops = storage_ops::Storage::init(&args.data_dir, node);
             return cli_op(db_ops, cmd);
         }
         Command::State(cmd) => {
-            return cli_state(
-                db_config,
-                args.chain_id,
-                &args.contract,
-                &args.data_dir,
-                cmd,
-            );
+            return cli_state(db_config, &args.data_dir, cmd);
         }
-        Command::Server => {
+        Command::Server { listen } => {
             // connecting to databases of operations:
             let mut db_ops = Map::new();
             for node in db_config.list() {
@@ -226,15 +225,14 @@ async fn main() -> anyhow::Result<()> {
                         rc.db_ops.get(&node).unwrap().list()
                     };
                     for op in ops {
-                        // state.handle_op(&op);
+                        state.handle_op(&op);
                     }
                     let mut rc = rcc.lock().unwrap();
                     rc.states.insert(node.clone(), state.clone());
                 }));
             }
 
-            let socket_addr: std::net::SocketAddr =
-                args.listen.parse().expect("invalid bind to listen");
+            let socket_addr: std::net::SocketAddr = listen.parse().expect("invalid bind to listen");
             warp::serve(endpoints::routes(app_state))
                 .run(socket_addr)
                 .await;
