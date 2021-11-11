@@ -54,7 +54,7 @@ RRP.ChangeFilter = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
+  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: '' });
   const { nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
@@ -65,7 +65,7 @@ RRP.GetProviders = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
+  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: '' });
   const { nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
@@ -76,7 +76,7 @@ RRP.GetOperations = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
+  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: 'operations' });
   const { nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
@@ -89,7 +89,7 @@ RRP.GetAdmins = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress });
+  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: 'admins' });
   const { nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
@@ -103,7 +103,7 @@ Airnode.GetRequests = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
+  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'requests' });
   const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
@@ -115,7 +115,7 @@ Airnode.GetOperations = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
+  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'operations' });
   const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
@@ -129,7 +129,7 @@ Airnode.GetEndpoints = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
+  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'endpoints' });
   const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
@@ -141,7 +141,7 @@ Airnode.GetWhitelist = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
+  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'whitelist' });
   const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
@@ -153,7 +153,7 @@ Airnode.GetWithdrawals = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider });
+  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'withdrawals' });
   const { airnodeState, nodeStatus, menu } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
