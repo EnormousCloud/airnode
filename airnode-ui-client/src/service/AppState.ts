@@ -3,7 +3,7 @@ import { Storage } from './Storage';
 import { noMenu } from "../fixtures/menu";
 import { MenuItem } from '../components/Menu';
 import { MenuPanelProps } from '../components/MenuPanel';
-import { parseBalance, NiceBalance } from './Balance';
+import { parseBalance } from './Balance';
 
 export interface AppState {
     // selection in the menu
@@ -54,12 +54,15 @@ export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef): Men
                 : rrpState.airnodes[selected.provider as string];
     const baseRRP = '/' + selected.chainId + '/' + selected.contractAddress;
     const baseURL = '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider;
+    const withdrawals = Object.keys(airnodeState.requests).filter((req: string) => (
+        !!airnodeState.requests[req].withdraw
+    ));
     const itemsAirnode: Array<MenuItem> = [
-        { name: "Requests", href: baseURL + '/requests'},
+        { name: "Requests", href: baseURL + '/requests', counter: Object.keys(airnodeState.requests).length}, 
         { name: "Operations", href: baseURL + '/operations', counter: airnodeState.operations_num },
         { name: "Endpoints", href: baseURL + '/endpoints', counter: Object.keys(airnodeState.endpoints).length },
         { name: "Whitelist", href: baseURL + '/whitelist', counter: airnodeState.whitelisted.length },
-        { name: "Withdrawals", href: baseURL + '/withdrawals' },
+        { name: "Withdrawals", href: baseURL + '/withdrawals', counter: withdrawals.length },
     ];
     const airnode = { 
         title: 'Airnode',
