@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Select } from "./Select";
-import { mockMenu } from "./../fixtures/menu";
+import fullState from './../fixtures/state';
 
 export default {
   title: "Screens/Select Airnode",
@@ -10,4 +10,4 @@ export default {
 const Template: ComponentStory<typeof Select> = (args) => <Select {...args} />;
 
 export const Default = Template.bind({});
-Default.args = { menu: mockMenu };
+Default.args = { fullState };
