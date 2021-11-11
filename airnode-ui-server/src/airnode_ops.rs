@@ -154,7 +154,21 @@ impl Operation {
 #[serde(tag = "type")]
 pub enum AirnodeOpsCmd {
     /// Get the list of operations
-    List,
+    List {
+        /// Chain ID of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "1")]
+        chain_id: u64,
+        /// Contract address of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "")]
+        contract_address: H160,
+    },
     /// Reset operations log
-    Truncate,
+    Truncate {
+        /// Chain ID of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "1")]
+        chain_id: u64,
+        /// Contract address of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "")]
+        contract_address: H160,
+    },
 }

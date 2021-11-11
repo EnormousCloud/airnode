@@ -1,4 +1,5 @@
 use crate::airnode_config::AirnodeRef;
+use crate::airnode_ops::Operation;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -50,7 +51,7 @@ pub struct AirnodeState {
     /// chain ID
     pub chain_id: u64,
     /// address of the airnode
-    pub address: H160,
+    pub contract_address: H160,
     /// details about chain syncing
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sync: Option<SyncState>,
@@ -83,9 +84,15 @@ impl AirnodeState {
     pub fn new(node: &AirnodeRef) -> Self {
         Self {
             chain_id: node.chain_id,
-            address: node.contract_address,
+            contract_address: node.contract_address,
             ..Self::default()
         }
+    }
+}
+
+impl AirnodeState {
+    pub fn handle_op(&mut self, _op: &Operation) {
+        self.operations_num += 1;
     }
 }
 
@@ -95,5 +102,12 @@ pub enum AirnodeStateCmd {
     /// List states for all nodes
     List,
     /// Get the state of the single node
-    Get,
+    Get {
+        /// Chain ID of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "1")]
+        chain_id: u64,
+        /// Contract address of RRP contract in case of "op" or "state" command
+        #[structopt(long, default_value = "")]
+        contract_address: H160,
+    },
 }
