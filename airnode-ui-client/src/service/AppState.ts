@@ -66,7 +66,7 @@ export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef, op: 
     ];
     const airnode = { 
         title: 'Airnode',
-        link: '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider + '/requests',
+        link: '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider + '/operations',
         chainId: selected.chainId,
         address: selected.provider as string,
         items: itemsAirnode,
@@ -79,7 +79,7 @@ export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef, op: 
 
     const rrp = { 
         title: 'RRP Contract',
-        link: '/' + selected.chainId + '/' + selected.contractAddress + '/operations',
+        link: '/' + selected.chainId + '/' + selected.contractAddress + '/providers',
         chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,
@@ -99,7 +99,7 @@ export const rrpMenuFromState = (state: AppState, selected: AirnodeRef, op: stri
     ];
     const rrp = { 
         title: 'RRP Contract',
-        link: baseRRP + '/operations',
+        link: baseRRP + '/providers',
         chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,

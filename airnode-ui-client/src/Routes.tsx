@@ -89,10 +89,11 @@ RRP.GetProviders = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: '' });
-  const { nodeStatus, menu } = state;
+  const { nodeStatus, menu, fullState } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
-  return <RrpAirnodes {...{ menu, chainId, contractAddress }} />
+  const nodeState = fullState.filter((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress));
+  return <RrpAirnodes {...{ menu, chainId, contractAddress, nodeState }} />
 }
 
 RRP.GetOperations = () => {
