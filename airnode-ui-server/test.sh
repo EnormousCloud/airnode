@@ -13,11 +13,28 @@ export LOG_LEVEL=airnode_ui_server=info,info
     cargo run --release -- config add \
         --contract-address 0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec \
         --min-block 7812260 \
-        --batch-size 50000
+        --batch-size 100000
     # display all RRP operations
     cargo run --release -- op list \
         --chain-id 4 \
         --contract-address 0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec
+    exit
+}
+
+[[ "$1" == "xdai" ]] && {
+    shift
+    export RPC_ENDPOINT=$(chainstate --endpoints -t xdai | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for xdai network. "; exit 1; }
+
+    # adding RRP contract to the configuration
+    cargo run --release -- config add \
+        --contract-address 0x32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE \
+        --min-block 13796900 \
+        --batch-size 100000
+    # display all RRP operations
+    cargo run --release -- op list \
+        --chain-id 100 \
+        --contract-address 0x32D228B5d44Fd18FefBfd68BfE5A5F3f75C873AE
     exit
 }
 
