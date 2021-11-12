@@ -1,4 +1,5 @@
 import { Footer } from '../components/Footer';
+import { Loading } from './../components/Loading';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 import { DataStatus } from './../service/types';
@@ -12,7 +13,7 @@ interface RrpOperationsProps {
 }
 
 export const RrpOperations = (props: RrpOperationsProps) => {
-    const { chainId, contractAddress } = props;
+    const { chainId, contractAddress, dataStatus, operations } = props;
     const provider = '';
     const xPubKey = '';
     return (
@@ -23,6 +24,11 @@ export const RrpOperations = (props: RrpOperationsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
+                        {dataStatus.isLoading ? (
+                            <Loading />
+                        ): (
+                            <pre>{JSON.stringify(operations, null, 2)}</pre>
+                        )}
                     </div>
                 </div>
             </main>

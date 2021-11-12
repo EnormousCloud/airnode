@@ -24,8 +24,31 @@ const init = (type: string, payload: any): any => {
   useEffect(() => {
     if (state.nodeStatus.isLoading) {
       API.fetchState().then((result: any) => {
+        dispatch({ type: 'OPERATIONS_INIT', payload: {} });
         dispatch({ type: 'STATE_READY', payload: result });
         if (type) dispatch({ type, payload });
+      }).catch((e: any) => {
+        dispatch({ type: 'STATE_ERROR', payload: e });
+      })
+    }
+  }, []);
+  return [state, dispatch];
+}
+
+const initOps = (type: string, payload: any): any => {
+  const [state, dispatch] = useReducer(reducer, defaultState, initState);
+  useEffect(() => {
+    if (state.nodeStatus.isLoading) {
+      API.fetchState().then((result: any) => {
+        dispatch({ type: 'STATE_READY', payload: result });
+        if (type) dispatch({ type, payload });
+        const { chainId, contractAddress } = payload;
+        dispatch({ type: 'OPERATIONS_INIT', payload: {} });
+        API.fetchOps(chainId, contractAddress).then((ops: any) => {
+          dispatch({ type: 'OPERATIONS_READY', payload: ops });  
+        }).catch((e: any) => {
+          dispatch({ type: 'OPERATIONS_ERROR', payload: e });  
+        });
       }).catch((e: any) => {
         dispatch({ type: 'STATE_ERROR', payload: e });
       })
@@ -76,12 +99,10 @@ RRP.GetOperations = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: 'operations' });
-  const { nodeStatus, menu } = state;
+  const [state, dispatch] = initOps('SELECT_RRP', { chainId, contractAddress, activeMenu: 'operations' });
+  const { nodeStatus, menu, dataStatus, operations } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
-  const operations = new Array(); // TODO: load operations
-  const dataStatus = DataIsLoading;
   return <RrpOperations {...{ menu, chainId, contractAddress, dataStatus, operations }} />
 }
 
@@ -115,12 +136,10 @@ Airnode.GetOperations = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state, dispatch] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'operations' });
-  const { airnodeState, nodeStatus, menu } = state;
+  const [state, dispatch] = initOps('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'operations' });
+  const { airnodeState, nodeStatus, dataStatus, menu, operations } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
-  const operations = new Array(); // TODO: load operations
-  const dataStatus = DataIsLoading;
   return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, dataStatus, airnodeState, operations }} />
 }
 
