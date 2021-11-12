@@ -121,9 +121,7 @@ export const AirnodeHeader = (props: HeaderProps) => {
                       <Link to={props.filter + ""}>{props.filterName}</Link>,
                     ]
                   ) : (
-                    <Link to={props.filter + ""}>
-                      All Endpoints, All Templates, All Functions
-                    </Link>
+                    <span>All Endpoints, All Templates, All Requests</span>
                   )
                 ) : (
                   <span>Airnode is not selected</span>
