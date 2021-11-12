@@ -21,7 +21,7 @@ export const AirnodeWithdrawals = (props: AirnodeWithdrawalsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Withdrawals</h1>
-                        <pre>{JSON.stringify(airnodeState, null, 2)}</pre>
+                        <pre>{JSON.stringify(airnodeState.requests, null, 2)}</pre>
                     </div>
                 </div>
             </main>

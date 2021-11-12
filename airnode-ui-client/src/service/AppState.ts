@@ -21,7 +21,7 @@ export interface AppState {
     // full state, downloaded
     fullState: Array<any>
     // list of operations for each node, downloaded
-    operations: Map<string, Array<any>>
+    operations: any
 }
 
 export const defaultState: AppState = {
@@ -169,7 +169,7 @@ export const reducer = (state: AppState, action: any): AppState => {
         case 'OPERATIONS_READY':
             const operations = { ...state.operations };
             const key = state.selected?.chainId + "-" + state.selected?.contractAddress + "-" + state.selected?.provider;
-            operations.set(key, action.payload);
+            operations[ key ] = action.payload;
             return { ...state, dataStatus: DataIsReady, operations };
         default:
             throw new Error();

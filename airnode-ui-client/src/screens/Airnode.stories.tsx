@@ -6,6 +6,7 @@ import { AirnodeOperations } from "./AirnodeOperations";
 import { AirnodeEndpoints } from "./AirnodeEndpoints";
 import { AirnodeWhitelist } from "./AirnodeWhitelist";
 import { AirnodeWithdrawals } from "./AirnodeWithdrawals";
+import { DataIsReady } from "../service/types";
 
 export default {
   title: "Screens/Airnode",
@@ -48,7 +49,7 @@ Requests.args = {
 
 
 const TemplateOperations: ComponentStory<typeof AirnodeOperations> = (args) => (
-    <AirnodeOperations {...args} />
+    <AirnodeOperations {...args} dataStatus={DataIsReady} />
 );
 
 export const Operations = TemplateOperations.bind({});

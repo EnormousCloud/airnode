@@ -1,4 +1,5 @@
 import { Footer } from '../components/Footer';
+import { Loading } from './../components/Loading';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 import { DataStatus } from './../service/types';
@@ -14,7 +15,7 @@ interface AirnodeOperationsProps {
 }
 
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
-    const { chainId, contractAddress, provider, airnodeState } = props;
+    const { chainId, contractAddress, provider, airnodeState, dataStatus, operations } = props;
     const { xpubkey } = airnodeState;
     return (
         <div>
@@ -24,7 +25,12 @@ export const AirnodeOperations = (props: AirnodeOperationsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
-                        <pre>{JSON.stringify(airnodeState, null, 2)}</pre>
+                        {dataStatus.isLoading ? (
+                            <Loading />
+                        ): (
+                            <pre>{JSON.stringify(operations, null, 2)}</pre>
+                        )}
+                        
                     </div>
                 </div>
             </main>

@@ -21,7 +21,7 @@ export const AirnodeWhitelist = (props: AirnodeWhitelistProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Whitelist</h1>
-                        <pre>{JSON.stringify(airnodeState.whitelist, null, 2)}</pre>
+                        <pre>{JSON.stringify(airnodeState.whitelisted, null, 2)}</pre>
                     </div>
                 </div>
             </main>
