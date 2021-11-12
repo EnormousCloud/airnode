@@ -1,9 +1,11 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { mockMenu, airnode, rrp } from "../fixtures/menu";
-
+import { rrp } from "../fixtures/menu";
+import fullState from "../fixtures/state";
+import operations from '../fixtures/ops-rinkeby';
 import { RrpAirnodes } from "./RrpAirnodes";
 import { RrpOperations } from "./RrpOperations";
 import { RrpAdmins } from "./RrpAdmins";
+import { DataIsReady } from "../service/types";
 
 const chainId = 4;
 const contractAddress = "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec";
@@ -22,6 +24,7 @@ Airnodes.args = {
   chainId, 
   contractAddress,
   menu: { rrp, airnode: null },
+  nodeState: fullState.filter((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress)),
 };
 
 const TemplateOperations: ComponentStory<typeof RrpOperations> = (args) => (
@@ -32,6 +35,8 @@ export const Operations = TemplateOperations.bind({});
 Operations.args = {
   chainId, 
   contractAddress,
+  dataStatus: DataIsReady,
+  operations,
   menu: {
     airnode: null,
     rrp: {
