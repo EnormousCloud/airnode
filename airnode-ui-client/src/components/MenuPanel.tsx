@@ -51,8 +51,9 @@ export interface MenuPanelProps {
 }
 
 const shortened = (x: string) => {
-    if (!x.startsWith('0x') || x.length <= 10) return x;
-    return x.substring(0, 6) + '...' + x.substring(x.length-4);
+    let ln = (x.length > 42) ? 8 : 4;
+    if (!x.startsWith('0x') || x.length <= 2*ln + 2) return x;
+    return x.substring(0, 2 + ln) + '...' + x.substring(x.length - ln);
 }
 
 const NodeMenu = (props: NodeMenuProps) => {
@@ -62,7 +63,9 @@ const NodeMenu = (props: NodeMenuProps) => {
             {props.address ? (
                 <div className="menu-address">
                     <Link to={props.link}>{shortened(props.address)}</Link>
-                    <AddressIcon chainId={''+props.chainId} address={props.address} />
+                    {(props.address.length == 42) ? (
+                        <AddressIcon chainId={''+props.chainId} address={props.address} />
+                    ): null}
                 </div>
             ) : null}
             <Menu items={props.items} />

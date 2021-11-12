@@ -70,23 +70,20 @@ export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef, op: 
         chainId: selected.chainId,
         address: selected.provider as string,
         items: itemsAirnode,
-        balance: '',
-        symbol: 'ETH',
+        ...parseBalance(airnodeState.balance),
     };
     const itemsRRP: Array<MenuItem> = [
         { name: "Operations", href: baseRRP + '/operations', counter: rrpState.operations_num },
         { name: "Admins", href: baseRRP + '/admins' },
     ];
 
-    const { balance, symbol } = parseBalance(rrpState.balance);
     const rrp = { 
         title: 'RRP Contract',
-        link: '/' + selected.chainId + '/' + selected.contractAddress + '/requests',
+        link: '/' + selected.chainId + '/' + selected.contractAddress + '/operations',
         chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,
-        balance,
-        symbol,
+        ...parseBalance(rrpState.balance)
     };
     return { airnode, rrp };
 }
@@ -100,21 +97,19 @@ export const rrpMenuFromState = (state: AppState, selected: AirnodeRef, op: stri
         { name: "Operations", href: baseRRP + '/operations', counter: rrpState.operations_num, active: op === 'operations' },
         { name: "Admins", href: baseRRP + '/admins', active: op === 'admins' },
     ];
-    const { balance, symbol } = parseBalance(rrpState.balance);
     const rrp = { 
         title: 'RRP Contract',
-        link: baseRRP + '/requests',
+        link: baseRRP + '/operations',
         chainId: selected.chainId,
         address: selected.contractAddress,
         items: itemsRRP,
-        balance,
-        symbol,
+        ...parseBalance(rrpState.balance),
     };
     return { airnode: null, rrp };
 }
 
 export const reducer = (state: AppState, action: any): AppState => {
-    console.log('reduce', action.type, JSON.stringify(Object.keys(action.payload)));
+    // console.log('reduce', action.type, JSON.stringify(Object.keys(action.payload)));
     switch (action.type) {
         case 'SELECT_NONE': {
             const menu = { rrp: null, airnode: null };
