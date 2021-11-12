@@ -1,5 +1,6 @@
 use crate::airnode_config::AirnodeRef;
 use crate::airnode_ops::Operation;
+use crate::web3sync::EthClient;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -10,8 +11,7 @@ use web3::types::{H160, H256, U256};
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Balance {
     /// the last balance value
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub last_value: Option<U256>,
+    pub last_value: U256,
     /// time of the last balance update
     #[serde(skip_serializing_if = "Option::is_none")]
     pub last_updated: Option<DateTime<Utc>>,
@@ -19,6 +19,32 @@ pub struct Balance {
     pub decimals: usize,
     /// symbol of the token network
     pub symbol: String,
+}
+
+fn chain_symbol(chain_id: u64) -> String {
+    if chain_id == 100 {
+        return "xDAI".to_owned();
+    }
+    if chain_id == 30 || chain_id == 31 {
+        return "RBTC".to_owned();
+    }
+    "ETH".to_owned()
+}
+
+fn chain_decimals(_chain_id: u64) -> usize {
+    18
+}
+
+impl Balance {
+    pub fn new(value: U256, chain_id: u64) -> Self {
+        let now = Utc::now();
+        Self {
+            last_value: value,
+            last_updated: Some(now),
+            decimals: chain_decimals(chain_id),
+            symbol: chain_symbol(chain_id),
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -93,6 +119,18 @@ impl AirnodeState {
 impl AirnodeState {
     pub fn handle_op(&mut self, _op: &Operation) {
         self.operations_num += 1;
+    }
+
+    pub fn update_balance(&mut self, rpc_address: &str) {
+        let client = EthClient::new(rpc_address);
+        let balance = match client.get_eth_balance(self.contract_address) {
+            Ok(x) => x,
+            Err(e) => {
+                tracing::warn!("Error of retrieving balance {}", e);
+                return;
+            }
+        };
+        self.balance = Some(Balance::new(balance, self.chain_id));
     }
 }
 
