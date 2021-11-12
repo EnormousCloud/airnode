@@ -130,11 +130,13 @@ pub fn cli_state(
             contract_address,
         } => {
             let node = AirnodeRef::new(chain_id, contract_address);
+            let config = db_config.find(&node).expect("airnode not found");
             let mut state: AirnodeState = AirnodeState::new(&node);
             let db_ops = storage_ops::Storage::init(&data_dir, node);
             for op in db_ops.list() {
                 state.handle_op(&op);
             }
+            state.update_balance(&config.rpc_address);
             println!("{}", serde_json::to_string(&state).unwrap());
         }
         AirnodeStateCmd::List => {
@@ -151,6 +153,7 @@ pub fn cli_state(
                     for op in db_ops.list() {
                         state.handle_op(&op);
                     }
+                    state.update_balance(&config.rpc_address);
                     let mut rc = rcc.lock().unwrap();
                     rc.push(state.clone());
                 }));
@@ -227,6 +230,7 @@ async fn main() -> anyhow::Result<()> {
                     for op in ops {
                         state.handle_op(&op);
                     }
+                    state.update_balance(&config.rpc_address);
                     let mut rc = rcc.lock().unwrap();
                     rc.states.insert(node.clone(), state.clone());
                 }));
