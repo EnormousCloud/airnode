@@ -1,5 +1,6 @@
 import { Footer } from '../components/Footer';
 import { Loading } from './../components/Loading';
+import { Operation } from './../components/Operation';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 import { DataStatus } from './../service/types';
@@ -9,25 +10,28 @@ interface RrpOperationsProps {
     contractAddress: string
     menu: MenuPanelProps
     dataStatus: DataStatus
-    operations: Array<any>
+    operations: any
 }
 
 export const RrpOperations = (props: RrpOperationsProps) => {
     const { chainId, contractAddress, dataStatus, operations } = props;
-    const provider = '';
-    const xPubKey = '';
+    console.log(dataStatus, Object.keys(operations));
+    const ops = (operations) ? operations[chainId + '-' + contractAddress + '-'] || [] : [];
     return (
         <div className="no-airnode">
-            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
+            <AirnodeHeader {...fromParams(chainId, contractAddress )}/>
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
-                        {dataStatus.isLoading ? (
-                            <Loading />
-                        ): (
-                            <pre>{JSON.stringify(operations, null, 2)}</pre>
+                        {(dataStatus.errorMessage) ? (
+                            <div>{dataStatus.errorMessage}</div>
+                        ): ((dataStatus.isLoading) ? (
+                                <Loading />
+                            ): ops.map((op:any) => (
+                                <Operation key={op.tx} op={op} chainId={chainId + ''} />
+                            ))
                         )}
                     </div>
                 </div>

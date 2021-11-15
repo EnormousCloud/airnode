@@ -3,17 +3,19 @@
     margin-left: 0.33em;
     margin-right: 0.7em;
     font-size: 0.75rem;
+    width: 100px;
 }
 .op .op-e {
-    max-width: 100%;
     overflow-x: auto;
     margin-left: 0.33em;
     margin-right: 0.33em;
+    margin-bottom: 15px;
 }
 
 .op .op-type {
     font-weight: bold;
-    line-height: 2;
+    line-height: 1;
+    padding-bottom: 5px;
 }
 
 .op .op-fee {
@@ -24,6 +26,7 @@
     font-family: monospace;
     font-size: 0.8rem;
     line-height: 1.33;
+    white-space: nowrap;
 }
 
 @media (min-width: 599px) {
