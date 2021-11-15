@@ -160,7 +160,7 @@ impl EthClient {
 
     pub fn get_max_block_number(&self) -> anyhow::Result<u64> {
         let payload = format!(
-            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[\"latest\",false],\"id\":\"1\"}}",
+            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[],\"id\":\"1\"}}",
         );
         let res: RpcSingleResponse<U256> = self.execute_str(&payload)?;
         Ok(res.result.as_u64())
