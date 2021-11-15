@@ -97,7 +97,7 @@ impl Operation {
         let block = log.block_hash.unwrap();
         let height = log.block_number.unwrap().as_u64();
         let transaction_hash = log.transaction_hash.unwrap();
-        let log_index = log.transaction_log_index.unwrap().as_u64();
+        let log_index = log.log_index.unwrap().as_u64();
         let tx_index = log.transaction_index.unwrap().as_u64();
 
         let rpc_client = crate::web3sync::EthClient::new(rpc_address);
@@ -110,7 +110,7 @@ impl Operation {
             jsonrpc: "2.0".to_owned(),
             id: "block".to_owned(),
             method: "eth_getBlockByHash".to_owned(),
-            params: Params::Array(vec![blockh]),
+            params: Params::Array(vec![blockh, serde_json::Value::from(false)]),
         };
         let rq2 = RpcSingleRequest {
             jsonrpc: "2.0".to_owned(),

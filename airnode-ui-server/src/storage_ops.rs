@@ -26,7 +26,7 @@ impl LogIndex for Storage {
         let mut cf_opts = Options::default();
         cf_opts.create_if_missing(true);
 
-        let file_path = format!("{}/{:?}", data_dir, airnode.to_string());
+        let file_path = format!("{}/{}", data_dir, airnode.to_string());
         let cf = ColumnFamilyDescriptor::new("log", cf_opts);
         Self {
             db: Arc::new(DB::open_cf_descriptors(&opts, file_path, vec![cf]).unwrap()),
