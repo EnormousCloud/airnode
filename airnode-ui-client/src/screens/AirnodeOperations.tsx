@@ -1,5 +1,6 @@
 import { Footer } from '../components/Footer';
 import { Loading } from './../components/Loading';
+import { Operation } from './../components/Operation';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
 import { DataStatus } from './../service/types';
@@ -11,12 +12,13 @@ interface AirnodeOperationsProps {
     menu: MenuPanelProps
     dataStatus: DataStatus
     airnodeState: any
-    operations: Array<any>
+    operations: any
 }
 
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
     const { chainId, contractAddress, provider, airnodeState, dataStatus, operations } = props;
     const { xpubkey } = airnodeState;
+    const ops = (operations) ? operations[chainId + '-' + contractAddress + '-' + provider] || [] : [];
     return (
         <div>
             <AirnodeHeader {...fromParams(chainId, contractAddress, provider)} xpubkey={xpubkey} />
@@ -25,12 +27,14 @@ export const AirnodeOperations = (props: AirnodeOperationsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
-                        {dataStatus.isLoading ? (
-                            <Loading />
-                        ): (
-                            <pre>{JSON.stringify(operations, null, 2)}</pre>
-                        )}
-                        
+                        {(dataStatus.errorMessage) ? (
+                            <div>{dataStatus.errorMessage}</div>
+                        ): ((dataStatus.isLoading) ? (
+                                <Loading />
+                            ): ops.map((op:any) => (
+                                <Operation key={op.tx} op={op} chainId={chainId + ''} />
+                            ))
+                        )}                        
                     </div>
                 </div>
             </main>

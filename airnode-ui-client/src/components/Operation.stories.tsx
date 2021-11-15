@@ -7,7 +7,7 @@ export default {
 } as ComponentMeta<typeof Op>;
 
 const Template: ComponentStory<typeof Op> = (args) => (
-  <div className="inner"><div className="content"><Op {...args} /></div></div>
+  <div className="inner"><div className="content"><Op {...args} /><Op {...args} /></div></div>
 );
 
 export const Operation = Template.bind({});
