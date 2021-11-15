@@ -65,6 +65,7 @@ impl KVStore for Storage {
         iter.seek_to_first();
         while iter.valid() {
             if let Some(v) = iter.value() {
+                println!("key = {:?}", String::from_utf8_lossy(iter.key().unwrap()));
                 if let Ok(config) = AirnodeConfig::from(v.to_vec()) {
                     res.push(config);
                 }
@@ -122,7 +123,10 @@ mod tests {
             serde_json::to_string(&nodes[0]).unwrap(),
             serde_json::to_string(&config).unwrap()
         );
-        // println!("{}", serde_json::to_string(&nodes[0]).unwrap());
+        println!("{}", serde_json::to_string(&nodes).unwrap());
+        let node = AirnodeRef::new(config.chain_id, config.contract_address);
+        let found_config = db.find(&node).unwrap();
+        println!("{}", serde_json::to_string(&found_config).unwrap());
         rocksdb::DB::destroy(&rocksdb::Options::default(), &data_dir).unwrap();
     }
 }
