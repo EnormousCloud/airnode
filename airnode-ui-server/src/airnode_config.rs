@@ -16,10 +16,10 @@ impl AirnodeRef {
         }
     }
     pub fn to_string(&self) -> String {
-        format!("{}.{}", self.contract_address, self.chain_id)
+        format!("{}.{:?}", self.chain_id, self.contract_address)
     }
     pub fn as_bytes(&self) -> Vec<u8> {
-        Vec::from(self.to_string().as_bytes())
+        Vec::from(self.to_string())
     }
 }
 
@@ -52,7 +52,7 @@ impl AirnodeConfig {
         })
     }
     pub fn key(&self) -> Vec<u8> {
-        Vec::from(format!("{}.{}", self.contract_address, self.chain_id).as_bytes())
+        Vec::from(format!("{}.{:?}", self.chain_id, self.contract_address).as_bytes())
     }
     pub fn as_bytes(&self) -> Vec<u8> {
         Vec::from(serde_json::to_string(&self).unwrap().as_bytes())
