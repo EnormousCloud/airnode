@@ -5,6 +5,7 @@ pub mod args;
 pub mod endpoints;
 pub mod fees;
 pub mod nice;
+pub mod reader;
 pub mod storage_config;
 pub mod storage_ops;
 pub mod usdprice;
@@ -37,6 +38,7 @@ pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> 
             let config =
                 AirnodeConfig::new(&rpc_address, contract_address, min_block, batch_size).unwrap(); // failure if there is no connection
             let _ = db_config.save(&config);
+            println!("{}", serde_json::to_string(&config).unwrap());
         }
         AirnodeConfigCmd::Get {
             contract_address,
@@ -105,13 +107,47 @@ pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> 
     Ok(())
 }
 
-pub fn cli_op(db_ops: storage_ops::Storage, cmd: AirnodeOpsCmd) -> anyhow::Result<()> {
+pub struct OpSaver {
+    pub rpc_addr: String,
+    pub db_ops: storage_ops::Storage,
+}
+
+impl reader::EventHandler for OpSaver {
+    fn on(&mut self, l: web3::types::Log) {
+        let op = airnode_ops::Operation::new(&l, &self.rpc_addr).unwrap();
+        self.db_ops.append(&op);
+    }
+}
+
+pub fn cli_op(
+    db_config: storage_config::Storage,
+    db_ops: storage_ops::Storage,
+    cmd: AirnodeOpsCmd,
+) -> anyhow::Result<()> {
     match cmd {
         AirnodeOpsCmd::Truncate { .. } => {
             let _ = db_ops.truncate();
             println!("OK");
         }
-        AirnodeOpsCmd::List { .. } => {
+        AirnodeOpsCmd::List {
+            chain_id,
+            contract_address,
+        } => {
+            let node = AirnodeRef::new(chain_id, contract_address);
+            let config = db_config.find(&node).unwrap();
+            let mut handler = OpSaver {
+                db_ops: db_ops.clone(),
+                rpc_addr: config.rpc_address.to_string(),
+            };
+            crate::reader::scan(
+                &config.rpc_address,
+                contract_address,
+                config.min_block.unwrap(),
+                None,
+                config.batch_size.unwrap(),
+                &mut handler,
+            )
+            .unwrap();
             let list = db_ops.list();
             println!("{}", serde_json::to_string(&list).unwrap());
         }
@@ -196,7 +232,7 @@ async fn main() -> anyhow::Result<()> {
             };
             let node = AirnodeRef::new(chain_id, contract_address);
             let db_ops = storage_ops::Storage::init(&args.data_dir, node);
-            return cli_op(db_ops, cmd);
+            return cli_op(db_config, db_ops, cmd);
         }
         Command::State(cmd) => {
             return cli_state(db_config, &args.data_dir, cmd);

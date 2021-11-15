@@ -3,7 +3,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::time::Duration;
-use web3::types::{Filter, Log, U256};
+use web3::types::{Filter, Log, H160, U256};
 
 pub struct EthClient {
     rpc_addr: String,
@@ -116,6 +116,16 @@ impl EthClient {
         self.execute_str(&payload)
     }
 
+    pub fn get_logs(&self, filter: &Filter) -> anyhow::Result<Vec<Log>> {
+        let filter_str = serde_json::to_string(filter).expect("filter serialize failure");
+        let payload = format!(
+            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_getLogs\",\"params\":[{}],\"id\":\"1\"}}",
+            filter_str
+        );
+        let res: RpcSingleResponse<Vec<Log>> = self.execute_str(&payload)?;
+        Ok(res.result)
+    }
+
     pub fn new_filter(&self, filter: &Filter) -> anyhow::Result<U256> {
         let filter_str = serde_json::to_string(filter).expect("filter serialize failure");
         let payload = format!(
@@ -146,5 +156,22 @@ impl EthClient {
             serde_json::Value::String(s) => return Ok(s.parse().unwrap()),
             _ => return Err(anyhow::Error::msg("result convertion failure")),
         }
+    }
+
+    pub fn get_max_block_number(&self) -> anyhow::Result<u64> {
+        let payload = format!(
+            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_blockNumber\",\"params\":[\"latest\",false],\"id\":\"1\"}}",
+        );
+        let res: RpcSingleResponse<U256> = self.execute_str(&payload)?;
+        Ok(res.result.as_u64())
+    }
+
+    pub fn get_eth_balance(&self, address: H160) -> anyhow::Result<U256> {
+        let payload = format!(
+            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[{},\"latest\"],\"id\":\"1\"}}",
+            address
+        );
+        let res: RpcSingleResponse<U256> = self.execute_str(&payload)?;
+        Ok(res.result)
     }
 }
