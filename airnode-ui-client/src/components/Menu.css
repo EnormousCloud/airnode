@@ -76,6 +76,7 @@
   top: 0px;
   right: 190px;
   height: 60px;
+  padding: 20px;
   background: var(--color-bk-darken);
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
@@ -86,6 +87,7 @@ button.btn-menu-open {
   position: fixed;
   top: 0px;
   right: 0px;
+  padding: 20px;
   background: var(--color-bk-darken);
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
