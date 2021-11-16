@@ -18,7 +18,7 @@ interface AirnodeOperationsProps {
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
     const { chainId, contractAddress, provider, airnodeState, dataStatus, operations } = props;
     const { xpubkey } = airnodeState;
-    const ops = (operations) ? operations[chainId + '-' + contractAddress + '-' + provider] || [] : [];
+    const ops = (operations) ? operations[chainId + '-' + contractAddress] || [] : [];
     return (
         <div>
             <AirnodeHeader {...fromParams(chainId, contractAddress, provider)} xpubkey={xpubkey} />
@@ -31,7 +31,9 @@ export const AirnodeOperations = (props: AirnodeOperationsProps) => {
                             <div>{dataStatus.errorMessage}</div>
                         ): ((dataStatus.isLoading) ? (
                                 <Loading />
-                            ): ops.map((op:any) => (
+                            ): ops.filter((op: any) => (
+                                op.e && op.e.provider_id === provider || op.e.airnode === provider
+                            )).map((op:any) => (
                                 <Operation key={op.tx} op={op} chainId={chainId + ''} />
                             ))
                         )}                        

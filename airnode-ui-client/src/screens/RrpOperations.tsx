@@ -15,8 +15,7 @@ interface RrpOperationsProps {
 
 export const RrpOperations = (props: RrpOperationsProps) => {
     const { chainId, contractAddress, dataStatus, operations } = props;
-    console.log(dataStatus, Object.keys(operations));
-    const ops = (operations) ? operations[chainId + '-' + contractAddress + '-'] || [] : [];
+    const ops = (operations) ? operations[chainId + '-' + contractAddress] || [] : [];
     return (
         <div className="no-airnode">
             <AirnodeHeader {...fromParams(chainId, contractAddress )}/>

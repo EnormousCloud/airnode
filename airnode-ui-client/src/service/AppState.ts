@@ -163,7 +163,7 @@ export const reducer = (state: AppState, action: any): AppState => {
             return { ...state, dataStatus: { isLoading: false, errorMessage: niceError(action.payload) } };
         case 'OPERATIONS_READY':
             const operations = { ...state.operations };
-            const key = state.selected?.chainId + "-" + state.selected?.contractAddress + "-" + state.selected?.provider;
+            const key = state.selected?.chainId + "-" + state.selected?.contractAddress;
             operations[ key ] = action.payload;
             return { ...state, dataStatus: DataIsReady, operations };
         default:

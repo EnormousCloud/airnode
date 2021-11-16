@@ -15,7 +15,6 @@ import { AirnodeOperations } from './screens/AirnodeOperations';
 import { AirnodeEndpoints } from './screens/AirnodeEndpoints';
 import { AirnodeWhitelist } from './screens/AirnodeWhitelist';
 import { AirnodeWithdrawals } from './screens/AirnodeWithdrawals';
-import { DataIsLoading } from './service/types';
 
 export const RRP: any = {};
 
