@@ -1,5 +1,4 @@
 import './Operation.css';
-import { ExternalLink } from './forms/ExternalLink';
 import { TxLink } from './forms/EtherscanLink';
 
 interface OperationProps {
