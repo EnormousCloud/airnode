@@ -7,6 +7,7 @@ pub trait LogIndex {
     fn init(data_dir: &str, airnode: AirnodeRef) -> Self;
     fn append(&self, v: &Operation) -> bool;
     fn list(&self) -> Vec<Operation>;
+    fn max_height(&self) -> u64;
     fn truncate(&self) -> bool;
 }
 
@@ -35,6 +36,17 @@ impl LogIndex for Storage {
 
     fn append(&self, v: &Operation) -> bool {
         self.db.put(v.as_ref().as_bytes(), v.as_bytes()).is_ok()
+    }
+
+    fn max_height(&self) -> u64 {
+        let mut iter = self.db.raw_iterator();
+        iter.seek_to_last();
+        if iter.valid() {
+            if let Ok(op) = Operation::from_bytes(iter.value().unwrap()) {
+                return op.height;
+            }
+        }
+        return 0;
     }
 
     fn list(&self) -> Vec<Operation> {
@@ -108,14 +120,17 @@ mod tests {
         let address: H160 = H160::from(into20(&fake::vec![u8; 20]));
         let airnode = AirnodeRef::new(1, address);
         let db = Storage::init(&data_dir, airnode);
+        assert_eq!(0, db.max_height());
         let first = random_operation();
         db.append(&first);
-        let second = random_operation();
+        let mut second = random_operation();
+        second.height = first.height + 1;
         db.append(&second);
         let ops = db.list();
         assert_eq!(ops.len(), 2);
         println!("{}", serde_json::to_string(&ops[0]).unwrap());
         println!("{}", serde_json::to_string(&ops[1]).unwrap());
+        assert_eq!(second.height, db.max_height());
         rocksdb::DB::destroy(&rocksdb::Options::default(), &data_dir).unwrap();
     }
 }
