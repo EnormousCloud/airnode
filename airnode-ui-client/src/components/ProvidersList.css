@@ -1,0 +1,20 @@
+
+.table-providers td.stats {
+    color: var(--color-text-darken);
+    font-size: 0.8em;
+    text-align: center;
+    font-family: monospace;
+}
+.table-providers td a {
+    font-size: 0.9em;
+    font-family: monospace;
+}
+
+.table-providers th {
+    font-size: 0.9em;
+    color: var(--color-text-darken);
+}
+
+.table-providers tr:hover {
+    background: var(--color-bk);
+}
