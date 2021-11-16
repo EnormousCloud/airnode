@@ -22,6 +22,7 @@ export const Select = (props: ScreenSelectProps) => {
             <h1>SELECT AIRNODE</h1>
             {fullState.map((node: any) => {
               const rrpURL = "/" + node.chain_id + "/" + node.contract_address;
+              const providers = node.providers;
               return (
                 <div className="well" key={node.contract_address}>
                   <h3 title="RRP Contract">
@@ -33,33 +34,117 @@ export const Select = (props: ScreenSelectProps) => {
                     />
                     ({node.operations_num} operations)
                   </h3>
-                  {node.providers ? (
-                    <ol>
-                      {Object.keys(node.providers)
-                        .filter(
-                          (p: any) => node.providers[p].operations_num > 0
-                        )
+                  {providers ? (
+                    <table className="table table-providers desktop-only">
+                      <thead>
+                        <tr>
+                          <th>Provider</th>
+                          <th>Requests</th>
+                          <th>Endpoints</th>
+                          <th>Functions</th>
+                          <th>Templates</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.keys(providers)
+                          .filter((p: any) => providers[p].operations_num > 0)
+                          .map((p: any) => {
+                            const airnode = providers[p];
+                            const airnodeURL =
+                              rrpURL + "/nodes/" + p + "/operations";
+                            const requests = Object.keys(
+                              airnode.requests
+                            ).length;
+                            const endpoints = Object.keys(
+                              airnode.endpoints
+                            ).length;
+                            const functions = Object.keys(
+                              airnode.functions
+                            ).length;
+                            const templates = Object.keys(
+                              airnode.templates
+                            ).length;
+                            return (
+                              <tr key={p}>
+                                <td>
+                                  <Link to={airnodeURL}>
+                                    {shortened(p, 16)}
+                                  </Link>
+                                </td>
+                                <td className="stats">
+                                  {requests ? requests : "-"}
+                                </td>
+                                <td className="stats">
+                                  {endpoints ? endpoints : "-"}
+                                </td>
+                                <td className="stats">
+                                  {functions ? functions : "-"}
+                                </td>
+                                <td className="stats">
+                                  {templates ? templates : "-"}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  ) : null}
+
+                  {providers ? (
+                    <ol className="mobile-only">
+                      {Object.keys(providers)
+                        .filter((p: any) => providers[p].operations_num > 0)
                         .map((p: any) => {
+                          const airnode = providers[p];
                           const airnodeURL =
                             rrpURL + "/nodes/" + p + "/operations";
+                          const requests = Object.keys(airnode.requests).length;
+                          const endpoints = Object.keys(
+                            airnode.endpoints
+                          ).length;
+                          const functions = Object.keys(
+                            airnode.functions
+                          ).length;
+                          const templates = Object.keys(
+                            airnode.templates
+                          ).length;
                           return (
                             <li key={p}>
-                              <Link to={airnodeURL}>{shortened(p, 8)}</Link>
-                              <br />
-                              <span className="darken">Operations:</span> 
-                              <span>{node.providers[p].operations_num}</span>
-                              &nbsp;
-                              <span className="darken">Requests:</span> 
-                              <span>{Object.keys(node.providers[p].requests).length}</span>
-                              &nbsp;
-                              <span className="darken">Endpoints:</span> 
-                              <span>{Object.keys(node.providers[p].endpoints).length}</span>
-                              &nbsp;
-                              <span className="darken">Functions:</span> 
-                              <span>{Object.keys(node.providers[p].functions).length}</span>
-                              &nbsp;
-                              <span className="darken">Templates:</span> 
-                              <span>{Object.keys(node.providers[p].templates).length}</span>
+                              <div className="">
+                                <Link to={airnodeURL}>{shortened(p, 8)}</Link>
+                              </div>
+                              <div className="row-stats">
+                                <div className="stats">
+                                  <span className="darken">Operations:</span>
+                                  <span>
+                                    {node.providers[p].operations_num}
+                                  </span>
+                                </div>
+                                {requests ? (
+                                  <div className="stats">
+                                    <span className="darken">Requests:</span>
+                                    <span>{requests ? requests : "-"}</span>
+                                  </div>
+                                ) : null}
+                                {endpoints ? (
+                                  <div className="stats">
+                                    <span className="darken">Endpoints:</span>
+                                    <span>{endpoints ? endpoints : "-"}</span>
+                                  </div>
+                                ) : null}
+                                {functions ? (
+                                  <div className="stats">
+                                    <span className="darken">Functions:</span>
+                                    <span>{functions ? functions : "-"}</span>
+                                  </div>
+                                ) : null}
+                                {templates ? (
+                                  <div className="stats">
+                                    <span className="darken">Templates:</span>
+                                    <span>{templates ? templates : "-"}</span>
+                                  </div>
+                                ) : null}
+                              </div>
                             </li>
                           );
                         })}
