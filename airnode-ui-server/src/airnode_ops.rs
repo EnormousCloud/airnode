@@ -161,6 +161,9 @@ pub enum AirnodeOpsCmd {
         /// Contract address of RRP contract in case of "op" or "state" command
         #[structopt(long, default_value = "")]
         contract_address: H160,
+        /// Skip syncing
+        #[structopt(long)]
+        no_sync: bool,
     },
     /// Reset operations log
     Truncate {

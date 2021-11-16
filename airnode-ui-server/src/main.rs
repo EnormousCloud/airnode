@@ -132,22 +132,27 @@ pub fn cli_op(
         AirnodeOpsCmd::List {
             chain_id,
             contract_address,
+            no_sync,
         } => {
-            let node = AirnodeRef::new(chain_id, contract_address);
-            let config = db_config.find(&node).unwrap();
-            let mut handler = OpSaver {
-                db_ops: db_ops.clone(),
-                rpc_addr: config.rpc_address.to_string(),
-            };
-            crate::reader::scan(
-                &config.rpc_address,
-                contract_address,
-                config.min_block.unwrap(),
-                None,
-                config.batch_size.unwrap(),
-                &mut handler,
-            )
-            .unwrap();
+            if !no_sync {
+                let node = AirnodeRef::new(chain_id, contract_address);
+                let config = db_config.find(&node).unwrap();
+                let min_block = std::cmp::max(config.min_block.unwrap(), db_ops.max_height() + 1);
+                tracing::info!("scanning from block {}", min_block);
+                let mut handler = OpSaver {
+                    db_ops: db_ops.clone(),
+                    rpc_addr: config.rpc_address.to_string(),
+                };
+                crate::reader::scan(
+                    &config.rpc_address,
+                    contract_address,
+                    min_block,
+                    None,
+                    config.batch_size.unwrap(),
+                    &mut handler,
+                )
+                .unwrap();
+            }
             let list = db_ops.list();
             println!("{}", serde_json::to_string(&list).unwrap());
         }
@@ -224,6 +229,7 @@ async fn main() -> anyhow::Result<()> {
                 AirnodeOpsCmd::List {
                     chain_id,
                     contract_address,
+                    no_sync: _,
                 } => (chain_id, contract_address),
                 AirnodeOpsCmd::Truncate {
                     chain_id,
