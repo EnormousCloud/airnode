@@ -110,12 +110,13 @@ RRP.GetAdmins = () => {
   const params = useParams();
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
-  const [state, dispatch] = init('SELECT_RRP', { chainId, contractAddress, activeMenu: 'admins' });
-  const { nodeStatus, menu, fullState } = state;
+  const [state, dispatch] = initOps('SELECT_RRP', { chainId, contractAddress, activeMenu: 'admins' });
+  const { nodeStatus, menu, dataStatus, operations, fullState } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
+  
   const nodeState = fullState.find((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress));
-  return <RrpAdmins {...{ menu, chainId, contractAddress, nodeState }} />
+  return <RrpAdmins {...{ menu, chainId, contractAddress, nodeState, dataStatus, operations }} />
 }
 
 export const Airnode: any = {};
