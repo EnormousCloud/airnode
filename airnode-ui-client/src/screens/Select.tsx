@@ -26,7 +26,8 @@ export const Select = (props: ScreenSelectProps) => {
                       chainId={node.chain_id + ""}
                       address={node.contract_address}
                     />
-                    ({node.operations_num} operations)
+                    <br className="mobile-only" />
+                    <small>({node.operations_num} operations)</small>
                   </h3>
                   <ProvidersList
                     providers={providers}
