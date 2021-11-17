@@ -138,18 +138,21 @@ pub fn cli_op(
                 let node = AirnodeRef::new(chain_id, contract_address);
                 let config = db_config.find(&node).unwrap();
                 let min_block = std::cmp::max(config.min_block.unwrap(), db_ops.max_height() + 1);
-                tracing::info!("scanning from block {}", min_block);
-                let mut handler = OpSaver {
-                    db_ops: db_ops.clone(),
-                    rpc_addr: config.rpc_address.to_string(),
-                };
+                tracing::info!(
+                    "rrp contract {} scanning from block {}",
+                    contract_address,
+                    min_block
+                );
                 crate::reader::scan(
                     &config.rpc_address,
                     contract_address,
                     min_block,
                     None,
                     config.batch_size.unwrap(),
-                    &mut handler,
+                    &mut OpSaver {
+                        db_ops: db_ops.clone(),
+                        rpc_addr: config.rpc_address.to_string(),
+                    },
                 )
                 .unwrap();
             }
@@ -169,18 +172,41 @@ pub fn cli_state(
         AirnodeStateCmd::Get {
             chain_id,
             contract_address,
+            no_sync,
         } => {
             let node = AirnodeRef::new(chain_id, contract_address);
             let config = db_config.find(&node).expect("airnode not found");
             let mut state: AirnodeState = AirnodeState::new(&node);
             let db_ops = storage_ops::Storage::init(&data_dir, node);
+
+            if !no_sync {
+                let min_block = std::cmp::max(config.min_block.unwrap(), db_ops.max_height() + 1);
+                tracing::info!(
+                    "rrp contract {} scanning from block {}",
+                    contract_address,
+                    min_block
+                );
+                crate::reader::scan(
+                    &config.rpc_address,
+                    contract_address,
+                    min_block,
+                    None,
+                    config.batch_size.unwrap(),
+                    &mut OpSaver {
+                        db_ops: db_ops.clone(),
+                        rpc_addr: config.rpc_address.to_string(),
+                    },
+                )
+                .unwrap();
+            }
+
             for op in db_ops.list() {
                 state.handle_op(&op);
             }
             state.update_balance(&config.rpc_address);
             println!("{}", serde_json::to_string(&state).unwrap());
         }
-        AirnodeStateCmd::List => {
+        AirnodeStateCmd::List { no_sync } => {
             let rc_list: Arc<Mutex<Vec<AirnodeState>>> = Arc::new(Mutex::new(vec![]));
             let dir: Arc<String> = Arc::new(data_dir.to_string());
             let mut threads = vec![];
@@ -191,6 +217,28 @@ pub fn cli_state(
                     let node = AirnodeRef::new(config.chain_id, config.contract_address);
                     let mut state: AirnodeState = AirnodeState::new(&node);
                     let db_ops = storage_ops::Storage::init(&data_path, node);
+                    if !no_sync {
+                        let min_block =
+                            std::cmp::max(config.min_block.unwrap(), db_ops.max_height() + 1);
+                        tracing::info!(
+                            "rrp contract {} scanning from block {}",
+                            config.contract_address,
+                            min_block
+                        );
+                        crate::reader::scan(
+                            &config.rpc_address,
+                            config.contract_address,
+                            min_block,
+                            None,
+                            config.batch_size.unwrap(),
+                            &mut OpSaver {
+                                db_ops: db_ops.clone(),
+                                rpc_addr: config.rpc_address.to_string(),
+                            },
+                        )
+                        .unwrap();
+                    }
+
                     for op in db_ops.list() {
                         state.handle_op(&op);
                     }
