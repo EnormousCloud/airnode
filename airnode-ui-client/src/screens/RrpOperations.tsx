@@ -13,6 +13,19 @@ interface RrpOperationsProps {
     operations: any
 }
 
+const renderOps = (chainId: number, dataStatus: DataStatus, ops: any) => {
+    if (dataStatus.errorMessage) return (<div>{dataStatus.errorMessage}</div>);
+    if (dataStatus.isLoading) return <Loading />;
+    if (!ops || ops.length === 0) return <div className='block-empty'>NO HISTORY</div>;
+    return (
+        <div>
+            {ops.map((op:any) => (
+                <Operation key={op.tx} op={op} chainId={chainId + ''} />
+            ))}
+        </div>
+    );
+}
+
 export const RrpOperations = (props: RrpOperationsProps) => {
     const { chainId, contractAddress, dataStatus, operations } = props;
     const ops = (operations) ? operations[chainId + '-' + contractAddress] || [] : [];
@@ -24,14 +37,7 @@ export const RrpOperations = (props: RrpOperationsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
-                        {(dataStatus.errorMessage) ? (
-                            <div>{dataStatus.errorMessage}</div>
-                        ): ((dataStatus.isLoading) ? (
-                                <Loading />
-                            ): ops.map((op:any) => (
-                                <Operation key={op.tx} op={op} chainId={chainId + ''} />
-                            ))
-                        )}
+                        {renderOps(chainId, dataStatus, ops)} 
                     </div>
                 </div>
             </main>
