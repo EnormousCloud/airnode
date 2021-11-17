@@ -91,7 +91,7 @@ RRP.GetProviders = () => {
   const { nodeStatus, menu, fullState } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
-  const nodeState = fullState.filter((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress));
+  const nodeState = fullState.find((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress));
   return <RrpAirnodes {...{ menu, chainId, contractAddress, nodeState }} />
 }
 

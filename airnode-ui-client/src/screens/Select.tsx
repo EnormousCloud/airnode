@@ -16,7 +16,7 @@ export const Select = (props: ScreenSelectProps) => {
           <div className="content">
             <h1>SELECT AIRNODE</h1>
             {fullState.map((node: any) => {
-              const providers = node.providers;
+              const providers = node.providers || node.airnodes;
               return (
                 <div className="well" key={node.contract_address}>
                   <h3 title="RRP Contract">
