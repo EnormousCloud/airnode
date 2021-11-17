@@ -128,6 +128,19 @@ h1 {
   }
 }
 
+h2 {
+  font-size: 1.2em;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 0px;
+}
+
+@media (min-width: 960px) {
+  h2 {
+    font-size: 2em;
+  }
+}
+
 .big-title,
 h2.big-title,
 h3.big-title {
@@ -251,6 +264,14 @@ table.table tbody tr:nth-child(odd) {
   font-size: 0.75em;
   background: var(--color-accent);
   color: var(--color-bk-highlight);
+}
+
+.block-empty {
+  text-align: center;
+  padding-top: 32px;
+  padding-bottom: 32px;
+  color: var(--color-bk-highlight) !important;
+  font-size: 1.5rem;
 }
 
 .screen-empty {
