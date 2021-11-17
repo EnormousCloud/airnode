@@ -1,6 +1,8 @@
 import { Footer } from '../components/Footer';
 import { MenuPanel, MenuPanelProps } from './../components/MenuPanel';
 import { AirnodeHeader, fromParams } from "./../components/AirnodeHeader";
+import { ProvidersList } from "../components/ProvidersList";
+import { getChainName } from '../service/Chain';
 
 interface RrpAirnodesProps {
     chainId: number
@@ -9,25 +11,27 @@ interface RrpAirnodesProps {
     nodeState: any
 }
 
-// const shortened = (x: string, ln: number) => {
-//   if (!x || !x.startsWith("0x") || x.length <= ln * 2 + 2) return x;
-//   return x.substring(0, ln + 2) + "..." + x.substring(x.length - ln);
-// };
-
 export const RrpAirnodes = (props: RrpAirnodesProps) => {
     const { chainId, contractAddress } = props;
     const { nodeState } = props;
-    const provider = '';
-    const xPubKey = '';
+    const providers = nodeState.providers || nodeState.airnodes;
     return (
         <div className="no-airnode">
-            <AirnodeHeader {...fromParams(chainId, contractAddress, provider, xPubKey )}/>
+            <AirnodeHeader {...fromParams(chainId, contractAddress )}/>
             <main>
                 <div className="inner">
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Airnodes</h1>
-                        <pre>{JSON.stringify(nodeState, null, 2)}</pre>
+                        <div style={{ textAlign: 'center', fontSize: '0.8rem' }} className="darken">
+                            {getChainName(chainId)} Contract &nbsp;
+                            <strong>{contractAddress}</strong>
+                        </div>
+                        <ProvidersList
+                            providers={providers}
+                            chainId={chainId}
+                            contractAddress={contractAddress}
+                        />
                     </div>
                 </div>
             </main>
