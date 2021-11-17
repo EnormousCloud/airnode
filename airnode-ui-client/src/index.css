@@ -95,7 +95,7 @@ ul {
 }
 
 .content {
-  max-width: 844px;
+  max-width: 744px;
   margin: 0px auto;
   padding: 0px 20px;
 }
@@ -233,7 +233,7 @@ table.table tbody td.entry {
 }
 
 table.table tbody tr:nth-child(odd) {
-  background-color: var(--color-body);
+  background-color: var(--color-bk);
 }
 
 .badges {

@@ -56,7 +56,7 @@ export const ProvidersList = (props: ProvidersListProps) => {
       ) : null}
 
       {providers ? (
-        <ol className="mobile-only">
+        <ol className="list-providers mobile-only">
           {Object.keys(providers)
             .filter((p: any) => providers[p].operations_num > 0)
             .map((p: any) => {
@@ -74,30 +74,30 @@ export const ProvidersList = (props: ProvidersListProps) => {
                   <div className="row-stats">
                     <div className="stats">
                       <span className="darken">Operations:</span>
-                      <span>{providers[p].operations_num}</span>
+                      <strong>{providers[p].operations_num}</strong>
                     </div>
                     {requests ? (
                       <div className="stats">
                         <span className="darken">Requests:</span>
-                        <span>{requests ? requests : "-"}</span>
+                        <strong>{requests ? requests : "-"}</strong>
                       </div>
                     ) : null}
                     {endpoints ? (
                       <div className="stats">
                         <span className="darken">Endpoints:</span>
-                        <span>{endpoints ? endpoints : "-"}</span>
+                        <strong>{endpoints ? endpoints : "-"}</strong>
                       </div>
                     ) : null}
                     {functions ? (
                       <div className="stats">
                         <span className="darken">Functions:</span>
-                        <span>{functions ? functions : "-"}</span>
+                        <strong>{functions ? functions : "-"}</strong>
                       </div>
                     ) : null}
                     {templates ? (
                       <div className="stats">
                         <span className="darken">Templates:</span>
-                        <span>{templates ? templates : "-"}</span>
+                        <strong>{templates ? templates : "-"}</strong>
                       </div>
                     ) : null}
                   </div>
