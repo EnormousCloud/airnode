@@ -168,7 +168,7 @@ impl EthClient {
 
     pub fn get_eth_balance(&self, address: H160) -> anyhow::Result<U256> {
         let payload = format!(
-            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[{},\"latest\"],\"id\":\"1\"}}",
+            "{{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"{:?}\",\"latest\"],\"id\":\"1\"}}",
             address
         );
         let res: RpcSingleResponse<U256> = self.execute_str(&payload)?;
