@@ -1,10 +1,10 @@
 {
   "name": "airnode-ui-client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "scripts": {
     "dev": "vite",
     "start": "VITE_API_URL=http://localhost:8000 vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --base ./",
     "preview": "vite preview",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
