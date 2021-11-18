@@ -291,7 +291,7 @@ async fn main() -> anyhow::Result<()> {
         Command::State(cmd) => {
             return cli_state(db_config, &args.data_dir, cmd);
         }
-        Command::Server { listen } => {
+        Command::Server { listen, no_sync } => {
             // connecting to databases of operations:
             let mut db_ops = Map::new();
             for node in db_config.list() {
@@ -307,15 +307,43 @@ async fn main() -> anyhow::Result<()> {
             let mut threads = vec![];
             for config in db_config.list() {
                 let rcc = app_state.clone();
+
                 threads.push(std::thread::spawn(move || {
                     let node = AirnodeRef::new(config.chain_id, config.contract_address);
+                    let default_state = AirnodeState::new(&node);
+                    let db = {
+                        let mut rc = rcc.lock().unwrap();
+                        rc.states.insert(node.clone(), default_state);
+                        rc.db_ops.get(&node).unwrap().clone()
+                    };
+                    let ops = {
+                        if !no_sync {
+                            let min_block =
+                                std::cmp::max(config.min_block.unwrap(), db.max_height() + 1);
+                            tracing::info!(
+                                "rrp contract {} scanning from block {}",
+                                config.contract_address,
+                                min_block
+                            );
+                            crate::reader::scan(
+                                &config.rpc_address,
+                                config.contract_address,
+                                min_block,
+                                None,
+                                config.batch_size.unwrap(),
+                                &mut OpSaver {
+                                    db_ops: db.clone(),
+                                    rpc_addr: config.rpc_address.to_string(),
+                                },
+                            )
+                            .unwrap();
+                        }
+                        db.list()
+                    };
+                    tracing::info!("rrp contract: found {} operations", ops.len());
                     let mut state: AirnodeState = {
                         let rc = rcc.lock().unwrap();
                         rc.states.get(&node).unwrap().clone()
-                    };
-                    let ops = {
-                        let rc = rcc.lock().unwrap();
-                        rc.db_ops.get(&node).unwrap().list()
                     };
                     for op in ops {
                         state.handle_op(&op);

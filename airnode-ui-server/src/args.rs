@@ -17,6 +17,9 @@ pub enum Command {
         /// Net listening address of HTTP server in case of "server" command
         #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
         listen: String,
+        /// Skip syncing
+        #[structopt(long)]
+        no_sync: bool,
     },
 }
 
