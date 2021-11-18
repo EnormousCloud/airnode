@@ -65,7 +65,6 @@ impl KVStore for Storage {
         iter.seek_to_first();
         while iter.valid() {
             if let Some(v) = iter.value() {
-                println!("key = {:?}", String::from_utf8_lossy(iter.key().unwrap()));
                 if let Ok(config) = AirnodeConfig::from(v.to_vec()) {
                     res.push(config);
                 }
