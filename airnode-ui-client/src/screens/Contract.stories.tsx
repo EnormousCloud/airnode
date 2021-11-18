@@ -28,12 +28,12 @@ const TemplateAdd: ComponentStory<typeof AddContract> = (args) => (
 export const Add = TemplateAdd.bind({});
 Add.args = {};
 
-const TemplateFilter: ComponentStory<typeof ChangeFilter> = (args) => (
-  <ChangeFilter {...args} />
-);
-export const Filter = TemplateFilter.bind({});
-Filter.args = {
-  chainId, 
-  contractAddress,
-  menu: { ...mockMenu, airnode: null },
-};
+// const TemplateFilter: ComponentStory<typeof ChangeFilter> = (args) => (
+//   <ChangeFilter {...args} />
+// );
+// export const Filter = TemplateFilter.bind({});
+// Filter.args = {
+//   chainId, 
+//   contractAddress,
+//   menu: { ...mockMenu, airnode: null },
+// };
