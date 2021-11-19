@@ -13,7 +13,7 @@ pub mod web3sync;
 
 use crate::airnode_config::{AirnodeConfig, AirnodeConfigCmd, AirnodeRef};
 use crate::airnode_ops::AirnodeOpsCmd;
-use crate::airnode_state::{AirnodeState, AirnodeStateCmd};
+use crate::airnode_state::{AirnodeRrpState, AirnodeStateCmd};
 use crate::args::Command;
 use crate::storage_config::KVStore;
 use crate::storage_ops::LogIndex;
@@ -24,7 +24,7 @@ use std::sync::{Arc, Mutex};
 pub struct AppState {
     pub db_config: storage_config::Storage,
     pub db_ops: Map<AirnodeRef, storage_ops::Storage>,
-    pub states: Map<AirnodeRef, AirnodeState>,
+    pub states: Map<AirnodeRef, AirnodeRrpState>,
 }
 
 pub fn cli_config(db_config: storage_config::Storage, cmd: AirnodeConfigCmd) -> anyhow::Result<()> {
@@ -176,7 +176,7 @@ pub fn cli_state(
         } => {
             let node = AirnodeRef::new(chain_id, contract_address);
             let config = db_config.find(&node).expect("airnode not found");
-            let mut state: AirnodeState = AirnodeState::new(&node);
+            let mut state = AirnodeRrpState::new(&node);
             let db_ops = storage_ops::Storage::init(&data_dir, node);
 
             if !no_sync {
@@ -207,7 +207,7 @@ pub fn cli_state(
             println!("{}", serde_json::to_string(&state).unwrap());
         }
         AirnodeStateCmd::List { no_sync } => {
-            let rc_list: Arc<Mutex<Vec<AirnodeState>>> = Arc::new(Mutex::new(vec![]));
+            let rc_list: Arc<Mutex<Vec<AirnodeRrpState>>> = Arc::new(Mutex::new(vec![]));
             let dir: Arc<String> = Arc::new(data_dir.to_string());
             let mut threads = vec![];
             for config in db_config.list() {
@@ -215,7 +215,7 @@ pub fn cli_state(
                 let data_path = dir.clone();
                 threads.push(std::thread::spawn(move || {
                     let node = AirnodeRef::new(config.chain_id, config.contract_address);
-                    let mut state: AirnodeState = AirnodeState::new(&node);
+                    let mut state = AirnodeRrpState::new(&node);
                     let db_ops = storage_ops::Storage::init(&data_path, node);
                     if !no_sync {
                         let min_block =
@@ -310,7 +310,7 @@ async fn main() -> anyhow::Result<()> {
 
                 threads.push(std::thread::spawn(move || {
                     let node = AirnodeRef::new(config.chain_id, config.contract_address);
-                    let default_state = AirnodeState::new(&node);
+                    let default_state = AirnodeRrpState::new(&node);
                     let db = {
                         let mut rc = rcc.lock().unwrap();
                         rc.states.insert(node.clone(), default_state);
@@ -341,7 +341,7 @@ async fn main() -> anyhow::Result<()> {
                         db.list()
                     };
                     tracing::info!("rrp contract: found {} operations", ops.len());
-                    let mut state: AirnodeState = {
+                    let mut state: AirnodeRrpState = {
                         let rc = rcc.lock().unwrap();
                         rc.states.get(&node).unwrap().clone()
                     };
