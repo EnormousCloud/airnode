@@ -71,22 +71,9 @@ pub struct SyncState {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AirnodeState {
-    /// whether this airnode is owned
-    /// by the private key/seed in the contaner environment
-    pub owned: bool,
-    /// chain ID
-    pub chain_id: u64,
-    /// address of the airnode
-    pub contract_address: H160,
-    /// details about chain syncing
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub sync: Option<SyncState>,
     /// extended public key of the Airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub xpubkey: Option<String>,
-    /// current balance details
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub balance: Option<Balance>,
     /// sponsor of this airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sponsor: Option<H160>,
@@ -102,11 +89,35 @@ pub struct AirnodeState {
     pub whitelisted: Vec<H160>,
     /// list of admins of this airnode
     pub admins: Vec<H160>,
+    /// current balance of airnode
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub balance: Option<Balance>,
+    /// number of operations that happened with this airnode
+    pub operations_num: u32,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct AirnodeRrpState {
+    /// whether this airnode is owned
+    /// by the private key/seed in the contaner environment
+    pub owned: bool,
+    /// chain ID
+    pub chain_id: u64,
+    /// address of the airnode
+    pub contract_address: H160,
+    /// details about chain syncing
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sync: Option<SyncState>,
+    /// current balance of RRP contract
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub balance: Option<Balance>,
+    /// Map of each airnode
+    pub airnodes: Map<H160, AirnodeState>,
     /// number of operations that happened
     pub operations_num: u32,
 }
 
-impl AirnodeState {
+impl AirnodeRrpState {
     pub fn new(node: &AirnodeRef) -> Self {
         Self {
             chain_id: node.chain_id,
@@ -116,7 +127,7 @@ impl AirnodeState {
     }
 }
 
-impl AirnodeState {
+impl AirnodeRrpState {
     pub fn handle_op(&mut self, _op: &Operation) {
         self.operations_num += 1;
     }
@@ -138,7 +149,11 @@ impl AirnodeState {
 #[serde(tag = "type")]
 pub enum AirnodeStateCmd {
     /// List states for all nodes
-    List,
+    List {
+        /// Skip syncing
+        #[structopt(long)]
+        no_sync: bool,
+    },
     /// Get the state of the single node
     Get {
         /// Chain ID of RRP contract in case of "op" or "state" command
@@ -147,5 +162,8 @@ pub enum AirnodeStateCmd {
         /// Contract address of RRP contract in case of "op" or "state" command
         #[structopt(long, default_value = "")]
         contract_address: H160,
+        /// Skip syncing
+        #[structopt(long)]
+        no_sync: bool,
     },
 }
