@@ -137,11 +137,25 @@ impl AirnodeRrpState {
         let balance = match client.get_eth_balance(self.contract_address) {
             Ok(x) => x,
             Err(e) => {
-                tracing::warn!("Error of retrieving balance {}", e);
+                tracing::warn!(
+                    "Error of retrieving balance {} of RRP contract {:?}",
+                    e,
+                    self.contract_address,
+                );
                 return;
             }
         };
         self.balance = Some(Balance::new(balance, self.chain_id));
+        for (node, state) in &mut self.airnodes {
+            let balance = match client.get_eth_balance(*node) {
+                Ok(x) => x,
+                Err(e) => {
+                    tracing::warn!("Error of retrieving balance {} of airnode {:?}", e, node);
+                    return;
+                }
+            };
+            state.balance = Some(Balance::new(balance, self.chain_id));
+        }
     }
 }
 
