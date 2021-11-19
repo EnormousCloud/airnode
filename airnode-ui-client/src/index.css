@@ -106,6 +106,12 @@ ul {
   background: #000;
 }
 
+.content .filtered {
+  font-size: 0.8rem;
+  color: var(--color-text-darken);
+  margin-bottom: 20px;
+}
+
 h1,
 h2,
 h3,

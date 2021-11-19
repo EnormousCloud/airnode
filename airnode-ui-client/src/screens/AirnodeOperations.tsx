@@ -9,16 +9,43 @@ interface AirnodeOperationsProps {
     chainId: number
     contractAddress: string
     provider: string
+    filterName?: string
+    filterValue?: string
     menu: MenuPanelProps
     dataStatus: DataStatus
     airnodeState: any
     operations: any
 }
 
+const renderOps = (chainId: number, dataStatus: DataStatus, ops: any) => {
+    if (dataStatus.errorMessage) return (<div>{dataStatus.errorMessage}</div>);
+    if (dataStatus.isLoading) return <Loading />;
+    if (!ops || ops.length === 0) return <div className='block-empty'>NO HISTORY</div>;
+    return (
+        <div>
+            {ops.map((op:any) => (
+                <Operation key={op.tx} op={op} chainId={chainId + ''} />
+            ))}
+        </div>
+    );
+}
+
 export const AirnodeOperations = (props: AirnodeOperationsProps) => {
     const { chainId, contractAddress, provider, airnodeState, dataStatus, operations } = props;
+    const { filterName, filterValue } = props;
     const { xpubkey } = airnodeState;
-    const ops = (operations) ? operations[chainId + '-' + contractAddress] || [] : [];
+    const opsAll = (operations) ? operations[chainId + '-' + contractAddress] || [] : [];
+    const ops = opsAll.filter((op: any) => {
+        if (!op.e) return false
+        if (op.e.provider_id !== provider && op.e.airnode !== provider) return false;
+        if (filterName && filterValue) {
+            if (filterName == 'request') return (op.e.request_id == filterValue);
+            if (filterName == 'endpoint') return (op.e.endpoint_id == filterValue);
+            if (filterName == 'from') return (op.from == filterValue);
+            if (filterName == 'tx') return (op.tx == filterValue);
+        }
+        return true;
+    });
     return (
         <div>
             <AirnodeHeader {...fromParams(chainId, contractAddress, provider)} xpubkey={xpubkey} />
@@ -27,16 +54,12 @@ export const AirnodeOperations = (props: AirnodeOperationsProps) => {
                     <MenuPanel {...props.menu} />
                     <div className="content">
                         <h1>Operations</h1>
-                        {(dataStatus.errorMessage) ? (
-                            <div>{dataStatus.errorMessage}</div>
-                        ): ((dataStatus.isLoading) ? (
-                                <Loading />
-                            ): ops.filter((op: any) => (
-                                op.e && op.e.provider_id === provider || op.e.airnode === provider
-                            )).map((op:any) => (
-                                <Operation key={op.tx} op={op} chainId={chainId + ''} />
-                            ))
-                        )}                        
+                        {(filterName && filterValue) ? (
+                            <div className="filtered darken">
+                                Filtered by {filterName}: <strong>{filterValue}</strong>
+                            </div>
+                        ): null}
+                        {renderOps(chainId, dataStatus, ops)}
                     </div>
                 </div>
             </main>

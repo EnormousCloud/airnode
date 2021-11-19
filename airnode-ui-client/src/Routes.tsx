@@ -69,7 +69,7 @@ RRP.Add = () => {
   const { nodeStatus } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
-  return <AddContract />
+  return <AddContract onSubmit={() => {}}/>
 }
 
 RRP.ChangeFilter = () => {
@@ -114,7 +114,6 @@ RRP.GetAdmins = () => {
   const { nodeStatus, menu, dataStatus, operations, fullState } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading) return <LoadingScreen />;
-  
   const nodeState = fullState.find((x: any) => (x.chain_id == chainId && x.contract_address == contractAddress));
   return <RrpAdmins {...{ menu, chainId, contractAddress, nodeState, dataStatus, operations }} />
 }
@@ -138,11 +137,12 @@ Airnode.GetOperations = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
+  const { filterName, filterValue } = params;
   const [state, dispatch] = initOps('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'operations' });
   const { airnodeState, nodeStatus, dataStatus, menu, operations } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
-  return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, dataStatus, airnodeState, operations }} />
+  return <AirnodeOperations {...{ menu, chainId, contractAddress, provider, dataStatus, airnodeState, operations, filterName, filterValue }} />
 }
 
 Airnode.GetEndpoints = () => {
