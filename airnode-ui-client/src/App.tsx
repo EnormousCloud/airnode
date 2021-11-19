@@ -14,6 +14,7 @@ const App = () => {
         <Route path="/:chainId/:contractAddress/admins" element={<RRP.GetAdmins />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/requests" element={<Airnode.GetRequests />}/>
         <Route path="/:chainId/:contractAddress/nodes/:provider/operations" element={<Airnode.GetOperations />} />
+        <Route path="/:chainId/:contractAddress/nodes/:provider/operations/:filterName/:filterValue" element={<Airnode.GetOperations />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/endpoints" element={<Airnode.GetEndpoints />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/whitelist" element={<Airnode.GetWhitelist />} />
         <Route path="/:chainId/:contractAddress/nodes/:provider/withdrawals" element={<Airnode.GetWithdrawals />} />
