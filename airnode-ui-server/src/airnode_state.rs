@@ -71,6 +71,12 @@ pub struct SyncState {
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct AirnodeRR {
+    /// request ID
+    pub id: U256,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct AirnodeState {
     /// extended public key of the Airnode
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -79,7 +85,7 @@ pub struct AirnodeState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sponsor: Option<H160>,
     /// map of requests that were actually took place
-    pub requests: Map<H256, u32>,
+    pub requests: Map<H256, AirnodeRR>,
     /// map of endpoints that were actually used
     pub endpoints: Map<H256, u32>,
     /// map of templates that were actually used
@@ -124,7 +130,7 @@ pub struct AirnodeRrpState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<Balance>,
     /// Map of each provider (pre-alpha)
-    pub providers: Map<u64, AirnodeState>,
+    pub providers: Map<U256, AirnodeState>,
     /// Map of each airnode (v0.2+)
     pub airnodes: Map<H160, AirnodeState>,
     /// number of operations that happened
@@ -169,10 +175,20 @@ impl AirnodeRrpState {
             }
             _ => {}
         };
-        // let airnode = match op.event.get_airnode() {
-        //     Some(x) => Some(x),
-        //     None => op.event.get_provider_id(),
-        // };
+        if let Some(provider_id) = op.event.get_provider_id() {
+            match &op.event {
+                AirnodeEvent::ProviderCreatedA {
+                    provider_id: _,
+                    admin: _,
+                    xpub,
+                } => {
+                    let mut provider = AirnodeState::default();
+                    provider.xpubkey = Some(xpub.clone());
+                    self.providers.insert(provider_id, provider);
+                }
+                _ => {}
+            };
+        };
         self.operations_num += 1;
     }
 
