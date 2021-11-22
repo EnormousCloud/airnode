@@ -272,6 +272,16 @@ table.table tbody tr:nth-child(odd) {
   color: var(--color-bk-highlight);
 }
 
+.badge-ok {
+  background: var(--color-bk-highlight);
+  color: var(--color-text-darken);
+}
+.badge-error {
+  background: var(--color-warning);
+  color: var(--color-text-darken);
+}
+
+
 .block-empty {
   text-align: center;
   padding-top: 32px;
