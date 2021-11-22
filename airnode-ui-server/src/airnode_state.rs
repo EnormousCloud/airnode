@@ -1,6 +1,7 @@
 use crate::airnode_config::AirnodeRef;
 use crate::airnode_ops::Operation;
 use crate::web3sync::EthClient;
+use airnode_events::AirnodeEvent;
 use chrono::offset::Utc;
 use chrono::DateTime;
 use serde::{Deserialize, Serialize};
@@ -87,13 +88,24 @@ pub struct AirnodeState {
     pub functions: Map<H256, u32>,
     /// list of whitelist addresses
     pub whitelisted: Vec<H160>,
-    /// list of admins of this airnode
-    pub admins: Vec<H160>,
     /// current balance of airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<Balance>,
     /// number of operations that happened with this airnode
     pub operations_num: u32,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+pub struct AirnodeRrpAdmin {
+    /// address of the admin
+    address: H160,
+    /// rank of the admin
+    rank: u64,
+}
+impl AirnodeRrpAdmin {
+    pub fn new(address: H160, rank: u64) -> Self {
+        Self { address, rank }
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -111,10 +123,14 @@ pub struct AirnodeRrpState {
     /// current balance of RRP contract
     #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<Balance>,
-    /// Map of each airnode
+    /// Map of each provider (pre-alpha)
+    pub providers: Map<u64, AirnodeState>,
+    /// Map of each airnode (v0.2+)
     pub airnodes: Map<H160, AirnodeState>,
     /// number of operations that happened
     pub operations_num: u32,
+    /// list of admins of this RRP contract
+    pub admins: Map<H160, AirnodeRrpAdmin>,
 }
 
 impl AirnodeRrpState {
@@ -128,7 +144,35 @@ impl AirnodeRrpState {
 }
 
 impl AirnodeRrpState {
-    pub fn handle_op(&mut self, _op: &Operation) {
+    pub fn handle_op(&mut self, op: &Operation) {
+        match op.event {
+            AirnodeEvent::SetRankAdminned {
+                adminned: _,
+                caller_admin: _,
+                target_admin,
+                new_rank,
+            } => {
+                self.admins.insert(
+                    target_admin.clone(),
+                    AirnodeRrpAdmin::new(target_admin, new_rank.as_u64()),
+                );
+            }
+            AirnodeEvent::SetRank {
+                caller_admin: _,
+                target_admin,
+                new_rank,
+            } => {
+                self.admins.insert(
+                    target_admin.clone(),
+                    AirnodeRrpAdmin::new(target_admin, new_rank.as_u64()),
+                );
+            }
+            _ => {}
+        };
+        // let airnode = match op.event.get_airnode() {
+        //     Some(x) => Some(x),
+        //     None => op.event.get_provider_id(),
+        // };
         self.operations_num += 1;
     }
 
