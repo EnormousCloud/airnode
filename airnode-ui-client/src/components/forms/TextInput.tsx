@@ -4,6 +4,7 @@ import { Checked, Warn } from './Check';
 export interface TextInputProps {
   type?: string
   id?: string
+  name?: string
   value: any
   style?: CSSProperties
   onChange: Function
@@ -138,6 +139,7 @@ export const TextInput = (props: TextInputProps) => {
         {props.prefix ? <div style={stylePrefixes} >{props.prefix}</div> : null}
         <input
           id={props.id}
+          name={props.name}
           maxLength={props.maxLength}
           ref={refInput}
           onChange={onChange}

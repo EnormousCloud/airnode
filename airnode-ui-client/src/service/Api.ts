@@ -5,6 +5,6 @@ const root = () => {
 };
 
 export const API = {
-    fetchState: () => fetch(root() + '/api/states').then(r => r.json()),
-    fetchOps: (chainId: number, address: string) => fetch(root() + '/api/operations/' + chainId + "/" + address).then(r => r.json())
+    fetchState: () => fetch(root() + 'api/states').then(r => r.json()),
+    fetchOps: (chainId: number, address: string) => fetch(root() + 'api/operations/' + chainId + "/" + address).then(r => r.json())
 };

@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "start": "VITE_API_URL=http://localhost:8000 vite",
-    "build": "tsc && vite build --base ./",
+    "build": "tsc && vite build --base /",
+    "build-demo": "tsc && vite build --base /dao/api3/airnodes",
     "preview": "vite preview",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
