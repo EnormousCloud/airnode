@@ -94,6 +94,8 @@ pub struct AirnodeState {
     pub functions: Map<H256, u32>,
     /// list of whitelist addresses
     pub whitelisted: Vec<H160>,
+    /// map of requesters (index -> admin)
+    pub requesters: Map<u64, H160>,
     /// current balance of airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<Balance>,
@@ -186,8 +188,20 @@ impl AirnodeRrpState {
                     provider.xpubkey = Some(xpub.clone());
                     self.providers.insert(provider_id, provider);
                 }
+                AirnodeEvent::RequesterCreatedA {
+                    requester_index,
+                    admin,
+                } => {
+                    if let Some(provider) = self.providers.get_mut(&provider_id) {
+                        let key = requester_index.as_u64();
+                        provider.requesters.insert(key, *admin);
+                    }
+                }
                 _ => {}
             };
+            if let Some(provider) = self.providers.get_mut(&provider_id) {
+                provider.operations_num += 1;
+            }
         };
         self.operations_num += 1;
     }
