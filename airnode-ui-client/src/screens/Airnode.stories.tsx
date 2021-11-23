@@ -132,6 +132,35 @@ const TemplateWithdrawals: ComponentStory<typeof AirnodeWithdrawals> = (args) =>
 
 export const Withdrawals = TemplateWithdrawals.bind({});
 Withdrawals.args = {
+    chainId, contractAddress, provider, 
+    airnodeState: { ...airnodeState, requests: {
+        "0x2408fbe31e0dea482c5e16be6d082848d42a683943d8fa063401bc05d68ce4c6": {
+            "id": "0x2408fbe31e0dea482c5e16be6d082848d42a683943d8fa063401bc05d68ce4c6",
+            "fulfill": 1,
+            "fail": 0,
+            "withdraw": 1
+        }
+    }},
+    menu: {
+        airnode: {
+            ...airnode,
+            items: airnode.items.map((item) => ({
+                ...item,
+                active: item.name === "Withdrawals",
+            })),
+        },
+        rrp: {
+            ...rrp,
+            items: rrp.items.map((item) => ({
+                ...item,
+                active: false,
+            })),
+        },
+    },
+};
+
+export const NoWithdrawals = TemplateWithdrawals.bind({});
+NoWithdrawals.args = {
     chainId, contractAddress, provider, airnodeState,
     menu: {
         airnode: {
