@@ -162,11 +162,12 @@ Airnode.GetWhitelist = () => {
   const chainId = parseInt(params.chainId as string);
   const contractAddress = params.contractAddress as string;
   const provider = params.provider as string;
-  const [state] = init('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'whitelist' });
-  const { airnodeState, nodeStatus, menu } = state;
+  const [state] = initOps('SELECT_AIRNODE', { chainId, contractAddress, provider, activeMenu: 'whitelist' });
+  const { airnodeState, nodeStatus, menu, dataStatus, operations } = state;
   if (nodeStatus.errorMessage) return <ErrorScreen error={nodeStatus.errorMessage} />
   if (nodeStatus.isLoading || !airnodeState) return <LoadingScreen />;
-  return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider, airnodeState }} />
+  console.log('dataStatus', dataStatus)
+  return <AirnodeWhitelist {...{ menu, chainId, contractAddress, provider, airnodeState, dataStatus, operations }} />
 }
 
 Airnode.GetWithdrawals = () => {

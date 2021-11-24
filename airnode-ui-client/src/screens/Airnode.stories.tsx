@@ -101,12 +101,16 @@ Endpoints.args = {
 
 
 const TemplateWhitelist: ComponentStory<typeof AirnodeWhitelist> = (args) => (
-    <AirnodeWhitelist {...args} />
+    <AirnodeWhitelist {...args} dataStatus={DataIsReady} />
 );
 
 export const Whitelist = TemplateWhitelist.bind({});
 Whitelist.args = {
-    chainId, contractAddress, provider, airnodeState,
+    chainId, contractAddress, provider, 
+    airnodeState: { ...airnodeState, whitelisted: [
+        "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec",
+        "0xf9c39ec11055508bdda0bc2a0234abbbc09a3dec",
+    ] },
     menu: {
         airnode: {
             ...airnode,
