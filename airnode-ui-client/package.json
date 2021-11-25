@@ -6,6 +6,7 @@
     "start": "VITE_API_URL=http://localhost:8000 vite",
     "build": "tsc && vite build --base /",
     "build-demo": "tsc && vite build --base /dao/api3/airnodes",
+    "upload-demo": "rsync -e\"ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null\" --progress -avr ./dist/ root@enormous.cloud:/opt/api3-airnodes/_www/ &&  ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@enormous.cloud chmod -R 0777 /opt/api3-airnodes/_www",
     "preview": "vite preview",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
