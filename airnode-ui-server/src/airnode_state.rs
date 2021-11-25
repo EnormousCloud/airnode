@@ -7,7 +7,7 @@ use chrono::DateTime;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap as Map;
 use structopt::StructOpt;
-use web3::types::{H160, H256, U256};
+use web3::types::{H160, U256};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Balance {
@@ -74,6 +74,20 @@ pub struct SyncState {
 pub struct AirnodeRR {
     /// request ID
     pub id: U256,
+    /// num of fulfilled
+    pub fulfill: u32,
+    /// errors
+    pub fail: u32,
+}
+
+impl AirnodeRR {
+    pub fn new(request_id: U256) -> Self {
+        Self {
+            id: request_id,
+            fulfill: 0,
+            fail: 0,
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -85,17 +99,15 @@ pub struct AirnodeState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sponsor: Option<H160>,
     /// map of requests that were actually took place
-    pub requests: Map<H256, AirnodeRR>,
+    pub requests: Map<U256, AirnodeRR>,
     /// map of endpoints that were actually used
-    pub endpoints: Map<H256, u32>,
+    pub endpoints: Map<U256, u32>,
     /// map of templates that were actually used
-    pub templates: Map<H256, u32>,
+    pub templates: Map<U256, u32>,
     /// map of functions that were actually used
-    pub functions: Map<H256, u32>,
+    pub functions: Map<u64, u32>,
     /// list of whitelist addresses
     pub whitelisted: Vec<H160>,
-    /// map of requesters (index -> admin)
-    pub requesters: Map<u64, H160>,
     /// current balance of airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub balance: Option<Balance>,
@@ -133,6 +145,8 @@ pub struct AirnodeRrpState {
     pub balance: Option<Balance>,
     /// Map of each provider (pre-alpha)
     pub providers: Map<U256, AirnodeState>,
+    /// Map of requesters (pre-alpha, index -> admin)
+    pub requesters: Map<u64, H160>,
     /// Map of each airnode (v0.2+)
     pub airnodes: Map<H160, AirnodeState>,
     /// number of operations that happened
@@ -175,9 +189,83 @@ impl AirnodeRrpState {
                     AirnodeRrpAdmin::new(target_admin, new_rank.as_u64()),
                 );
             }
+            AirnodeEvent::RequesterCreatedA {
+                requester_index,
+                admin,
+            } => {
+                let key = requester_index.as_u64();
+                self.requesters.insert(key, admin);
+            }
             _ => {}
         };
+
         if let Some(provider_id) = op.event.get_provider_id() {
+            if let Some(provider) = self.providers.get_mut(&provider_id) {
+                if let Some(request_id) = op.event.get_request_id() {
+                    if let None = provider.requests.get(&request_id) {
+                        provider
+                            .requests
+                            .insert(request_id, AirnodeRR::new(request_id));
+                    }
+                    if let Some(rr) = provider.requests.get_mut(&request_id) {
+                        match &op.event {
+                            AirnodeEvent::ClientRequestFulfilledA { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::ClientRequestFulfilledWithBytesA { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::RequestFulfilledA { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::RequestFulfilledWithBytesA { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::FulfilledRequest { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::WithdrawalFulfilledA { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::FulfilledWithdrawal { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::ErroredBeaconUpdate { .. } => {
+                                rr.fail += 1;
+                            }
+                            AirnodeEvent::FailedRequest { .. } => {
+                                rr.fail += 1;
+                            }
+                            _ => {}
+                        }
+                    }
+                }
+
+                if let Some(endpoint_id) = op.event.get_endpoint_id() {
+                    if let None = provider.endpoints.get(&endpoint_id) {
+                        provider.endpoints.insert(endpoint_id, 0);
+                    }
+                    let val = provider.endpoints.get_mut(&endpoint_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(tpl_id) = op.event.get_template_id() {
+                    if let None = provider.templates.get(&tpl_id) {
+                        provider.templates.insert(tpl_id, 0);
+                    }
+                    let val = provider.templates.get_mut(&tpl_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(func_id) = op.event.get_fulfill_function_id() {
+                    if let None = provider.functions.get(&func_id) {
+                        provider.functions.insert(func_id, 0);
+                    }
+                    let val = provider.functions.get_mut(&func_id).unwrap();
+                    *val += 1;
+                }
+
+                provider.operations_num += 1;
+            }
+
             match &op.event {
                 AirnodeEvent::ProviderCreatedA {
                     provider_id: _,
@@ -188,20 +276,9 @@ impl AirnodeRrpState {
                     provider.xpubkey = Some(xpub.clone());
                     self.providers.insert(provider_id, provider);
                 }
-                AirnodeEvent::RequesterCreatedA {
-                    requester_index,
-                    admin,
-                } => {
-                    if let Some(provider) = self.providers.get_mut(&provider_id) {
-                        let key = requester_index.as_u64();
-                        provider.requesters.insert(key, *admin);
-                    }
-                }
+
                 _ => {}
             };
-            if let Some(provider) = self.providers.get_mut(&provider_id) {
-                provider.operations_num += 1;
-            }
         };
         self.operations_num += 1;
     }
