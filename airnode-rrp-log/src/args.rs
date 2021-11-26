@@ -23,6 +23,9 @@ pub struct Args {
     #[structopt(long, env = "ADDR_CONTRACT")]
     pub address_contract: String,
 
+    /// Pretty print JSON responses
+    #[structopt(long)]
+    pub pretty_print: bool,
     #[structopt(long, env = "BY_PROVIDER_ID")]
     pub by_provider_id: Option<String>,
     #[structopt(long, env = "BY_ENDPOINT_ID")]
