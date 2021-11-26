@@ -5,7 +5,7 @@ use web3::types::{FilterBuilder, Log, H160};
 use web3::{Transport, Web3};
 
 pub trait EventHandler {
-    fn on(&mut self, l: Log, pretty_print: bool) -> ();
+    fn on(&mut self, l: Log) -> ();
 }
 
 pub async fn get_transport(source: &str) -> Either<Http, Ipc> {
@@ -79,7 +79,6 @@ impl Scanner {
         web3: &Web3<T>,
         address: H160,
         handler: &mut impl EventHandler,
-        pretty_print: bool,
     ) -> anyhow::Result<u64>
     where
         T: Transport,
@@ -96,7 +95,7 @@ impl Scanner {
             let logs: Vec<Log> = web3.eth().logs(filter).await?;
             if logs.len() > 0 {
                 for l in logs {
-                    handler.on(l.clone(), pretty_print);
+                    handler.on(l.clone());
                 }
             }
             last_block = b.to;
