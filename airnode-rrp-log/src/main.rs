@@ -19,7 +19,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(args: Args) -> Self {
+    pub fn new(args: &Args) -> Self {
         Self {
             unknown: BTreeMap::new(),
             filtration: LogFiltration::default(),
@@ -58,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     let addr_contract =
         H160::from_str(args.address_contract.as_str()).expect("ADDR_CONTRACT is missing");
 
-    let mut state = State::new(args);
+    let mut state = State::new(&args);
     let mut scanner = reader::Scanner::new(
         chain_id,
         args.min_block,
