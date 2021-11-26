@@ -3,6 +3,7 @@ pub mod filter;
 pub mod logevent;
 pub mod reader;
 
+use crate::args::Args;
 use crate::filter::LogFiltration;
 use crate::logevent::LogEvent;
 use std::collections::BTreeMap;
@@ -14,19 +15,21 @@ pub struct State {
     // a map of unknown topics
     pub unknown: BTreeMap<H256, H256>,
     pub filtration: LogFiltration,
+    pub pretty_print: bool,
 }
 
 impl State {
-    pub fn new() -> Self {
+    pub fn new(args: Args) -> Self {
         Self {
             unknown: BTreeMap::new(),
             filtration: LogFiltration::default(),
+            pretty_print: args.pretty_print,
         }
     }
 }
 
 impl reader::EventHandler for State {
-    fn on(&mut self, l: web3::types::Log, pretty_print: bool) -> () {
+    fn on(&mut self, l: web3::types::Log) -> () {
         let hash = l.transaction_hash.unwrap();
         let topic = l.topics[0];
         let le = LogEvent::new(l);
@@ -34,7 +37,7 @@ impl reader::EventHandler for State {
             self.unknown.insert(topic, hash);
         }
         if self.filtration.allows(&le) {
-            if pretty_print {
+            if self.pretty_print {
                 tracing::info!("{}", serde_json::to_string_pretty(&le).unwrap());
             } else {
                 tracing::info!("{}", serde_json::to_string(&le).unwrap());
@@ -55,16 +58,14 @@ async fn main() -> anyhow::Result<()> {
     let addr_contract =
         H160::from_str(args.address_contract.as_str()).expect("ADDR_CONTRACT is missing");
 
-    let mut state = State::new();
+    let mut state = State::new(args);
     let mut scanner = reader::Scanner::new(
         chain_id,
         args.min_block,
         args.max_block,
         args.rpc_batch_size,
     );
-    let _ = scanner
-        .scan_address(&web3, addr_contract, &mut state, args.pretty_print)
-        .await;
+    let _ = scanner.scan_address(&web3, addr_contract, &mut state).await;
     if state.unknown.len() > 0 {
         return Err(anyhow::Error::msg("unknown events met"));
     }
