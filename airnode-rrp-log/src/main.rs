@@ -19,12 +19,12 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(args: &Args) -> Self {
-        Self {
+    pub fn new(args: &Args) -> anyhow::Result<Self> {
+        Ok(Self {
             unknown: BTreeMap::new(),
-            filtration: LogFiltration::default(),
+            filtration: LogFiltration::new(args.clone()).unwrap(),
             pretty_print: args.pretty_print,
-        }
+        })
     }
 }
 
@@ -58,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     let addr_contract =
         H160::from_str(args.address_contract.as_str()).expect("ADDR_CONTRACT is missing");
 
-    let mut state = State::new(&args);
+    let mut state = State::new(&args).unwrap();
     let mut scanner = reader::Scanner::new(
         chain_id,
         args.min_block,
