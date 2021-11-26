@@ -78,6 +78,8 @@ pub struct AirnodeRR {
     pub fulfill: u32,
     /// errors
     pub fail: u32,
+    /// whether this was a withdrawal request
+    pub withdraw: u32,
 }
 
 impl AirnodeRR {
@@ -86,6 +88,7 @@ impl AirnodeRR {
             id: request_id,
             fulfill: 0,
             fail: 0,
+            withdraw: 0,
         }
     }
 }
@@ -98,7 +101,7 @@ pub struct AirnodeState {
     /// sponsor of this airnode
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sponsor: Option<H160>,
-    /// map of requests that were actually took place
+    /// map of all requests that were actually took place
     pub requests: Map<U256, AirnodeRR>,
     /// map of endpoints that were actually used
     pub endpoints: Map<U256, u32>,
@@ -179,6 +182,22 @@ impl AirnodeRrpState {
                     AirnodeRrpAdmin::new(target_admin, new_rank.as_u64()),
                 );
             }
+            AirnodeEvent::DecreasedSelfRank { admin, new_rank } => {
+                self.admins.insert(
+                    admin.clone(),
+                    AirnodeRrpAdmin::new(admin, new_rank.as_u64()),
+                );
+            }
+            AirnodeEvent::DecreasedSelfRankAdminned {
+                adminned: _,
+                admin,
+                new_rank,
+            } => {
+                self.admins.insert(
+                    admin.clone(),
+                    AirnodeRrpAdmin::new(admin, new_rank.as_u64()),
+                );
+            }
             AirnodeEvent::SetRank {
                 caller_admin: _,
                 target_admin,
@@ -224,8 +243,15 @@ impl AirnodeRrpState {
                             AirnodeEvent::FulfilledRequest { .. } => {
                                 rr.fulfill += 1;
                             }
+                            AirnodeEvent::FulfilledRequestWithStatus { .. } => {
+                                rr.fulfill += 1;
+                            }
+                            AirnodeEvent::WithdrawalRequestedA { .. } => {
+                                rr.withdraw = 1;
+                            }
                             AirnodeEvent::WithdrawalFulfilledA { .. } => {
                                 rr.fulfill += 1;
+                                rr.withdraw = 1;
                             }
                             AirnodeEvent::FulfilledWithdrawal { .. } => {
                                 rr.fulfill += 1;
