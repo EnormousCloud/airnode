@@ -26,7 +26,7 @@ impl State {
 }
 
 impl reader::EventHandler for State {
-    fn on(&mut self, l: web3::types::Log) -> () {
+    fn on(&mut self, l: web3::types::Log, pretty_print: bool) -> () {
         let hash = l.transaction_hash.unwrap();
         let topic = l.topics[0];
         let le = LogEvent::new(l);
@@ -34,7 +34,11 @@ impl reader::EventHandler for State {
             self.unknown.insert(topic, hash);
         }
         if self.filtration.allows(&le) {
-            tracing::info!("{}", serde_json::to_string(&le).unwrap());
+            if pretty_print {
+                tracing::info!("{}", serde_json::to_string_pretty(&le).unwrap());
+            } else {
+                tracing::info!("{}", serde_json::to_string(&le).unwrap());
+            }
         }
     }
 }
@@ -58,7 +62,9 @@ async fn main() -> anyhow::Result<()> {
         args.max_block,
         args.rpc_batch_size,
     );
-    let _ = scanner.scan_address(&web3, addr_contract, &mut state).await;
+    let _ = scanner
+        .scan_address(&web3, addr_contract, &mut state, args.pretty_print)
+        .await;
     if state.unknown.len() > 0 {
         return Err(anyhow::Error::msg("unknown events met"));
     }
