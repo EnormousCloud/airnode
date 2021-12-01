@@ -3,7 +3,7 @@ pub mod filter;
 pub mod logevent;
 pub mod reader;
 
-use crate::args::Args;
+use crate::args::{Args, OutputFormat};
 use crate::filter::LogFiltration;
 use crate::logevent::LogEvent;
 use std::collections::BTreeMap;
@@ -15,7 +15,9 @@ pub struct State {
     // a map of unknown topics
     pub unknown: BTreeMap<H256, H256>,
     pub filtration: LogFiltration,
+    pub format: OutputFormat,
     pub pretty_print: bool,
+    pub log_events: Vec<LogEvent>,
 }
 
 impl State {
@@ -23,6 +25,8 @@ impl State {
         Ok(Self {
             unknown: BTreeMap::new(),
             filtration: LogFiltration::new(args.clone()).unwrap(),
+            format: args.format.clone(),
+            log_events: vec![],
             pretty_print: args.pretty_print,
         })
     }
@@ -37,11 +41,20 @@ impl reader::EventHandler for State {
             self.unknown.insert(topic, hash);
         }
         if self.filtration.allows(&le) {
-            if self.pretty_print {
-                tracing::info!("{}", serde_json::to_string_pretty(&le).unwrap());
-            } else {
-                tracing::info!("{}", serde_json::to_string(&le).unwrap());
-            }
+            match self.format {
+                OutputFormat::Jsonl => {
+                    // immediate flush
+                    if self.pretty_print {
+                        tracing::info!("{}", serde_json::to_string_pretty(&le).unwrap());
+                    } else {
+                        tracing::info!("{}", serde_json::to_string(&le).unwrap());
+                    }
+                }
+                OutputFormat::Json => {
+                    // accumulation
+                    self.log_events.push(le.clone());
+                }
+            };
         }
     }
 }
@@ -66,6 +79,15 @@ async fn main() -> anyhow::Result<()> {
         args.rpc_batch_size,
     );
     let _ = scanner.scan_address(&web3, addr_contract, &mut state).await;
+    if let OutputFormat::Json = state.format {
+        let o = &state.log_events;
+        if state.pretty_print {
+            tracing::info!("{}", serde_json::to_string_pretty(o).unwrap());
+        } else {
+            tracing::info!("{}", serde_json::to_string(o).unwrap());
+        }
+    }
+
     if state.unknown.len() > 0 {
         return Err(anyhow::Error::msg("unknown events met"));
     }
