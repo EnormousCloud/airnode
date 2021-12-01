@@ -1,5 +1,34 @@
+use std::fmt;
+use std::str::FromStr;
 use structopt::StructOpt;
 use tracing_subscriber::prelude::*;
+
+#[derive(Debug, Clone)]
+pub enum OutputFormat {
+    Jsonl,
+    Json,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[non_exhaustive]
+pub struct ParseFormatError;
+impl fmt::Display for ParseFormatError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        "provided output format was not `json` or `jsonl`".fmt(f)
+    }
+}
+
+impl FromStr for OutputFormat {
+    type Err = ParseFormatError;
+    fn from_str(input: &str) -> Result<Self, Self::Err> {
+        match input {
+            "json" => Ok(OutputFormat::Json),
+            "jsonl" => Ok(OutputFormat::Jsonl),
+            "" => Ok(OutputFormat::Jsonl),
+            _ => Err(ParseFormatError),
+        }
+    }
+}
 
 #[derive(Debug, StructOpt, Clone)]
 #[structopt(
@@ -22,7 +51,9 @@ pub struct Args {
     /// API3 secondary voting agent address
     #[structopt(long, env = "ADDR_CONTRACT")]
     pub address_contract: String,
-
+    /// format of output: "jsonl" or "json"
+    #[structopt(short, long, default_value = "jsonl", case_insensitive = true)]
+    pub format: OutputFormat,
     /// Pretty print JSON responses
     #[structopt(long)]
     pub pretty_print: bool,
