@@ -1,4 +1,4 @@
-import { utils } from 'ethers';
+import { utils, BigNumber } from 'ethers';
 
 export interface NiceBalance {
     balance: string
@@ -7,9 +7,10 @@ export interface NiceBalance {
 
 const pad6 = (x: string): string => {
     // this is far from perfect, we decided to wait for uiValue from the server side
-    const parts = utils.formatEther(x).split(".");
+    const bn = BigNumber.from(x);
+    const parts = utils.formatEther(bn).split(".");
     if (parts.length != 2) return x;
-    if (parts[1].length > 6) return x;
+    if (parts[1].length < 6) return x;
     return parts[0] + '.' + parts[1].substring(0, 6);
 }
 
