@@ -825,7 +825,7 @@ impl AirnodeEvent {
         } else if t0
             == hex!("3a52c462346de2e9436a3868970892956828a11b9c43da1ed43740b12e1125ae").into()
         {
-            let mut r = LogReader::new(&log, 3, Some(2)).unwrap();
+            let mut r = LogReader::new(&log, 2, None).unwrap();
             let airnode = r.address();
             let request_id = r.value();
             let requester_request_count = r.value().as_u64();
