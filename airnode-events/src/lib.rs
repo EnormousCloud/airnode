@@ -786,16 +786,16 @@ impl AirnodeEvent {
         } else if t0
             == hex!("8c087e42b178608800a2ea8b3d009bdbbf75e0d23426510c2edd447d4f8b8ebd").into()
         {
-            let mut r = LogReader::new(&log, 2, Some(0)).unwrap();
+            let mut r = LogReader::new(&log, 2, None).unwrap();
             return Ok(Self::FailedRequest {
                 airnode: r.address(),
                 request_id: r.value(),
-                error_message: "".to_owned(),
+                error_message: r.text(),
             });
         } else if t0
             == hex!("c7143b2270cddda57e0087ca5e2a4325657dcab10d10f6b1f9d5ce6b41cb97fc").into()
         {
-            let mut r = LogReader::new(&log, 2, Some(1)).unwrap();
+            let mut r = LogReader::new(&log, 2, None).unwrap();
             return Ok(Self::FailedRequest {
                 airnode: r.address(),
                 request_id: r.value(),
