@@ -58,7 +58,20 @@
     exit
 }
 
+[[ "$1" == "rsk-testnet" ]] && {
+    shift
+    export RPC_ENDPOINT=$(chainstate --endpoints -t rsk,testnet | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for RSK-testnet network. "; exit 1; }
+
+    export RPC_BATCH_SIZE=100000
+    export RPC_MIN_BLOCK=1817900
+    export ADDR_CONTRACT=0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e
+    export RUST_LOG=debug
+    cargo run --release -- $@
+    exit
+}
+
 [[ "$1" == "" ]] && {
-    echo "missing parameter: xdai,rinkeby-prealpha,rinkeby-prealpha2,ropsten-0.3,inkeby-0.3"
+    echo "missing parameter: xdai,rinkeby-prealpha,rinkeby-prealpha2,ropsten-0.3,rinkeby-0.3,rsk-testnet"
     exit 1
 }
