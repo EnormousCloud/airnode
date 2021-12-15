@@ -4,12 +4,12 @@ use web3::types::{H160, H256, U256};
 
 #[derive(Error, Debug, Clone)]
 pub enum EventParseError {
-    #[error("no topics")]
-    NoTopics,
-    #[error("{0} topics found, {1} expected")]
-    InvalidTopics(usize, usize),
-    #[error("{0} data length, {1} bytes expected")]
-    InvalidDataSize(usize, usize),
+    #[error("tx {0}: no topics")]
+    NoTopics(H256),
+    #[error("tx {0}: {1} topics found, {2} expected")]
+    InvalidTopics(H256, usize, usize),
+    #[error("tx {0}: {1} data length, {2} bytes expected")]
+    InvalidDataSize(H256, usize, usize),
 }
 
 pub struct LogReader {
@@ -27,11 +27,13 @@ impl LogReader {
         expected_topics: usize,
         expected_data_size: Option<usize>,
     ) -> Result<Self, EventParseError> {
+        let hash = log.transaction_hash.unwrap();
         if log.topics.len() == 0 {
-            return Err(EventParseError::NoTopics);
+            return Err(EventParseError::NoTopics(hash));
         }
         if log.topics.len() - 1 != expected_topics {
             return Err(EventParseError::InvalidTopics(
+                hash,
                 log.topics.len() - 1,
                 expected_topics,
             ));
@@ -39,7 +41,7 @@ impl LogReader {
         let data: &Vec<u8> = &log.data.0;
         if let Some(sz) = expected_data_size {
             if data.len() != sz * 32 {
-                return Err(EventParseError::InvalidDataSize(data.len(), sz));
+                return Err(EventParseError::InvalidDataSize(hash, data.len(), sz));
             }
         }
         Ok(Self {
