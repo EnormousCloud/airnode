@@ -11,7 +11,7 @@ readme = "README.md"
 
 [dependencies]
 airnode-abi = { version = "0.1" }
-airnode-events = { version = "0.1.2" }
+airnode-events = { path = "../airnode-events" }
 anyhow = { version = "1.0" }
 dotenv = "0.15"
 futures = "0.3.13"
@@ -25,4 +25,4 @@ tokio-stream = { version = "0.1" }
 tracing = { version = "0.1" }
 tracing-futures =  { version = "0.2" }
 tracing-subscriber = { version = "0.2" }
-web3 = { version = "0.16.0" }
+web3 = { version = "0.17" }
