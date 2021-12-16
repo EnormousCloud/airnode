@@ -35,7 +35,7 @@ impl LogEvent {
             _ => return false,
         };
         match e {
-            AirnodeEvent::Unknown => true,
+            AirnodeEvent::Unknown{ topic: _ } => true,
             _ => false,
         }
     }
