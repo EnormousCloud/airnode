@@ -7,7 +7,7 @@ use airnode_abi::{DecodingError, ABI};
 use hex_literal::hex;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
-use web3::types::{H160, U256};
+use web3::types::{H160, H256, U256};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -193,6 +193,11 @@ pub enum AirnodeEvent {
     FulfilledRequest {
         airnode: H160,
         request_id: U256,
+        data: Vec<U256>,
+    },
+    FulfilledRequestWithStatus {
+        airnode: H160,
+        request_id: U256,
         status_code: u64,
         data: Vec<U256>,
     },
@@ -314,9 +319,13 @@ pub enum AirnodeEvent {
     },
 
     // unknown, but ignored, do not fail on this type
-    Unclassified,
+    Unclassified {
+        topic: H256,
+    },
     // unknown and fail on that
-    Unknown,
+    Unknown {
+        topic: H256,
+    },
 }
 
 static KNOWN_EVENTS: phf::Map<&'static str, &'static str> = phf_map! {
@@ -350,6 +359,7 @@ static KNOWN_EVENTS: phf::Map<&'static str, &'static str> = phf_map! {
     "8c087e42b178608800a2ea8b3d009bdbbf75e0d23426510c2edd447d4f8b8ebd" => "FailedRequest(address,bytes32)",
     "c7143b2270cddda57e0087ca5e2a4325657dcab10d10f6b1f9d5ce6b41cb97fc" => "FailedRequest(address,bytes32,string)",
     "d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066" => "FulfilledRequest(address,bytes32,uint256,bytes)",
+    "c0977dab79883641ece94bb6a932ca83049f561ffff8d8daaeafdbc1acce9e0a" => "FulfilledRequest(index_topic_1 address airnode, index_topic_2 bytes32 requestId, bytes data)",
     "adb4840bbd5f924665ae7e0e0c83de5c0fb40a98c9b57dba53a6c978127a622e" => "FulfilledWithdrawal(address,address,bytes32,address,uint256)",
     "3a52c462346de2e9436a3868970892956828a11b9c43da1ed43740b12e1125ae" => "MadeFullRequest(address,bytes32,uint256,uint256,address,bytes32,address,address,address,bytes4,bytes)",
     "eb39930cdcbb560e6422558a2468b93a215af60063622e63cbb165eba14c3203" => "MadeTemplateRequest(address,bytes32,uint256,uint256,address,bytes32,address,address,address,bytes4,bytes)",
@@ -802,10 +812,19 @@ impl AirnodeEvent {
                 error_message: r.text(),
             });
         } else if t0
-            == hex!("d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066").into()
+            == hex!("c0977dab79883641ece94bb6a932ca83049f561ffff8d8daaeafdbc1acce9e0a").into()
         {
             let mut r = LogReader::new(&log, 2, None).unwrap();
             return Ok(Self::FulfilledRequest {
+                airnode: r.address(),
+                request_id: r.value(),
+                data: r.values(),
+            });
+        } else if t0
+            == hex!("d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066").into()
+        {
+            let mut r = LogReader::new(&log, 2, None).unwrap();
+            return Ok(Self::FulfilledRequestWithStatus {
                 airnode: r.address(),
                 request_id: r.value(),
                 status_code: r.value().as_u64(),
@@ -1028,9 +1047,9 @@ impl AirnodeEvent {
         match KNOWN_EVENTS.get(&topic_str) {
             Some(_title) => {
                 // println!("{} topic={:?}", title, t0);
-                Ok(Self::Unclassified)
+                Ok(Self::Unclassified { topic: t0 })
             }
-            None => Ok(Self::Unknown),
+            None => Ok(Self::Unknown { topic: t0 }),
         }
     }
 }
