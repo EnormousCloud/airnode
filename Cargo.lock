@@ -31,7 +31,7 @@ dependencies = [
 
 [[package]]
 name = "airnode-events"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "airnode-abi 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait",
@@ -70,7 +70,7 @@ dependencies = [
 
 [[package]]
 name = "airnode-rrp-log"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "airnode-abi 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "airnode-events",
