@@ -1,6 +1,6 @@
 [package]
 name = "airnode-rrp-log"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["EnormousCloud"]
 edition = "2018"
 license = "MIT"
@@ -11,7 +11,7 @@ readme = "README.md"
 
 [dependencies]
 airnode-abi = { version = "0.1" }
-airnode-events = { path = "../airnode-events" }
+airnode-events = { version = "0.3" }
 anyhow = { version = "1.0" }
 dotenv = "0.15"
 futures = "0.3.13"
