@@ -11,3 +11,4 @@ target/
 
 run.sh
 mocks/
+*.log
