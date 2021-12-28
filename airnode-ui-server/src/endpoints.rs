@@ -159,7 +159,7 @@ pub fn routes_nodes(
 }
 
 pub fn api_operations(data: &storage_ops::Storage) -> Response {
-    let res = data.list();
+    let res = data.rev_list();
     with_status(json(&res), StatusCode::OK).into_response()
 }
 
