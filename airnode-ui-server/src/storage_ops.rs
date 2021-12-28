@@ -7,6 +7,7 @@ pub trait LogIndex {
     fn init(data_dir: &str, airnode: AirnodeRef) -> Self;
     fn append(&self, v: &Operation) -> bool;
     fn list(&self) -> Vec<Operation>;
+    fn rev_list(&self) -> Vec<Operation>;
     fn max_height(&self) -> u64;
     fn truncate(&self) -> bool;
 }
@@ -58,6 +59,19 @@ impl LogIndex for Storage {
                 out.push(op.clone())
             }
             iter.next();
+        }
+        out
+    }
+
+    fn rev_list(&self) -> Vec<Operation> {
+        let mut out = vec![];
+        let mut iter = self.db.raw_iterator();
+        iter.seek_to_last();
+        while iter.valid() {
+            if let Ok(op) = Operation::from_bytes(iter.value().unwrap()) {
+                out.push(op.clone())
+            }
+            iter.prev();
         }
         out
     }
