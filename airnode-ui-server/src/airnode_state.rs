@@ -300,6 +300,7 @@ impl AirnodeRrpState {
                 } => {
                     let mut provider = AirnodeState::default();
                     provider.xpubkey = Some(xpub.clone());
+                    provider.operations_num = 1;
                     self.providers.insert(provider_id, provider);
                 }
 
