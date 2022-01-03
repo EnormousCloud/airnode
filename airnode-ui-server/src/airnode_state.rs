@@ -256,6 +256,9 @@ impl AirnodeRrpState {
                             AirnodeEvent::FulfilledWithdrawal { .. } => {
                                 rr.fulfill += 1;
                             }
+                            AirnodeEvent::ClientRequestFailedA { .. } => {
+                                rr.fail += 1;
+                            }
                             AirnodeEvent::ErroredBeaconUpdate { .. } => {
                                 rr.fail += 1;
                             }
