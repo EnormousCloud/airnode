@@ -292,7 +292,7 @@ async fn main() -> anyhow::Result<()> {
         Command::State(cmd) => {
             return cli_state(db_config, &args.data_dir, cmd);
         }
-        Command::Server { listen, no_sync } => {
+        Command::Server { listen, no_sync, static_dir } => {
             // connecting to databases of operations:
             let mut db_ops = Map::new();
             for node in db_config.list() {
@@ -359,7 +359,7 @@ async fn main() -> anyhow::Result<()> {
             let cors = warp::cors()
                 .allow_any_origin()
                 .allow_methods(vec!["GET", "POST", "OPTIONS"]);
-            warp::serve(endpoints::routes(app_state).with(cors))
+            warp::serve(endpoints::routes(app_state, &static_dir).with(cors))
                 .run(socket_addr)
                 .await;
         }
