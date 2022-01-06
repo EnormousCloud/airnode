@@ -222,8 +222,9 @@ pub fn cli_state(
                         let min_block =
                             std::cmp::max(config.min_block.unwrap(), db_ops.max_height() + 1);
                         tracing::info!(
-                            "rrp contract {} scanning from block {}",
+                            "rrp contract {}/{} scanning from block {}",
                             config.contract_address,
+                            config.chain_id,
                             min_block
                         );
                         crate::reader::scan(
@@ -292,7 +293,11 @@ async fn main() -> anyhow::Result<()> {
         Command::State(cmd) => {
             return cli_state(db_config, &args.data_dir, cmd);
         }
-        Command::Server { listen, no_sync, static_dir } => {
+        Command::Server {
+            listen,
+            no_sync,
+            static_dir,
+        } => {
             // connecting to databases of operations:
             let mut db_ops = Map::new();
             for node in db_config.list() {
