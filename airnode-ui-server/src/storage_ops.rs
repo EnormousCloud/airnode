@@ -2,6 +2,7 @@ use crate::airnode_config::AirnodeRef;
 use crate::airnode_ops::Operation;
 use rocksdb::{ColumnFamilyDescriptor, Options, DB};
 use std::sync::Arc;
+use tracing::{debug, info, warn};
 
 pub trait LogIndex {
     fn init(data_dir: &str, airnode: AirnodeRef) -> Self;
@@ -24,6 +25,8 @@ impl LogIndex for Storage {
         opts.create_missing_column_families(true);
         opts.set_use_fsync(false);
         opts.set_keep_log_file_num(1);
+        opts.set_db_write_buffer_size(0);
+        opts.set_write_buffer_size(0);
 
         let mut cf_opts = Options::default();
         cf_opts.create_if_missing(true);
@@ -36,15 +39,28 @@ impl LogIndex for Storage {
     }
 
     fn append(&self, v: &Operation) -> bool {
-        self.db.put(v.as_ref().as_bytes(), v.as_bytes()).is_ok()
+        let now = std::time::SystemTime::now();
+        let res = self.db.put(v.as_ref().as_bytes(), v.as_bytes()).is_ok();
+        let took = now.elapsed().unwrap();
+        debug!(
+            "saved {:?} tx {}, took {:?}",
+            v.height, v.transaction_hash, took
+        );
+        res
     }
 
     fn max_height(&self) -> u64 {
         let mut iter = self.db.raw_iterator();
         iter.seek_to_last();
         if iter.valid() {
-            if let Ok(op) = Operation::from_bytes(iter.value().unwrap()) {
-                return op.height;
+            match Operation::from_bytes(iter.value().unwrap()) {
+                Ok(op) => {
+                    info!("last operation block at {}", op.height);
+                    return op.height;
+                }
+                Err(e) => {
+                    warn!("error on reading the last item in ops: {:?}", e);
+                }
             }
         }
         return 0;
