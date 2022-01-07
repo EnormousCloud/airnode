@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-airnode-events = { version = "0.3" }
+airnode-events = { version = "0.3.3" }
 cached = { version = "0.26" }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = { version = "0.15" }

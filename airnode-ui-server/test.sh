@@ -98,8 +98,9 @@ export LOG_LEVEL=airnode_ui_server=info,info
     cargo run --release -- config add \
         --contract-address 0x3B35250Ca54C1Fb8c83D48F21231ef6e4fb9f79D \
         --min-block 11329160 \
-        --batch-size 500000
+        --batch-size 100000
     # display all RRP operations
+    export LOG_LEVEL=airnode_ui_server::storage_ops=debug,info
     cargo run --release -- op list \
         --chain-id 3 \
         --contract-address 0x3B35250Ca54C1Fb8c83D48F21231ef6e4fb9f79D 
