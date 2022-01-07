@@ -89,4 +89,21 @@ export LOG_LEVEL=airnode_ui_server=info,info
     exit
 }
 
+[[ "$1" == "ropsten-0.3" ]] && {
+    shift
+    export RPC_ENDPOINT=$(chainstate --endpoints -t ropsten | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for Ropsten network. "; exit 1; }
+
+    # adding RRP contract to the configuration
+    cargo run --release -- config add \
+        --contract-address 0x3B35250Ca54C1Fb8c83D48F21231ef6e4fb9f79D \
+        --min-block 11329160 \
+        --batch-size 500000
+    # display all RRP operations
+    cargo run --release -- op list \
+        --chain-id 3 \
+        --contract-address 0x3B35250Ca54C1Fb8c83D48F21231ef6e4fb9f79D 
+    exit
+}
+
 cargo run --release -- server
