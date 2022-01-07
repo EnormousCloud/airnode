@@ -72,4 +72,21 @@ export LOG_LEVEL=airnode_ui_server=info,info
     exit
 }
 
+[[ "$1" == "rinkeby-0.3" ]] && {
+    shift
+    export RPC_ENDPOINT=$(chainstate --endpoints -t rinkeby,infura | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for Rinkeby network. "; exit 1; }
+
+    # adding RRP contract to the configuration
+    cargo run --release -- config add \
+        --contract-address 0xC11593B87f258672b8eB02d9A723a429b15E9E03 \
+        --min-block 9780500 \
+        --batch-size 500000
+    # display all RRP operations
+    cargo run --release -- op list \
+        --chain-id 4 \
+        --contract-address 0xC11593B87f258672b8eB02d9A723a429b15E9E03 
+    exit
+}
+
 cargo run --release -- server
