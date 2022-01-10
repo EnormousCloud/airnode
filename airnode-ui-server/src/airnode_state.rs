@@ -259,6 +259,47 @@ impl AirnodeRrpState {
             }
             _ => {}
         };
+        if let Some(airnode_id) = op.event.get_airnode() {
+            if let None = self.airnodes.get(&airnode_id) {
+                let mut airnode = AirnodeState::default();
+                airnode.operations_num = 1;
+                self.airnodes.insert(airnode_id, airnode);
+            }
+            if let Some(ain) = self.airnodes.get_mut(&airnode_id) {
+                if let Some(request_id) = op.event.get_request_id() {
+                    if let None = ain.requests.get(&request_id) {
+                        ain.requests.insert(request_id, AirnodeRR::new(request_id));
+                    }
+                    if let Some(rr) = ain.requests.get_mut(&request_id) {
+                        rr.read_event(&op.event);
+                    }
+                }
+
+                if let Some(endpoint_id) = op.event.get_endpoint_id() {
+                    if let None = ain.endpoints.get(&endpoint_id) {
+                        ain.endpoints.insert(endpoint_id, 0);
+                    }
+                    let val = ain.endpoints.get_mut(&endpoint_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(tpl_id) = op.event.get_template_id() {
+                    if let None = ain.templates.get(&tpl_id) {
+                        ain.templates.insert(tpl_id, 0);
+                    }
+                    let val = ain.templates.get_mut(&tpl_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(func_id) = op.event.get_fulfill_function_id() {
+                    if let None = ain.functions.get(&func_id) {
+                        ain.functions.insert(func_id, 0);
+                    }
+                    let val = ain.functions.get_mut(&func_id).unwrap();
+                    *val += 1;
+                }
+
+                ain.operations_num += 1;
+            }
+        }
 
         if let Some(provider_id) = op.event.get_provider_id() {
             if let Some(provider) = self.providers.get_mut(&provider_id) {
