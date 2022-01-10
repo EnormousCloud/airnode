@@ -91,6 +91,48 @@ impl AirnodeRR {
             withdraw: 0,
         }
     }
+    pub fn read_event(&mut self, e: &AirnodeEvent) {
+        match &e {
+            AirnodeEvent::ClientRequestFulfilledA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::ClientRequestFulfilledWithBytesA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::RequestFulfilledA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::RequestFulfilledWithBytesA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::FulfilledRequest { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::FulfilledRequestWithStatus { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::WithdrawalRequestedA { .. } => {
+                self.withdraw = 1;
+            }
+            AirnodeEvent::WithdrawalFulfilledA { .. } => {
+                self.fulfill += 1;
+                self.withdraw = 1;
+            }
+            AirnodeEvent::FulfilledWithdrawal { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::ClientRequestFailedA { .. } => {
+                self.fail += 1;
+            }
+            AirnodeEvent::ErroredBeaconUpdate { .. } => {
+                self.fail += 1;
+            }
+            AirnodeEvent::FailedRequest { .. } => {
+                self.fail += 1;
+            }
+            _ => {}
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -227,46 +269,7 @@ impl AirnodeRrpState {
                             .insert(request_id, AirnodeRR::new(request_id));
                     }
                     if let Some(rr) = provider.requests.get_mut(&request_id) {
-                        match &op.event {
-                            AirnodeEvent::ClientRequestFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::ClientRequestFulfilledWithBytesA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::RequestFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::RequestFulfilledWithBytesA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::FulfilledRequest { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::FulfilledRequestWithStatus { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::WithdrawalRequestedA { .. } => {
-                                rr.withdraw = 1;
-                            }
-                            AirnodeEvent::WithdrawalFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                                rr.withdraw = 1;
-                            }
-                            AirnodeEvent::FulfilledWithdrawal { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::ClientRequestFailedA { .. } => {
-                                rr.fail += 1;
-                            }
-                            AirnodeEvent::ErroredBeaconUpdate { .. } => {
-                                rr.fail += 1;
-                            }
-                            AirnodeEvent::FailedRequest { .. } => {
-                                rr.fail += 1;
-                            }
-                            _ => {}
-                        }
+                        rr.read_event(&op.event);
                     }
                 }
 
