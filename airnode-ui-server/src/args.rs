@@ -14,6 +14,9 @@ pub enum Command {
     State(AirnodeStateCmd),
     /// start HTTP server
     Server {
+        /// Local path of static files to be served
+        #[structopt(long, default_value = "./_www", env = "STATIC_DIR")]
+        static_dir: String,
         /// Net listening address of HTTP server in case of "server" command
         #[structopt(long, default_value = "0.0.0.0:8000", env = "LISTEN")]
         listen: String,
