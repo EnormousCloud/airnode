@@ -63,10 +63,9 @@
     export RPC_ENDPOINT=$(chainstate --endpoints -t rsk,testnet | head -n1)
     [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for RSK-testnet network. "; exit 1; }
 
-    export RPC_BATCH_SIZE=100000
+    export RPC_BATCH_SIZE=50000
     export RPC_MIN_BLOCK=1817900
     export ADDR_CONTRACT=0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e
-    export RUST_LOG=debug
     cargo run --release -- $@
     exit
 }
