@@ -1,0 +1,71 @@
+header {
+    z-index: 1;
+    background: var(--color-body);
+    box-shadow: 0px 2px 4px #888;
+    width: 100%;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+header .inner {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+header a.select-airnode {
+    background: var(--color-body);
+    color: var(--color-accent);
+    cursor: pointer;
+    font-weight: bold;
+    line-height: 1.33rem;
+    display: block;
+}
+header a.select-airnode:hover {
+    color: var(--color-panel-title);
+}
+
+header .sep,
+header .chain-name {
+    color: var(--color-text-darken);
+}
+
+header .xpub {
+    color: var(--color-text-darken);
+    font-size: 0.8rem;
+}
+
+header .chain-row {
+    line-height: 1.33rem;
+    font-size: 0.9rem;
+}
+
+@media (min-width: 640px) {
+    header {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    header .inner {
+        align-items: center;
+    }
+
+    header a.select-airnode {
+        display: flex;
+        align-items: center;
+        width: 175px;
+        line-height: 1rem;
+        padding-top: 10;
+        padding-bottom: 10;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+}
+
+.hd-column {
+    flex: 0;
+    min-width: 200px;
+}
+.hd-column-wide {
+    flex: 1;
+}

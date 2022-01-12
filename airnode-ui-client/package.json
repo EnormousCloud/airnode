@@ -1,0 +1,38 @@
+{
+  "name": "airnode-ui-client",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "vite",
+    "start": "VITE_API_URL=http://localhost:8000 vite",
+    "build": "tsc && vite build --base /",
+    "build-demo": "tsc && vite build --base /dao/api3/airnodes",
+    "upload-demo": "rsync -e\"ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null\" --progress -avr ./dist/ root@enormous.cloud:/opt/api3-airnodes/_www/ &&  ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@enormous.cloud chmod -R 0777 /opt/api3-airnodes/_www",
+    "preview": "vite preview",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook",
+    "upload-storybook": "cd storybook-static/ && zip storybook-static.zip -r static/ images/ *.txt *.json *.map *.ico *.html *.js && ls -All *.zip && scp -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no storybook-static.zip root@enormous.cloud:/opt/api3-airnodes-ui-storybook/storybook-static/storybook-static.zip && ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no root@enormous.cloud 'cd /opt/api3-airnodes-ui-storybook/storybook-static && unzip -qo storybook-static.zip'"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-router": "^6.2.1",
+    "react-router-dom": "^6.2.1",
+    "styled-components": "^5.3.3",
+    "sweetalert2": "^11.3.4",
+    "sweetalert2-react-content": "^4.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@storybook/addon-actions": "^6.4.3",
+    "@storybook/addon-essentials": "^6.4.3",
+    "@storybook/addon-links": "^6.4.3",
+    "@storybook/react": "^6.4.3",
+    "@types/react": "^17.0.33",
+    "@types/react-dom": "^17.0.10",
+    "@types/styled-components": "^5.1.19",
+    "@vitejs/plugin-react": "^1.0.7",
+    "babel-loader": "^8.2.3",
+    "typescript": "^4.4.4",
+    "vite": "^2.6.13"
+  }
+}

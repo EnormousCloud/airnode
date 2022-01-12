@@ -1,0 +1,45 @@
+.op .op-dt,
+.op .op-tm {
+    margin-left: 0.33em;
+    margin-right: 0.7em;
+    font-size: 0.75rem;
+    width: 100px;
+}
+.op .op-e {
+    overflow-x: auto;
+    margin-left: 0.33em;
+    margin-right: 0.33em;
+    margin-bottom: 15px;
+}
+
+.op .op-type {
+    font-weight: bold;
+    line-height: 1;
+    padding-bottom: 5px;
+}
+
+.op .op-fee {
+    margin-left: 0.33em;
+    font-size: 0.75rem;
+}
+.op .op-kv {
+    font-family: monospace;
+    font-size: 0.8rem;
+    line-height: 1.33;
+    white-space: nowrap;
+}
+
+@media (min-width: 599px) {
+    .op .op-row {
+        display: flex;
+    }
+    .op .op-row .op-e{
+        flex: 1;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .op .op-fee {
+        text-align: right;
+    }
+}
+
