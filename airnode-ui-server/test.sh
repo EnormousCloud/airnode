@@ -21,6 +21,23 @@ export LOG_LEVEL=airnode_ui_server=info,info
     exit
 }
 
+[[ "$1" == "rinkeby-prealpha2" ]] && {
+    shift
+    export RPC_ENDPOINT=$(chainstate --endpoints -t rinkeby,infura | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for rinkeby network. "; exit 1; }
+
+    # adding RRP contract to the configuration
+    cargo run --release -- config add \
+        --contract-address 0xb8e96200a1290907436d928bcc3c7ff18e7f4ae6 \
+        --min-block 8494000 \
+        --batch-size 100000
+    # display all RRP operations
+    cargo run --release -- op list \
+        --chain-id 4 \
+        --contract-address 0xb8e96200a1290907436d928bcc3c7ff18e7f4ae6
+    exit
+}
+
 [[ "$1" == "xdai-prealpha" ]] && {
     shift
     export RPC_ENDPOINT=$(chainstate --endpoints -t xdai | head -n1)
@@ -40,7 +57,7 @@ export LOG_LEVEL=airnode_ui_server=info,info
 
 [[ "$1" == "rsk-testnet-prealpha" ]] && {
     shift
-    export RPC_ENDPOINT=$(chainstate --endpoints -t rsk,testnet | head -n1)
+    export RPC_ENDPOINT=$(chainstate --endpoints -t rsk,testnet,localhost | head -n1)
     [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for RSK-testnet network. "; exit 1; }
 
     # adding RRP contract to the configuration
@@ -50,8 +67,8 @@ export LOG_LEVEL=airnode_ui_server=info,info
         --batch-size 100000
     # display all RRP operations
     cargo run --release -- op list \
-        --chain-id 100 \
-        --contract-address 0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e
+        --chain-id 31 \
+        --contract-address 0x1190a5e1f2afe4c8128fd820a7ac85a95a9e6e3e 
     exit
 }
 

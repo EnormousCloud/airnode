@@ -19,6 +19,7 @@ use crate::storage_config::KVStore;
 use crate::storage_ops::LogIndex;
 use std::collections::BTreeMap as Map;
 use std::sync::{Arc, Mutex};
+use warp::Filter;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -291,7 +292,7 @@ async fn main() -> anyhow::Result<()> {
         Command::State(cmd) => {
             return cli_state(db_config, &args.data_dir, cmd);
         }
-        Command::Server { listen, no_sync } => {
+        Command::Server { listen, no_sync, static_dir } => {
             // connecting to databases of operations:
             let mut db_ops = Map::new();
             for node in db_config.list() {
@@ -355,7 +356,10 @@ async fn main() -> anyhow::Result<()> {
             }
 
             let socket_addr: std::net::SocketAddr = listen.parse().expect("invalid bind to listen");
-            warp::serve(endpoints::routes(app_state))
+            let cors = warp::cors()
+                .allow_any_origin()
+                .allow_methods(vec!["GET", "POST", "OPTIONS"]);
+            warp::serve(endpoints::routes(app_state, &static_dir).with(cors))
                 .run(socket_addr)
                 .await;
         }

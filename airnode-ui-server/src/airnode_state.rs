@@ -256,6 +256,9 @@ impl AirnodeRrpState {
                             AirnodeEvent::FulfilledWithdrawal { .. } => {
                                 rr.fulfill += 1;
                             }
+                            AirnodeEvent::ClientRequestFailedA { .. } => {
+                                rr.fail += 1;
+                            }
                             AirnodeEvent::ErroredBeaconUpdate { .. } => {
                                 rr.fail += 1;
                             }
@@ -300,6 +303,7 @@ impl AirnodeRrpState {
                 } => {
                     let mut provider = AirnodeState::default();
                     provider.xpubkey = Some(xpub.clone());
+                    provider.operations_num = 1;
                     self.providers.insert(provider_id, provider);
                 }
 
