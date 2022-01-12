@@ -350,7 +350,7 @@ static KNOWN_EVENTS: phf::Map<&'static str, &'static str> = phf_map! {
     "3d0ebccb4fc9730699221da0180970852f595ed5c78781346149123cbbe9f1d3" => "WithdrawalRequested(bytes32,uint256,bytes32,address,address)",
 
     // Beta protocol version
-    "dfa496c578099ee263f6fbdc842c01815924953f92c186099d640f910c1f92de" => "CreatedTemplate(bytes32,address,bytes32,bytes)",
+    "ba204bad31c4ec4b9b54164af94ae10c4e7312f22c0f9c065d6319c928ec9e7a" => "CreatedTemplate(bytes32,address,bytes32,bytes)",
     "b4a13e8a5b83b6572fd11170aa28965f4b16ce6ed228501322a428b48e34230c" => "DecreasedSelfRank(address,uint256)",
     "907b7436750d9bb04b635c837b151be449230b1975dac4ba31b01343b41eb75c" => "DecreasedSelfRank(address,address,uint256)",
     "df7c6cf6c7d32bf473537bcf24259094d6e7cb863700e071f65a4d8a05b6ce5e" => "ErroredBeaconUpdate(bytes32,bytes32,uint256)",
@@ -725,7 +725,7 @@ impl AirnodeEvent {
                 amount: r.value(),
             });
         } else if t0
-            == hex!("dfa496c578099ee263f6fbdc842c01815924953f92c186099d640f910c1f92de").into()
+            == hex!("ba204bad31c4ec4b9b54164af94ae10c4e7312f22c0f9c065d6319c928ec9e7a").into()
         {
             let mut r = LogReader::new(&log, 1, None).unwrap();
             let template_id = r.value();

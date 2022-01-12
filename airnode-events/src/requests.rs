@@ -138,6 +138,7 @@ pub fn get_request_id(evt: &AirnodeEvent) -> Option<U256> {
         AirnodeEvent::ErroredBeaconUpdate { request_id, .. } => Some(request_id.clone()),
         AirnodeEvent::FailedRequest { request_id, .. } => Some(request_id.clone()),
         AirnodeEvent::FulfilledRequest { request_id, .. } => Some(request_id.clone()),
+        AirnodeEvent::FulfilledRequestWithStatus { request_id, .. } => Some(request_id.clone()),
         AirnodeEvent::FulfilledWithdrawal {
             withdrawal_request_id,
             ..
@@ -161,6 +162,7 @@ pub fn get_airnode(evt: &AirnodeEvent) -> Option<H160> {
         AirnodeEvent::ExtendedWhitelistExpiration { airnode, .. } => Some(airnode.clone()),
         AirnodeEvent::FailedRequest { airnode, .. } => Some(airnode.clone()),
         AirnodeEvent::FulfilledRequest { airnode, .. } => Some(airnode.clone()),
+        AirnodeEvent::FulfilledRequestWithStatus { airnode, .. } => Some(airnode.clone()),
         AirnodeEvent::FulfilledWithdrawal { airnode, .. } => Some(airnode.clone()),
         AirnodeEvent::MadeFullRequest { airnode, .. } => Some(airnode.clone()),
         AirnodeEvent::MadeTemplateRequest { airnode, .. } => Some(airnode.clone()),
