@@ -10,6 +10,7 @@ use warp::http::StatusCode;
 use warp::reply::{json, with_status, Response};
 use warp::{Filter, Rejection, Reply};
 use web3::types::H160;
+use warp::filters::BoxedFilter;
 
 pub fn json_error(code: StatusCode, msg: &str) -> Response {
     let mut res: Map<String, String> = Map::new();
@@ -159,7 +160,7 @@ pub fn routes_nodes(
 }
 
 pub fn api_operations(data: &storage_ops::Storage) -> Response {
-    let res = data.list();
+    let res = data.rev_list();
     with_status(json(&res), StatusCode::OK).into_response()
 }
 
@@ -206,10 +207,20 @@ pub fn routes_states(
     h_get.or(h_list)
 }
 
+pub fn routes_assets(static_dir: &str) -> BoxedFilter<(impl Reply,)> {
+    warp::path("assets").and(warp::fs::dir( format!("{}/assets", static_dir ))).boxed()
+}
+
 pub fn routes(
     state: Arc<Mutex<AppState>>,
+    static_dir: &str,
 ) -> impl Filter<Extract = impl Reply, Error = Rejection> + Clone {
+    let index = format!("{}/index.html", static_dir);
+    let route_index = warp::path::end().and(warp::fs::file(index));
+
     routes_nodes(state.clone())
         .or(routes_ops(state.clone()))
         .or(routes_states(state))
+        .or(routes_assets(static_dir))
+        .or(route_index)
 }
