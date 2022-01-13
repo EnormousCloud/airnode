@@ -274,11 +274,16 @@ impl fmt::Display for Param {
     }
 }
 
+fn default_version() -> u8 {
+    return 1;
+}
+
 /// Airnode ABI object that can be encoded into the vector of U256 and decoded from it
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ABI {
     /// Id of the ABI version. It is always "1" so far
     #[serde(skip_serializing)]
+    #[serde(default = "default_version")]
     pub version: u8,
     /// Schema string. Each parameter is represented by a char
     pub schema: String,
