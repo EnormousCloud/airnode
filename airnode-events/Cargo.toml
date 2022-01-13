@@ -1,6 +1,6 @@
 [package]
 name = "airnode-events"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["EnormousCloud"]
 edition = "2018"
 license = "MIT"
@@ -11,7 +11,7 @@ readme = "README.md"
 
 
 [dependencies]
-airnode-abi = { version = "0.1" }
+airnode-abi = { version = "0.1.2" }
 async-trait = { version = "0.1" }
 hex = { version = "0.4" }
 hex-literal = "0.3"
