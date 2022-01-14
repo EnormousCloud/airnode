@@ -1,5 +1,6 @@
 use crate::web3sync::EthClient;
-use tracing::debug;
+use std::time::SystemTime;
+use tracing::{info, warn};
 use web3::types::{FilterBuilder, Log, H160};
 
 pub trait EventHandler {
@@ -56,15 +57,33 @@ pub fn scan(
     let mut last_block = min_block;
     let client = EthClient::new(rpc_address);
     for b in get_batches(rpc_address, min_block, max_block, batch_size) {
-        debug!("reading blocks {:?} from {}", b, rpc_address);
+        let now = SystemTime::now();
         let filter = FilterBuilder::default()
             .from_block(b.from.into())
             .to_block(b.to.into())
             .address(vec![contract_address])
             .build();
         let logs: Vec<Log> = match client.get_logs(&filter) {
-            Ok(x) => x,
-            Err(e) => return Err(e),
+            Ok(x) => {
+                info!(
+                    "read {} events {:?} from {}, took {:?}",
+                    x.len(),
+                    b,
+                    rpc_address,
+                    now.elapsed().unwrap()
+                );
+                x
+            }
+            Err(e) => {
+                warn!(
+                    "failure {:?} of reading events {:?} from {}, took {:?}",
+                    e,
+                    b,
+                    rpc_address,
+                    now.elapsed().unwrap()
+                );
+                return Err(e);
+            }
         };
         if logs.len() > 0 {
             for l in logs {

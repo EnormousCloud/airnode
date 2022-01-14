@@ -20,17 +20,17 @@ pub struct TxFee {
 }
 
 impl TxFee {
-    pub fn new(tx: &Transaction, receipt: &Receipt, dt: NaiveDateTime) -> Self {
-        let eth = match receipt.gas_used {
-            Some(gas_used) => gas_used * tx.gas_price,
-            None => tx.gas * tx.gas_price,
-        };
-        let usd = crate::usdprice::coin_price_at("ethereum", eth, 18, dt);
+    pub fn new(tx: &Transaction, receipt: &Receipt, _dt: NaiveDateTime) -> Self {
+        // let eth = match receipt.gas_used {
+        //     Some(gas_used) => gas_used * tx.gas_price,
+        //     None => tx.gas * tx.gas_price,
+        // };
+        // let usd = crate::usdprice::coin_price_at("ethereum", eth, 18, dt);
         Self {
             gas_price: tx.gas_price,
             gas: tx.gas,
             gas_used: receipt.gas_used,
-            usd,
+            usd: None,
         }
     }
 
