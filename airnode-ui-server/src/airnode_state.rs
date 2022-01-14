@@ -261,9 +261,7 @@ impl AirnodeRrpState {
         };
         if let Some(airnode_id) = op.event.get_airnode() {
             if let None = self.airnodes.get(&airnode_id) {
-                let mut airnode = AirnodeState::default();
-                airnode.operations_num = 1;
-                self.airnodes.insert(airnode_id, airnode);
+                self.airnodes.insert(airnode_id, AirnodeState::default());
             }
             if let Some(ain) = self.airnodes.get_mut(&airnode_id) {
                 if let Some(request_id) = op.event.get_request_id() {

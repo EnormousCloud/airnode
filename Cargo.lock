@@ -10,7 +10,7 @@ checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
 
 [[package]]
 name = "airnode-abi"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "ethereum-types",
  "hex",
@@ -23,9 +23,9 @@ dependencies = [
 
 [[package]]
 name = "airnode-abi"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "63aed60f7d99a47f2c3f7a0c349d0c2c5a1fec36d7851dd25f8bf0738c808eee"
+checksum = "4732e81f53923d991990e164c87fa7d84cf1e06af0c2f116b7ef799f474bd7cf"
 dependencies = [
  "ethereum-types",
  "hex",
@@ -41,7 +41,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17f08af81ad33fd4242a229bd43a52b20c58d356a484ff00371303bfef6216f7"
 dependencies = [
- "airnode-abi 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "airnode-abi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait",
  "hex",
  "hex-literal",
@@ -54,9 +54,9 @@ dependencies = [
 
 [[package]]
 name = "airnode-events"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
- "airnode-abi 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "airnode-abi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "async-trait",
  "hex",
  "hex-literal",
@@ -79,7 +79,7 @@ dependencies = [
 name = "airnode-rrp-explorer"
 version = "0.1.0"
 dependencies = [
- "airnode-events 0.3.2",
+ "airnode-events 0.3.3",
  "anyhow",
  "gloo",
  "serde",
@@ -95,7 +95,7 @@ dependencies = [
 name = "airnode-rrp-log"
 version = "0.3.2"
 dependencies = [
- "airnode-abi 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "airnode-abi 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "airnode-events 0.3.0",
  "anyhow",
  "dotenv",
