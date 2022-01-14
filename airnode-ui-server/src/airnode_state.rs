@@ -91,6 +91,48 @@ impl AirnodeRR {
             withdraw: 0,
         }
     }
+    pub fn read_event(&mut self, e: &AirnodeEvent) {
+        match &e {
+            AirnodeEvent::ClientRequestFulfilledA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::ClientRequestFulfilledWithBytesA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::RequestFulfilledA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::RequestFulfilledWithBytesA { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::FulfilledRequest { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::FulfilledRequestWithStatus { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::WithdrawalRequestedA { .. } => {
+                self.withdraw = 1;
+            }
+            AirnodeEvent::WithdrawalFulfilledA { .. } => {
+                self.fulfill += 1;
+                self.withdraw = 1;
+            }
+            AirnodeEvent::FulfilledWithdrawal { .. } => {
+                self.fulfill += 1;
+            }
+            AirnodeEvent::ClientRequestFailedA { .. } => {
+                self.fail += 1;
+            }
+            AirnodeEvent::ErroredBeaconUpdate { .. } => {
+                self.fail += 1;
+            }
+            AirnodeEvent::FailedRequest { .. } => {
+                self.fail += 1;
+            }
+            _ => {}
+        }
+    }
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -217,6 +259,47 @@ impl AirnodeRrpState {
             }
             _ => {}
         };
+        if let Some(airnode_id) = op.event.get_airnode() {
+            if let None = self.airnodes.get(&airnode_id) {
+                let mut airnode = AirnodeState::default();
+                airnode.operations_num = 1;
+                self.airnodes.insert(airnode_id, airnode);
+            }
+            if let Some(ain) = self.airnodes.get_mut(&airnode_id) {
+                if let Some(request_id) = op.event.get_request_id() {
+                    if let None = ain.requests.get(&request_id) {
+                        ain.requests.insert(request_id, AirnodeRR::new(request_id));
+                    }
+                    if let Some(rr) = ain.requests.get_mut(&request_id) {
+                        rr.read_event(&op.event);
+                    }
+                }
+
+                if let Some(endpoint_id) = op.event.get_endpoint_id() {
+                    if let None = ain.endpoints.get(&endpoint_id) {
+                        ain.endpoints.insert(endpoint_id, 0);
+                    }
+                    let val = ain.endpoints.get_mut(&endpoint_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(tpl_id) = op.event.get_template_id() {
+                    if let None = ain.templates.get(&tpl_id) {
+                        ain.templates.insert(tpl_id, 0);
+                    }
+                    let val = ain.templates.get_mut(&tpl_id).unwrap();
+                    *val += 1;
+                }
+                if let Some(func_id) = op.event.get_fulfill_function_id() {
+                    if let None = ain.functions.get(&func_id) {
+                        ain.functions.insert(func_id, 0);
+                    }
+                    let val = ain.functions.get_mut(&func_id).unwrap();
+                    *val += 1;
+                }
+
+                ain.operations_num += 1;
+            }
+        }
 
         if let Some(provider_id) = op.event.get_provider_id() {
             if let Some(provider) = self.providers.get_mut(&provider_id) {
@@ -227,46 +310,7 @@ impl AirnodeRrpState {
                             .insert(request_id, AirnodeRR::new(request_id));
                     }
                     if let Some(rr) = provider.requests.get_mut(&request_id) {
-                        match &op.event {
-                            AirnodeEvent::ClientRequestFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::ClientRequestFulfilledWithBytesA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::RequestFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::RequestFulfilledWithBytesA { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::FulfilledRequest { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::FulfilledRequestWithStatus { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::WithdrawalRequestedA { .. } => {
-                                rr.withdraw = 1;
-                            }
-                            AirnodeEvent::WithdrawalFulfilledA { .. } => {
-                                rr.fulfill += 1;
-                                rr.withdraw = 1;
-                            }
-                            AirnodeEvent::FulfilledWithdrawal { .. } => {
-                                rr.fulfill += 1;
-                            }
-                            AirnodeEvent::ClientRequestFailedA { .. } => {
-                                rr.fail += 1;
-                            }
-                            AirnodeEvent::ErroredBeaconUpdate { .. } => {
-                                rr.fail += 1;
-                            }
-                            AirnodeEvent::FailedRequest { .. } => {
-                                rr.fail += 1;
-                            }
-                            _ => {}
-                        }
+                        rr.read_event(&op.event);
                     }
                 }
 
