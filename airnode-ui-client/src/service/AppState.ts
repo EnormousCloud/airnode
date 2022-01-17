@@ -49,9 +49,9 @@ export const airnodeMenuFromState = (state: AppState, selected: AirnodeRef, op: 
     const rrpState = state.fullState.find((x:any) => (
         x.chain_id == selected.chainId && x.contract_address == selected.contractAddress
     ));
-    const airnodeState = rrpState.providers 
-                ? rrpState.providers[selected.provider as string]
-                : rrpState.airnodes[selected.provider as string];
+    const { providers, airnodes } = rrpState;
+    const p = (airnodes && Object.keys(airnodes).length > 0) ? airnodes : providers;
+    const airnodeState = p[selected.provider as string];
     const baseRRP = '/' + selected.chainId + '/' + selected.contractAddress;
     const baseURL = '/' + selected.chainId + '/' + selected.contractAddress + '/nodes/' + selected.provider;
     const withdrawals = Object.keys(airnodeState.requests).filter((req: string) => (
@@ -139,13 +139,13 @@ export const reducer = (state: AppState, action: any): AppState => {
                 const errorMessage = 'RRP contract ' + selected.contractAddress + ' not found in network ' + selected.chainId;
                 return { ...state, nodeStatus: { isLoading: false, errorMessage } };
             }
-            if (!rrpState.providers && !rrpState.airnodes) {
+            const { providers, airnodes } = rrpState;
+            const p = (airnodes && Object.keys(airnodes).length > 0) ? airnodes : providers;
+            if (!p) {
                 const errorMessage = 'RRP contract ' + selected.contractAddress + ' in network ' + selected.chainId + ' has no airnodes';
                 return { ...state, nodeStatus: { isLoading: false, errorMessage } };
             }
-            const airnodeState = rrpState.providers 
-                ? rrpState.providers[selected.provider as string]
-                : rrpState.airnodes[selected.provider as string];
+            const airnodeState = p[selected.provider as string];
             if (!airnodeState) {
                 const errorMessage = 'Provider ' + selected.provider + ' is not found in RRP contract ' + selected.contractAddress + ' in network ' + selected.chainId;
                 return { ...state, nodeStatus: { isLoading: false, errorMessage } };
