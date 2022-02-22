@@ -9,8 +9,8 @@
 }
 
 .table-providers td.stats {
-    color: var(--color-text-darken);
-    font-size: 0.8em;
+    color: var(--color-text-header);
+    font-size: 1em;
     font-family: monospace;
     text-align: center;
 }
@@ -29,7 +29,7 @@
 
 .table-providers th {
     font-size: 0.9em;
-    color: var(--color-text-darken);
+    color: var(--color-text-header);
 }
 
 .table-providers tr:hover {

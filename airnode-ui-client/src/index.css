@@ -40,7 +40,7 @@ ul {
   color: var(--color-accent) !important;
 }
 .warning {
-  color: var(--color-warning) !important;
+  color: var(--color-error) !important;
 }
 .padded {
   padding-top: 20px !important;
@@ -95,7 +95,6 @@ ul {
 }
 
 .content {
-  max-width: 824px;
   margin: 0px auto;
   padding: 0px 20px;
 }
@@ -113,7 +112,10 @@ ul {
 }
 
 h1,
-h2,
+h2 {
+  color: var(--color-text-header);
+}
+
 h3,
 h4,
 h5,
@@ -277,7 +279,7 @@ table.table tbody tr:nth-child(odd) {
   color: var(--color-text-darken);
 }
 .badge-error {
-  background: var(--color-warning);
+  background: var(--color-error);
   color: var(--color-text-darken);
 }
 

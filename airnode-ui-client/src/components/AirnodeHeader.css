@@ -1,7 +1,7 @@
 header {
     z-index: 1;
     background: var(--color-body);
-    box-shadow: 0px 2px 4px #888;
+    border-bottom: 1px #fff solid;
     width: 100%;
     padding-top: 5px;
     padding-bottom: 5px;
