@@ -28,13 +28,13 @@
   border-left: 2px transparent solid;
 }
 .menu a.active {
-  color: var(--color-accent);
+  color: var(--color-menu-active);
   background: var(--color-bk-darken);
-  border-left: 2px var(--color-accent) solid;
+  border-left: 2px var(--color-menu-active) solid;
 }
 .menu a:hover {
-  color: var(--color-text);
-  border-left: 2px var(--color-accent) solid;
+  color: var(--color-menu-hover);
+  border-left: 2px var(--color-menu-hover) solid;
 }
 
 .menu-panel {

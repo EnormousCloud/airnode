@@ -1,5 +1,5 @@
 footer {
-  box-shadow: 0px -2px 4px #888;
+  border-top: 1px #fff solid;
   background: var(--color-body);
   color: var(--color-text);
 }
