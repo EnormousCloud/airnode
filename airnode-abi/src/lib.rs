@@ -324,7 +324,7 @@ impl ABI {
         Self {
             version: 0x31,
             schema: encode_schema(0x31, &params),
-            params: params,
+            params,
         }
     }
 
@@ -476,6 +476,17 @@ impl ABI {
             let (value, sign) = chunk_to_int(arr[*offset]);
             *offset += 1;
             return Ok(Param::Int256 { name, value, sign });
+        } else if ch == 's' {
+            let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
+            *offset += 1;
+            let data_offset = value_index / 32;
+            let value_size: usize = arr[data_offset].as_usize(); // todo: handle failure
+            let value = chunk_to_vec(arr, data_offset + 1, value_size);
+            let s = match String::from_utf8(value) {
+                Ok(s) => s,
+                Err(e) => return Err(DecodingError::InvalidUtf8String(format!("{}", e))),
+            };
+            return Ok(Param::String32 { name, value: s });
         } else if ch == 'B' || ch == 'S' {
             let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
             *offset += 1;
