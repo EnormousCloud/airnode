@@ -82,6 +82,8 @@ pub enum DecodingError {
     InvalidSchemaCharacter(char),
     #[error("invalid UTF-8 string {0}")]
     InvalidUtf8String(String),
+    #[error("invalid bool {0}")]
+    InvalidBool(String),
 }
 
 /// Atomic parameter in the Airnode ABI
@@ -464,6 +466,17 @@ impl ABI {
                 }
             }
             return Ok(Param::Bytes32 { name, value });
+        } else if ch == 'f' {
+            let value = arr[*offset];
+            *offset += 1;
+            if let Ok(v) = chunk_to_str(value) {
+                if v == "true" {
+                    return Ok(Param::Bool { name, value: true });
+                } else if v == "false" {
+                    return Ok(Param::Bool { name, value: false });
+                }
+                return Err(DecodingError::InvalidBool(v));
+            }
         } else if ch == 'u' {
             let value = arr[*offset];
             *offset += 1;
