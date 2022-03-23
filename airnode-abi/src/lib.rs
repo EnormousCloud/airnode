@@ -80,6 +80,8 @@ pub enum DecodingError {
     InvalidVersion,
     #[error("invalid schema character {0}")]
     InvalidSchemaCharacter(char),
+    #[error("invalid chunk string {0}")]
+    InvalidChunkString(String),
     #[error("invalid UTF-8 string {0}")]
     InvalidUtf8String(String),
     #[error("invalid bool {0}")]
@@ -406,7 +408,7 @@ impl ABI {
 
         let schema: String = match chunk_to_str(*schema_chunk) {
             Ok(x) => x,
-            Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
+            Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
         };
         let mut params: Vec<Param> = vec![];
         if schema.len() > 1 {
@@ -440,7 +442,7 @@ impl ABI {
     ) -> Result<Param, DecodingError> {
         let name: String = match chunk_to_str(arr[*offset]) {
             Ok(x) => x,
-            Err(e) => return Err(DecodingError::InvalidUtf8String(e.to_string())),
+            Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
         };
         *offset += 1;
         if ch == 'b' {
@@ -469,14 +471,19 @@ impl ABI {
         } else if ch == 'f' {
             let value = arr[*offset];
             *offset += 1;
-            if let Ok(v) = chunk_to_str(value) {
-                if v == "true" {
-                    return Ok(Param::Bool { name, value: true });
-                } else if v == "false" {
-                    return Ok(Param::Bool { name, value: false });
+            match chunk_to_str(value) {
+                Ok(v) => {
+                    if v == "true" {
+                        return Ok(Param::Bool { name, value: true });
+                    } else if v == "false" {
+                        return Ok(Param::Bool { name, value: false });
+                    }
+                    return Err(DecodingError::InvalidBool(v));
                 }
-                return Err(DecodingError::InvalidBool(v));
-            }
+                Err(e) => {
+                    return Err(DecodingError::InvalidChunkString(e.to_string()));
+                }
+            };
         } else if ch == 'u' {
             let value = arr[*offset];
             *offset += 1;
@@ -492,10 +499,10 @@ impl ABI {
         } else if ch == 's' {
             let value = arr[*offset];
             *offset += 1;
-            if let Ok(s) = chunk_to_str(value) {
-                return Ok(Param::String32 { name, value: s });
-            }
-            // TODO: invalid chunk handling
+            match chunk_to_str(value) {
+                Ok(s) => return Ok(Param::String32 { name, value: s }),
+                Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
+            };
         } else if ch == 'B' || ch == 'S' {
             let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
             *offset += 1;
@@ -776,7 +783,7 @@ mod tests {
     }
 
     #[test]
-    fn it_encodes_decodes_bool() {
+    fn it_encodes_decodes_true() {
         let param = Param::Bool {
             name: "some bool".to_owned(),
             value: true,
@@ -784,10 +791,25 @@ mod tests {
         let value = ABI::only(param);
         let decoded = ABI::decode(&value.encode().unwrap(), false).unwrap();
         assert_eq!(decoded, value);
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
+        assert_eq!(decoded, value);
     }
 
     #[test]
-    fn it_decodes_true() {
+    fn it_encodes_decodes_false() {
+        let param = Param::Bool {
+            name: "some bool".to_owned(),
+            value: false,
+        };
+        let value = ABI::only(param);
+        let decoded = ABI::decode(&value.encode().unwrap(), false).unwrap();
+        assert_eq!(decoded, value);
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
+        assert_eq!(decoded, value);
+    }
+
+    #[test]
+    fn it_decodes_true_from_bytes() {
         let data: Vec<U256> = vec![
             hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
             hex!("54657374426F6F6C000000000000000000000000000000000000000000000000").into(),
@@ -802,7 +824,7 @@ mod tests {
     }
 
     #[test]
-    fn it_decodes_false() {
+    fn it_decodes_false_from_bytes() {
         let data: Vec<U256> = vec![
             hex!("3162000000000000000000000000000000000000000000000000000000000000").into(),
             hex!("54657374426F6F6C000000000000000000000000000000000000000000000000").into(),
