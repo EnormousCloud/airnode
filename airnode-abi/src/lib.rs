@@ -178,11 +178,11 @@ impl Param {
     /// returns character of the parameter for encoding
     /// - Upper case letters refer to dynamically sized types
     /// - Lower case letters refer to statically sized types
-    /// - String32 is encoded into Bytes32
+    /// - String32 is encoded into Bytes32 in solidity
     pub fn get_char(&self) -> char {
         match &self {
             Self::Address { name: _, value: _ } => 'a',
-            Self::Bool { name: _, value: _ } => 'b',
+            Self::Bool { name: _, value: _ } => 'f',
             Self::Bytes { name: _, value: _ } => 'B',
             Self::Bytes32 { name: _, value: _ } => 'b',
             Self::Date {
@@ -197,7 +197,7 @@ impl Param {
                 sign: _,
             } => 'i',
             Self::String { name: _, value: _ } => 'S',
-            Self::String32 { name: _, value: _ } => 'B',
+            Self::String32 { name: _, value: _ } => 's',
             Self::Uint256 { name: _, value: _ } => 'u',
         }
     }
@@ -490,16 +490,12 @@ impl ABI {
             *offset += 1;
             return Ok(Param::Int256 { name, value, sign });
         } else if ch == 's' {
-            let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
+            let value = arr[*offset];
             *offset += 1;
-            let data_offset = value_index / 32;
-            let value_size: usize = arr[data_offset].as_usize(); // todo: handle failure
-            let value = chunk_to_vec(arr, data_offset + 1, value_size);
-            let s = match String::from_utf8(value) {
-                Ok(s) => s,
-                Err(e) => return Err(DecodingError::InvalidUtf8String(format!("{}", e))),
-            };
-            return Ok(Param::String32 { name, value: s });
+            if let Ok(s) = chunk_to_str(value) {
+                return Ok(Param::String32 { name, value: s });
+            }
+            // TODO: invalid chunk handling
         } else if ch == 'B' || ch == 'S' {
             let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
             *offset += 1;
@@ -547,6 +543,17 @@ mod tests {
         let param = Param::Bytes {
             name: rand_str(),
             value: rand_vec(16),
+        };
+        let value = ABI::only(param);
+        let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
+        assert_eq!(decoded, value);
+    }
+
+    #[test]
+    fn it_encodes_decodes_string32() {
+        let param = Param::String32 {
+            name: rand_str(),
+            value: rand_str(),
         };
         let value = ABI::only(param);
         let decoded = ABI::decode(&value.encode().unwrap(), true).unwrap();
@@ -730,7 +737,7 @@ mod tests {
             hex!("54657374427974657333324e616d650000000000000000000000000000000000").into(),
             hex!("536f6d6520627974657333322076616c75650000000000000000000000000000").into(),
         ];
-        let res = ABI::decode(&data, false).unwrap(); // strict mode "off" is importnant
+        let res = ABI::decode(&data, false).unwrap(); // strict mode "off"
         let expected = ABI::only(Param::String32 {
             name: "TestBytes32Name".to_owned(),
             value: "Some bytes32 value".to_owned(),
