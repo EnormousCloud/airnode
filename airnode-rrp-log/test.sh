@@ -1,3 +1,35 @@
+[[ "$1" == "ankr" ]] && {
+    shift
+    export RPC_ENDPOINT=https://rpc.ankr.com/eth
+    export ADDR_CONTRACT=0xa0AD79D995DdeeB18a14eAef56A549A04e3Aa1Bd
+   export RPC_BATCH_SIZE=3000
+    export RPC_MIN_BLOCK=14622752
+    export RPC_MAX_BLOCK=14698580
+    cargo run --release -- $@
+    exit
+}
+
+[[ "$1" == "cloudflare" ]] && {
+    shift
+    export RPC_ENDPOINT=https://cloudflare-eth.com/
+    export ADDR_CONTRACT=0xa0AD79D995DdeeB18a14eAef56A549A04e3Aa1Bd
+    cargo run --release -- $@
+    exit
+}
+
+[[ "$1" == "mainnet" ]] && {
+    shift
+set -x
+    export RPC_ENDPOINT=$(chainstate --endpoints -t mainnet,alchemy | head -n1)
+    [[ "$RPC_ENDPOINT" == "" ]] && { echo "missing RPC endpoint for mainnet network. "; exit 1; }
+    export RPC_BATCH_SIZE=25000
+    export RPC_MIN_BLOCK=14622752
+    export RPC_MAX_BLOCK=14698580
+    export ADDR_CONTRACT=0xa0AD79D995DdeeB18a14eAef56A549A04e3Aa1Bd
+    cargo run --release -- $@
+    exit
+}
+
 [[ "$1" == "xdai" ]] && {
     shift
     export RPC_ENDPOINT=$(chainstate --endpoints -t xdai | head -n1)
