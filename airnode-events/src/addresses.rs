@@ -1,6 +1,6 @@
 use crate::AirnodeEvent;
 use airnode_abi::{Param, ABI};
-use web3::types::H160;
+use ethereum_types::H160;
 
 fn abi_addresses(parameters: &Option<ABI>) -> Vec<H160> {
     let mut out = vec![];

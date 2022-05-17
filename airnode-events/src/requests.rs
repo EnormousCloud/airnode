@@ -1,5 +1,5 @@
 use crate::AirnodeEvent;
-use web3::types::{H160, U256};
+use ethereum_types::{H160, U256};
 
 pub fn get_template_id(evt: &AirnodeEvent) -> Option<U256> {
     match evt {

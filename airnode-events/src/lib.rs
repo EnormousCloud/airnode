@@ -4,10 +4,10 @@ mod requests;
 
 use crate::logreader::{EventParseError, LogReader};
 use airnode_abi::{DecodingError, ABI};
+use ethereum_types::{H160, H256, U256};
 use hex_literal::hex;
 use phf::phf_map;
 use serde::{Deserialize, Serialize};
-use web3::types::{H160, H256, U256};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]

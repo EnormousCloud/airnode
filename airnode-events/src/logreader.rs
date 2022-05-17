@@ -1,6 +1,6 @@
+use ethereum_types::{H160, H256, U256};
 use std::str::FromStr;
 use thiserror::Error;
-use web3::types::{H160, H256, U256};
 
 #[derive(Error, Debug, Clone)]
 pub enum EventParseError {
@@ -160,8 +160,9 @@ impl LogReader {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ethereum_types::Address;
     use hex_literal::hex;
-    use web3::types::{Address, Log};
+    use web3::types::Log;
 
     #[test]
     pub fn test_it_reads() {
