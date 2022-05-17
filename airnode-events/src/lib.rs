@@ -560,20 +560,30 @@ impl AirnodeEvent {
             == hex!("1bdbe9e5d42a025a741fc3582eb3cad4ef61ac742d83cc87e545fbd481b926b5").into()
         {
             let mut r = LogReader::new(&log, 2, Some(2)).unwrap();
+            let provider_id = r.value();
+            let request_id = r.value();
+            let status_code = r.value().as_u64();
+            r.skip();
+            r.skip();
             return Ok(Self::ClientRequestFulfilledA {
-                provider_id: r.value(),
-                request_id: r.value(),
-                status_code: r.value().as_u64(),
+                provider_id,
+                request_id,
+                status_code,
                 data: r.values(),
             });
         } else if t0
             == hex!("0ebeb9b9b5c4baf915e7541c7e0919dd1a58eb06ee596035a50d08d20b9219de").into()
         {
             let mut r = LogReader::new(&log, 2, None).unwrap();
+            let provider_id = r.value();
+            let request_id = r.value();
+            let status_code = r.value().as_u64();
+            r.skip();
+            r.skip();
             return Ok(Self::ClientRequestFulfilledWithBytesA {
-                provider_id: r.value(),
-                request_id: r.value(),
-                status_code: r.value().as_u64(),
+                provider_id,
+                request_id,
+                status_code,
                 data: r.values(),
             });
         } else if t0
@@ -665,9 +675,13 @@ impl AirnodeEvent {
             == hex!("13873a3c5277d69c913bb408d87512468d41afb41113dd46eee917ec4eceb04b").into()
         {
             let mut r = LogReader::new(&log, 0, None).unwrap();
+            let request_id = r.value();
+            let status_code = r.value().as_u64();
+            r.skip();
+            r.skip();
             return Ok(Self::RequestFulfilledWithBytesA {
-                request_id: r.value(),
-                status_code: r.value().as_u64(),
+                request_id,
+                status_code,
                 data: r.values(),
             });
         } else if t0
@@ -815,19 +829,28 @@ impl AirnodeEvent {
             == hex!("c0977dab79883641ece94bb6a932ca83049f561ffff8d8daaeafdbc1acce9e0a").into()
         {
             let mut r = LogReader::new(&log, 2, None).unwrap();
+            let airnode = r.address();
+            let request_id = r.value();
+            r.skip();
+            r.skip();
             return Ok(Self::FulfilledRequest {
-                airnode: r.address(),
-                request_id: r.value(),
+                airnode,
+                request_id,
                 data: r.values(),
             });
         } else if t0
             == hex!("d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066").into()
         {
             let mut r = LogReader::new(&log, 2, None).unwrap();
+            let airnode = r.address();
+            let request_id = r.value();
+            let status_code = r.value().as_u64();
+            r.skip();
+            r.skip();
             return Ok(Self::FulfilledRequestWithStatus {
-                airnode: r.address(),
-                request_id: r.value(),
-                status_code: r.value().as_u64(),
+                airnode,
+                request_id,
+                status_code,
                 data: r.values(),
             });
         } else if t0
