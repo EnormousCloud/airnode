@@ -24,7 +24,7 @@ dependencies = [
 
 [[package]]
 name = "airnode-abi"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "ethereum-types 0.13.1",
  "hex",
@@ -47,7 +47,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "web3 0.17.0",
+ "web3",
 ]
 
 [[package]]
@@ -64,7 +64,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "web3 0.17.0",
+ "web3",
 ]
 
 [[package]]
@@ -87,7 +87,7 @@ dependencies = [
  "serde_json",
  "url",
  "wasm-bindgen",
- "web3 0.18.0",
+ "web3",
  "yew",
 ]
 
@@ -110,7 +110,7 @@ dependencies = [
  "tracing",
  "tracing-futures",
  "tracing-subscriber",
- "web3 0.17.0",
+ "web3",
 ]
 
 [[package]]
@@ -136,7 +136,7 @@ dependencies = [
  "tracing-subscriber",
  "ureq",
  "warp",
- "web3 0.17.0",
+ "web3",
 ]
 
 [[package]]
@@ -631,21 +631,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ethabi"
-version = "16.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4c98847055d934070b90e806e12d3936b787d0a115068981c1d8dfd5dfef5a5"
-dependencies = [
- "ethereum-types 0.12.1",
- "hex",
- "serde",
- "serde_json",
- "sha3",
- "thiserror",
- "uint",
-]
-
-[[package]]
 name = "ethbloom"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -682,20 +667,6 @@ dependencies = [
  "impl-rlp",
  "impl-serde",
  "primitive-types 0.9.1",
- "uint",
-]
-
-[[package]]
-name = "ethereum-types"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05136f7057fe789f06e6d41d07b34e6f70d8c86e5693b60f97aaa6553553bdaf"
-dependencies = [
- "ethbloom 0.11.0",
- "fixed-hash",
- "impl-rlp",
- "impl-serde",
- "primitive-types 0.10.1",
  "uint",
 ]
 
@@ -1757,17 +1728,7 @@ checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
 dependencies = [
  "instant",
  "lock_api",
- "parking_lot_core 0.8.5",
-]
-
-[[package]]
-name = "parking_lot"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f5ec2493a61ac0506c0f4199f99070cbe83857b0337006a30f3e6719b8ef58"
-dependencies = [
- "lock_api",
- "parking_lot_core 0.9.3",
+ "parking_lot_core",
 ]
 
 [[package]]
@@ -1782,19 +1743,6 @@ dependencies = [
  "redox_syscall",
  "smallvec",
  "winapi",
-]
-
-[[package]]
-name = "parking_lot_core"
-version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09a279cbf25cb0757810394fbc1e359949b59e348145c643a939a525692e6929"
-dependencies = [
- "cfg-if 1.0.0",
- "libc",
- "redox_syscall",
- "smallvec",
- "windows-sys",
 ]
 
 [[package]]
@@ -1911,19 +1859,6 @@ name = "primitive-types"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06345ee39fbccfb06ab45f3a1a5798d9dafa04cb8921a76d227040003a234b0e"
-dependencies = [
- "fixed-hash",
- "impl-codec 0.5.1",
- "impl-rlp",
- "impl-serde",
- "uint",
-]
-
-[[package]]
-name = "primitive-types"
-version = "0.10.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05e4722c697a58a99d5d06a08c30821d7c082a4632198de1eaa5a6c22ef42373"
 dependencies = [
  "fixed-hash",
  "impl-codec 0.5.1",
@@ -2638,7 +2573,7 @@ dependencies = [
  "mio",
  "num_cpus",
  "once_cell",
- "parking_lot 0.11.2",
+ "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
  "tokio-macros",
@@ -3093,7 +3028,7 @@ dependencies = [
  "base64",
  "bytes",
  "derive_more",
- "ethabi 14.1.0",
+ "ethabi",
  "ethereum-types 0.11.0",
  "futures",
  "futures-timer",
@@ -3103,7 +3038,7 @@ dependencies = [
  "js-sys",
  "jsonrpc-core",
  "log",
- "parking_lot 0.11.2",
+ "parking_lot",
  "pin-project",
  "rand",
  "reqwest",
@@ -3120,40 +3055,6 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web3-async-native-tls",
-]
-
-[[package]]
-name = "web3"
-version = "0.18.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44f258e254752d210b84fe117b31f1e3cc9cbf04c0d747eb7f8cf7cf5e370f6d"
-dependencies = [
- "arrayvec 0.7.1",
- "base64",
- "bytes",
- "derive_more",
- "ethabi 16.0.0",
- "ethereum-types 0.12.1",
- "futures",
- "futures-timer",
- "getrandom",
- "headers",
- "hex",
- "idna",
- "js-sys",
- "jsonrpc-core",
- "log",
- "parking_lot 0.12.0",
- "pin-project",
- "rand",
- "reqwest",
- "rlp",
- "serde",
- "serde_json",
- "tiny-keccak",
- "url",
- "wasm-bindgen",
- "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -3208,49 +3109,6 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
-
-[[package]]
-name = "windows-sys"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea04155a16a59f9eab786fe12a4a450e75cdb175f9e0d80da1e17db09f55b8d2"
-dependencies = [
- "windows_aarch64_msvc",
- "windows_i686_gnu",
- "windows_i686_msvc",
- "windows_x86_64_gnu",
- "windows_x86_64_msvc",
-]
-
-[[package]]
-name = "windows_aarch64_msvc"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bb8c3fd39ade2d67e9874ac4f3db21f0d710bee00fe7cab16949ec184eeaa47"
-
-[[package]]
-name = "windows_i686_gnu"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "180e6ccf01daf4c426b846dfc66db1fc518f074baa793aa7d9b9aaeffad6a3b6"
-
-[[package]]
-name = "windows_i686_msvc"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2e7917148b2812d1eeafaeb22a97e4813dfa60a3f8f78ebe204bcc88f12f024"
-
-[[package]]
-name = "windows_x86_64_gnu"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4dcd171b8776c41b97521e5da127a2d86ad280114807d0b2ab1e462bc764d9e1"
-
-[[package]]
-name = "windows_x86_64_msvc"
-version = "0.36.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c811ca4a8c853ef420abd8592ba53ddbbac90410fab6903b3e79972a631f7680"
 
 [[package]]
 name = "winreg"
