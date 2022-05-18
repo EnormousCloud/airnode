@@ -1,8 +1,8 @@
-use ethereum_types::{H160, U256, U512};
-use std::str::{self, FromStr, Utf8Error};
+use ethereum_types::{BigEndianHash, H160, H256, U256, U512};
+use std::str::{self, FromStr};
 
 /// decode chunk into string (it is right padded with zeros)
-pub fn chunk_to_str(src: U256) -> Result<String, Utf8Error> {
+pub fn chunk_to_str(src: U256) -> anyhow::Result<String> {
     let mut arr: Vec<u8> = vec![];
     let mut i = 31;
     loop {
@@ -18,7 +18,11 @@ pub fn chunk_to_str(src: U256) -> Result<String, Utf8Error> {
     }
     match str::from_utf8(&arr) {
         Ok(s) => Ok(s.to_string()),
-        Err(e) => Err(e),
+        Err(e) => Err(anyhow::Error::msg(format!(
+            "{} in chunk {:?}",
+            e,
+            H256::from_uint(&src)
+        ))),
     }
 }
 

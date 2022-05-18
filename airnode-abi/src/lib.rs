@@ -80,6 +80,12 @@ pub enum DecodingError {
     InvalidVersion,
     #[error("invalid schema character {0}")]
     InvalidSchemaCharacter(char),
+    #[error("invalid schema chunk string {0}")]
+    InvalidSchemaChunkString(String),
+    #[error("invalid name chunk string {0}")]
+    InvalidNameChunkString(String),
+    #[error("invalid bool chunk {0}")]
+    InvalidBoolChunk(String),
     #[error("invalid chunk string {0}")]
     InvalidChunkString(String),
     #[error("invalid UTF-8 string {0}")]
@@ -401,6 +407,7 @@ impl ABI {
         if input.len() < 1 {
             return Err(DecodingError::NoInput);
         }
+
         let schema_chunk = input.get(0).unwrap();
         if schema_chunk.is_zero() {
             return Err(DecodingError::NoSchema);
@@ -408,8 +415,9 @@ impl ABI {
 
         let schema: String = match chunk_to_str(*schema_chunk) {
             Ok(x) => x,
-            Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
+            Err(e) => return Err(DecodingError::InvalidSchemaChunkString(format!("{}", e))),
         };
+
         let mut params: Vec<Param> = vec![];
         if schema.len() > 1 {
             let ch_version = schema.chars().nth(0).unwrap();
@@ -421,10 +429,13 @@ impl ABI {
             schema.chars().skip(1).for_each(|ch| {
                 match Self::from_chunks(ch, &input, &mut offs, strict) {
                     Ok(p) => params.push(p),
-                    Err(e) => errors.push(e),
+                    Err(e) => {
+                        errors.push(e);
+                    }
                 }
             });
             if errors.len() > 0 {
+                // it would be nice to use schema in the thrown error..
                 return Err(errors[0].clone());
             }
         }
@@ -442,7 +453,7 @@ impl ABI {
     ) -> Result<Param, DecodingError> {
         let name: String = match chunk_to_str(arr[*offset]) {
             Ok(x) => x,
-            Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
+            Err(e) => return Err(DecodingError::InvalidNameChunkString(format!("{}", e))),
         };
         *offset += 1;
         if ch == 'b' {
@@ -481,7 +492,7 @@ impl ABI {
                     return Err(DecodingError::InvalidBool(v));
                 }
                 Err(e) => {
-                    return Err(DecodingError::InvalidChunkString(e.to_string()));
+                    return Err(DecodingError::InvalidBoolChunk(format!("{}", e)));
                 }
             };
         } else if ch == 'u' {
@@ -501,7 +512,7 @@ impl ABI {
             *offset += 1;
             match chunk_to_str(value) {
                 Ok(s) => return Ok(Param::String32 { name, value: s }),
-                Err(e) => return Err(DecodingError::InvalidChunkString(e.to_string())),
+                Err(e) => return Err(DecodingError::InvalidChunkString(format!("{}", e))),
             };
         } else if ch == 'B' || ch == 'S' {
             let value_index: usize = arr[*offset].as_usize(); // todo: handle failure
