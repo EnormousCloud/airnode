@@ -407,6 +407,13 @@ impl ABI {
         if input.len() < 1 {
             return Err(DecodingError::NoInput);
         }
+        if input.len() == 1 {
+            // if there is just 1 item in input vector - there will be no schema
+            return Ok(Self::new(vec![Param::Bytes32 {
+                name: "raw".to_string(),
+                value: input[0].clone(),
+            }]));
+        }
 
         let schema_chunk = input.get(0).unwrap();
         if schema_chunk.is_zero() {
