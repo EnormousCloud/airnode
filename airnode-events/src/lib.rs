@@ -59,13 +59,23 @@ pub enum AirnodeEvent {
         provider_id: U256,
         request_id: U256,
         status_code: u64,
-        data: Vec<U256>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     ClientRequestFulfilledWithBytesA {
         provider_id: U256,
         request_id: U256,
         status_code: u64,
-        data: Vec<U256>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     ClientShortRequestCreatedA {
         provider_id: U256,
@@ -114,7 +124,12 @@ pub enum AirnodeEvent {
     RequestFulfilledWithBytesA {
         request_id: U256,
         status_code: u64,
-        data: Vec<U256>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     TemplateCreatedA {
         template_id: U256,
@@ -193,13 +208,23 @@ pub enum AirnodeEvent {
     FulfilledRequest {
         airnode: H160,
         request_id: U256,
-        data: Vec<U256>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     FulfilledRequestWithStatus {
         airnode: H160,
         request_id: U256,
         status_code: u64,
-        data: Vec<U256>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        parameters: Option<ABI>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        error: Option<DecodingError>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        data: Option<Vec<U256>>,
     },
     FulfilledWithdrawal {
         airnode: H160,
@@ -491,15 +516,7 @@ impl AirnodeEvent {
             let designated_wallet = r.address();
             let fulfill_address = r.address();
             let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
-            // chunks.iter().enumerate().for_each(|(i, u)| println!("{:04x?}: {}", i*0x20, serde_json::to_string(u).unwrap()));
-            // println!("ClientFullRequestCreated decoded: {:#?}", ABI::decode(&chunks));
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::ClientFullRequestCreatedA {
                 provider_id,
                 request_id,
@@ -527,13 +544,7 @@ impl AirnodeEvent {
             let designated_wallet = r.address();
             let fulfill_address = r.address();
             let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::ClientRequestCreatedA {
                 provider_id,
                 request_id,
@@ -563,13 +574,14 @@ impl AirnodeEvent {
             let provider_id = r.value();
             let request_id = r.value();
             let status_code = r.value().as_u64();
-            r.skip();
-            r.skip();
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::ClientRequestFulfilledA {
                 provider_id,
                 request_id,
                 status_code,
-                data: r.values(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("0ebeb9b9b5c4baf915e7541c7e0919dd1a58eb06ee596035a50d08d20b9219de").into()
@@ -578,13 +590,14 @@ impl AirnodeEvent {
             let provider_id = r.value();
             let request_id = r.value();
             let status_code = r.value().as_u64();
-            r.skip();
-            r.skip();
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::ClientRequestFulfilledWithBytesA {
                 provider_id,
                 request_id,
                 status_code,
-                data: r.values(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("fcbcd5adb2d26ecd4ad50e6267e977fd479fcd0a6c82bde8eea85290ab3b46e6").into()
@@ -595,13 +608,7 @@ impl AirnodeEvent {
             let no_requests = r.value().as_u64();
             let client_address = r.address();
             let template_id = r.value();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::ClientShortRequestCreatedA {
                 provider_id,
                 request_id,
@@ -677,12 +684,13 @@ impl AirnodeEvent {
             let mut r = LogReader::new(&log, 0, None).unwrap();
             let request_id = r.value();
             let status_code = r.value().as_u64();
-            r.skip();
-            r.skip();
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::RequestFulfilledWithBytesA {
                 request_id,
                 status_code,
-                data: r.values(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("fa33b8597a1a83305d334562a90f8b4ce657e1b33c081423b6a44792d1cf41a4").into()
@@ -695,13 +703,7 @@ impl AirnodeEvent {
             let designated_wallet = r.address();
             let fulfill_address = r.address();
             let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::TemplateCreatedA {
                 template_id,
                 provider_id,
@@ -745,13 +747,7 @@ impl AirnodeEvent {
             let template_id = r.value();
             let airnode = r.address();
             let endpoint_id = r.value();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::CreatedTemplate {
                 template_id,
                 airnode,
@@ -831,12 +827,13 @@ impl AirnodeEvent {
             let mut r = LogReader::new(&log, 2, None).unwrap();
             let airnode = r.address();
             let request_id = r.value();
-            r.skip();
-            r.skip();
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::FulfilledRequest {
                 airnode,
                 request_id,
-                data: r.values(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("d1cc11d12363af4b6022e66d14b18ba1779ecd85a5b41891349d530fb6eee066").into()
@@ -845,13 +842,14 @@ impl AirnodeEvent {
             let airnode = r.address();
             let request_id = r.value();
             let status_code = r.value().as_u64();
-            r.skip();
-            r.skip();
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::FulfilledRequestWithStatus {
                 airnode,
                 request_id,
                 status_code,
-                data: r.values(),
+                parameters,
+                error,
+                data,
             });
         } else if t0
             == hex!("adb4840bbd5f924665ae7e0e0c83de5c0fb40a98c9b57dba53a6c978127a622e").into()
@@ -878,13 +876,7 @@ impl AirnodeEvent {
             let sponsor_wallet = r.address();
             let fulfill_address = r.address();
             let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::MadeFullRequest {
                 airnode,
                 request_id,
@@ -914,13 +906,7 @@ impl AirnodeEvent {
             let sponsor_wallet = r.address();
             let fulfill_address = r.address();
             let fulfill_function_id = U256::from(r.value().as_ref()[3] / 0x100000000).as_u64();
-            r.skip();
-            r.skip();
-            let chunks = r.values();
-            let (parameters, error, data) = match ABI::decode(&chunks, false) {
-                Ok(x) => (Some(x), None, None),
-                Err(e) => (None, Some(e), Some(chunks)),
-            };
+            let (parameters, error, data) = r.decoded();
             return Ok(Self::MadeTemplateRequest {
                 airnode,
                 request_id,

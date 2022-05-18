@@ -1,3 +1,4 @@
+use airnode_abi::{DecodingError, ABI};
 use ethereum_types::{H160, H256, U256};
 use std::str::FromStr;
 use thiserror::Error;
@@ -154,6 +155,26 @@ impl LogReader {
     pub fn bool(&mut self) -> bool {
         let val = self.value().as_u64();
         val > 0
+    }
+
+    // pop ABI-decoded values
+    pub fn decoded(&mut self) -> (Option<ABI>, Option<DecodingError>, Option<Vec<U256>>) {
+        self.skip();
+        self.skip();
+        let chunks = self.values();
+        let (parameters, error, data) = match ABI::decode(&chunks, false) {
+            Ok(x) => (Some(x), None, None),
+            Err(e) => (
+                None,
+                Some(e),
+                if chunks.len() > 0 {
+                    Some(chunks.clone())
+                } else {
+                    None
+                },
+            ),
+        };
+        (parameters, error, data)
     }
 }
 
