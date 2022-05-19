@@ -40,11 +40,11 @@ pub struct Args {
     #[structopt(long, default_value = "http://localhost:8545/", env = "RPC_ENDPOINT")]
     pub rpc_endpoint: String,
     /// Ethereum JSON+RPC batch size for reading. Light clients will require smaller sizes
-    #[structopt(long, default_value = "1000", env = "RPC_BATCH_SIZE")]
-    pub rpc_batch_size: u64,
+    #[structopt(long, env = "RPC_BATCH_SIZE")]
+    pub rpc_batch_size: Option<u64>,
     /// Number of the first block to start watching
-    #[structopt(long, default_value = "1", env = "RPC_MIN_BLOCK")]
-    pub min_block: u64,
+    #[structopt(long, env = "RPC_MIN_BLOCK")]
+    pub min_block: Option<u64>,
     /// Max block to stop contract events listening
     #[structopt(long, env = "RPC_MAX_BLOCK")]
     pub max_block: Option<u64>,

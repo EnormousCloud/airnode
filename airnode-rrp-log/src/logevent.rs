@@ -1,7 +1,8 @@
 use airnode_events::AirnodeEvent;
 
 use serde::{Deserialize, Serialize};
-use web3::types::{Log, H256};
+use web3::types::Log;
+use web3::types::H256;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct LogEvent {
@@ -35,7 +36,7 @@ impl LogEvent {
             _ => return false,
         };
         match e {
-            AirnodeEvent::Unknown{ topic: _ } => true,
+            AirnodeEvent::Unknown { topic: _ } => true,
             _ => false,
         }
     }

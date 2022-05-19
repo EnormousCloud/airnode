@@ -78,7 +78,9 @@ async fn main() -> anyhow::Result<()> {
         args.max_block,
         args.rpc_batch_size,
     );
-    let _ = scanner.scan_address(&web3, addr_contract, &mut state).await;
+    if let Err(e) = scanner.scan_address(&web3, addr_contract, &mut state).await {
+        return Err(e);
+    }
     if let OutputFormat::Json = state.format {
         let o = &state.log_events;
         if state.pretty_print {

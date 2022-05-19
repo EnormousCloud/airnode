@@ -1,6 +1,6 @@
 [package]
 name = "airnode-rrp-log"
-version = "0.3.2"
+version = "0.4.0"
 authors = ["EnormousCloud"]
 edition = "2018"
 license = "MIT"
@@ -10,8 +10,8 @@ description = "Airnode RRP Log command-line interface"
 readme = "README.md"
 
 [dependencies]
-airnode-abi = { version = "0.1" }
-airnode-events = { version = "0.3.3" }
+airnode-abi = { version = "0.2.0" }
+airnode-events = { path = "../airnode-events" }
 anyhow = { version = "1.0" }
 dotenv = "0.15"
 futures = "0.3.13"
@@ -25,4 +25,4 @@ tokio-stream = { version = "0.1" }
 tracing = { version = "0.1" }
 tracing-futures =  { version = "0.2" }
 tracing-subscriber = { version = "0.2" }
-web3 = { version = "0.17" }
+web3 = { version = "0.18" }

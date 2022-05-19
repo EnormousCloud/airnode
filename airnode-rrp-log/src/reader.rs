@@ -1,6 +1,6 @@
 use tracing::debug;
 use web3::api::Eth;
-use web3::transports::{Either, Http, Ipc};
+use web3::transports::Http;
 use web3::types::{FilterBuilder, Log, H160};
 use web3::{Transport, Web3};
 
@@ -8,32 +8,37 @@ pub trait EventHandler {
     fn on(&mut self, l: Log) -> ();
 }
 
-pub async fn get_transport(source: &str) -> Either<Http, Ipc> {
-    if source.contains(".ipc") {
-        let transport = Ipc::new(source)
-            .await
-            .expect("Failed to connect to IPC file");
-        debug!("Connected to {:?}", source);
-        Either::Right(transport)
-    } else {
-        let transport = Http::new(source).expect("Invalid RPC HTTP endpoint");
-        debug!("Connecting to {:?}", source);
-        Either::Left(transport)
-    }
+pub async fn get_transport(source: &str) -> Http {
+    let transport = Http::new(source).expect("Invalid RPC HTTP endpoint");
+    debug!("Connecting to {:?}", source);
+    transport
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct BlockBatch {
-    pub from: u64,
-    pub to: u64,
+    pub from: Option<u64>,
+    pub to: Option<u64>,
 }
 
 pub async fn get_batches<T: Transport>(
     eth: Eth<T>,
-    genesis: u64,
+    min: Option<u64>,
     max: Option<u64>,
-    batch_size: u64,
+    batch_size: Option<u64>,
 ) -> Vec<BlockBatch> {
+    if let None = min {
+        if let None = max {
+            return vec![BlockBatch::default()];
+        }
+    }
+    let b_size = match batch_size {
+        Some(x) => x,
+        None => {
+            // in case of batch size absense - we have a single batch
+            return vec![BlockBatch { from: min, to: max }];
+        }
+    };
+
     let max_block: u64 = match max {
         Some(x) => x,
         None => eth
@@ -42,16 +47,23 @@ pub async fn get_batches<T: Transport>(
             .expect("max block height failure")
             .as_u64(),
     };
-    let mut from = genesis;
+    let mut from: u64 = match min {
+        Some(x) => x,
+        None => 1,
+    };
+
     let mut res = vec![];
     while from <= max_block {
-        let to = if from + batch_size > max_block {
+        let to = if from + b_size > max_block {
             max_block
         } else {
-            from + batch_size - 1
+            from + b_size - 1
         };
-        res.push(BlockBatch { from, to });
-        from = from + batch_size
+        res.push(BlockBatch {
+            from: Some(from),
+            to: Some(to),
+        });
+        from = from + b_size
     }
     res
 }
@@ -59,13 +71,18 @@ pub async fn get_batches<T: Transport>(
 #[derive(Debug, Clone)]
 pub struct Scanner {
     chain_id: u64,
-    min_block: u64,
+    min_block: Option<u64>,
     max_block: Option<u64>,
-    batch_size: u64,
+    batch_size: Option<u64>,
 }
 
 impl Scanner {
-    pub fn new(chain_id: u64, min_block: u64, max_block: Option<u64>, batch_size: u64) -> Self {
+    pub fn new(
+        chain_id: u64,
+        min_block: Option<u64>,
+        max_block: Option<u64>,
+        batch_size: Option<u64>,
+    ) -> Self {
         Self {
             chain_id,
             min_block,
@@ -79,20 +96,24 @@ impl Scanner {
         web3: &Web3<T>,
         address: H160,
         handler: &mut impl EventHandler,
-    ) -> anyhow::Result<u64>
+    ) -> anyhow::Result<Option<u64>>
     where
         T: Transport,
     {
         let chain_id = self.chain_id;
         let mut last_block = self.min_block;
-        for b in get_batches(web3.eth(), self.min_block, self.max_block, self.batch_size).await {
+        let batches =
+            get_batches(web3.eth(), self.min_block, self.max_block, self.batch_size).await;
+        for b in batches {
             debug!("reading blocks {:?}/{}", b, chain_id);
-            let filter = FilterBuilder::default()
-                .from_block(b.from.into())
-                .to_block(b.to.into())
-                .address(vec![address])
-                .build();
-            let logs: Vec<Log> = web3.eth().logs(filter).await?;
+            let mut filter = FilterBuilder::default().address(vec![address]);
+            if let Some(from) = b.from {
+                filter = filter.from_block(from.into());
+            }
+            if let Some(to) = b.to {
+                filter = filter.to_block(to.into());
+            }
+            let logs: Vec<Log> = web3.eth().logs(filter.build()).await?;
             if logs.len() > 0 {
                 for l in logs {
                     handler.on(l.clone());
