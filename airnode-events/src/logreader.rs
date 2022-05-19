@@ -162,6 +162,9 @@ impl LogReader {
         self.skip();
         self.skip();
         let chunks = self.values();
+        if chunks.len() == 0 {
+            return (None, None, None);
+        }
         let (parameters, error, data) = match ABI::decode(&chunks, false) {
             Ok(x) => (Some(x), None, None),
             Err(e) => (
