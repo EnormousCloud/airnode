@@ -11,7 +11,7 @@ readme = "README.md"
 
 [dependencies]
 airnode-abi = { version = "0.2.0" }
-airnode-events = { path = "../airnode-events" }
+airnode-events = { version = "0.4.1" }
 anyhow = { version = "1.0" }
 dotenv = "0.15"
 futures = "0.3.13"
