@@ -19,6 +19,7 @@ export STATIC_DIR=$(pwd)/dist
 
 [[ "$1" == "publish-mainnet" ]] && {
     export SSH_HOST="root@enormous.cloud"
-    docker save api3-rrp-explorer | bzip2 | ssh $SSH_HOST 'bunzip2 | docker load'
-    ssh $SSH_HOST 'cd /opt/api3-rrp-explorer; docker rm -f api3-rrp-explorer; docker-compose up -d'
+    docker save api3-rrp-explorer | bzip2 | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SSH_HOST 'bunzip2 | docker load'
+    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+       $SSH_HOST 'cd /opt/api3-rrp-explorer; docker rm -f api3-rrp-explorer; docker-compose up -d'
 }
