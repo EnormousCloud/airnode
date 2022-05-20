@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-airnode-events = { version = "0.3.3" }
+airnode-events = { path = "../airnode-events" }
 cached = { version = "0.26" }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = { version = "0.15" }
@@ -25,4 +25,4 @@ tracing-futures =  { version = "0.2" }
 tracing-subscriber = { version = "0.2" }
 tokio = { version = "1.0" }
 ureq = { version = "2.3" }
-web3 = { version = "0.17.0" }
+web3 = { version = "0.18" }

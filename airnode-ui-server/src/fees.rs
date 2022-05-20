@@ -27,7 +27,7 @@ impl TxFee {
         // };
         // let usd = crate::usdprice::coin_price_at("ethereum", eth, 18, dt);
         Self {
-            gas_price: tx.gas_price,
+            gas_price: tx.gas_price.unwrap_or(U256::from(0)),
             gas: tx.gas,
             gas_used: receipt.gas_used,
             usd: None,

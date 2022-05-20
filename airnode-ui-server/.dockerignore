@@ -1,0 +1,6 @@
+target/
+!/target/release/airnode-ui-server
+_data/
+_www/
+node_modules/
+
