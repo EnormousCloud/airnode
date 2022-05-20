@@ -4,13 +4,25 @@ use web3::{Transport, Web3};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct BlockBatch {
-    pub from: u64,
-    pub to: u64,
+    pub from: Option<u64>,
+    pub to: Option<u64>,
 }
 
 impl BlockBatch {
     pub fn status(&self) -> String {
-        format!("{} ... {}", self.from, self.to)
+        if let Some(from) = self.from {
+            if let Some(to) = self.to {
+                format!("{} ... {}", from, to)
+            } else {
+                format!("{} ...", from)
+            }
+        } else {
+            if let Some(to) = self.to {
+                format!("... {}", to)
+            } else {
+                "".to_owned()
+            }
+        }
     }
 }
 
@@ -20,6 +32,9 @@ pub async fn get_batches<T: Transport>(
     max: Option<u64>,
     batch_size: u64,
 ) -> Vec<BlockBatch> {
+    if batch_size == 0 {
+        return vec![];
+    }
     let max_block: u64 = match max {
         Some(x) => x,
         None => eth
@@ -36,7 +51,10 @@ pub async fn get_batches<T: Transport>(
         } else {
             from + batch_size - 1
         };
-        res.push(BlockBatch { from, to });
+        res.push(BlockBatch {
+            from: Some(from),
+            to: Some(to),
+        });
         from = from + batch_size
     }
     res
@@ -89,13 +107,15 @@ where
             return Ok(None);
         }
         let b = self.batches[current_batch].clone();
-        let filter = FilterBuilder::default()
-            .from_block(b.from.into())
-            .to_block(b.to.into())
-            .address(vec![address.clone()])
-            .build();
-        let logs = self.web3.eth().logs(filter).await?;
+        let mut filter = FilterBuilder::default().address(vec![address.clone()]);
 
+        if let Some(from) = b.from {
+            filter = filter.from_block(from.into());
+        }
+        if let Some(to) = b.to {
+            filter = filter.to_block(to.into());
+        }
+        let logs = self.web3.eth().logs(filter.build()).await?;
         Ok(Some(logs))
     }
 }

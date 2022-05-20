@@ -5,7 +5,7 @@ use gloo::storage::{SessionStorage, Storage};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use web3::types::{H160, U256};
-use yew::web_sys::{Event, HtmlInputElement, InputEvent};
+use web_sys::{Event, HtmlInputElement, InputEvent};
 use yew::{html, Callback, Component, Context, Html, Properties, TargetCast};
 
 /// structure that will be passed to the parent when

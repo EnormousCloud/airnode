@@ -123,6 +123,9 @@ impl Component for App {
                             let chain_id = s.chain_id;
                             let batches = s.batches.clone();
                             let num_batches = batches.len();
+
+                            if num_batches == 0 {}
+
                             let rc: Rc<Scanner<web3::transports::Http>> = Rc::new(s);
                             batches.iter().enumerate().for_each(|(i, batch)| {
                                 let b = batch.clone();
