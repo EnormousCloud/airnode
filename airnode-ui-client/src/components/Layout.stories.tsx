@@ -1,5 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { AirnodeHeader, fromParams } from "./AirnodeHeader";
+import { ErrorScreen } from "./ErrorScreen";
 import { Loading } from "./Loading";
 import { MenuPanel } from "./MenuPanel";
 import { Footer } from "./Footer";
@@ -50,7 +51,7 @@ const DataInProgress = (props: any) => {
 }
 
 export default {
-  title: "Screens/Empty",
+  title: "Screens/Layout",
   component: Screen,
 } as ComponentMeta<typeof Screen>;
 
@@ -64,3 +65,7 @@ export const WaitForState = TemplateLoading.bind({});
 
 const TemplateInProgress: ComponentStory<typeof DataInProgress> = (args) => <DataInProgress {...args} />;
 export const WaitForData = TemplateInProgress.bind({});
+
+const TemplateError: ComponentStory<typeof DataInProgress> = (args) => <ErrorScreen {...args} />;
+export const CriticalError = TemplateError.bind({});
+CriticalError.args = { error: new Error("This is a critical error that prevents state to be loaded") };
